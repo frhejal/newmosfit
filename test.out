@@ -1,0 +1,7 @@
+ VERSION MAI 2016
+ 20/09/97 NR Fe51Pt27Nb2B20 900C Mot:H1 8mm/s App:1 Temp:300K wt96 PR= 511.5561                                                  
+  OPTIONS UTILISEES =            0           0           0           0           0           0           0           0           0           0           0           1           1           1           0           0           1           0           0           0
+ VITESSE PAR CANAL=   6.0035600000000001E-002  NBRE DE COMPOSANTES =           8
+ NBRE MAX ITERATIO=          80
+ DISTRIBUTION ENTRE NS1=           5  ET NS2 =           8
+    DI          GA          H1        SQ CH       ETA      TETA      GAMA      BETA      ALFA    MONOC 

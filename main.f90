@@ -1,3 +1,4 @@
+program mosfit
 !********************************************************************
 !         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57
 !                     VERSION  FEV  86
@@ -39,15 +40,48 @@
 !    IO(13)=1  DISTRIBUTION
 !    IO(14)=1  DISTRIBUTION
 !    IO(16)=N  (N=NBRE DE SOUS CANAUX)  CONVOLUTION GAUSS*LORENZ
-!    IO(20)=1  HORIZONTALISATION FOND CONTINU
 !    IO(17)=1  TRACE DES SOUS-SPECTRES
+!    IO(20)=1  HORIZONTALISATION FOND CONTINU
 !*********************************************************************
-!
-!                  P R O G R A M M E    M O S F I T
-!
-!**********************************************************************
-program mosfit
   use precision
-  use algebre
-!~   use io
+  use options   ! variables pour choix des options
+  use lecture   ! routines de lecture du fichier .coo
+  use ecriture  ! routines d'ecriture du fichier résultat
+  use algebre   ! routines d'algebre lineraire (inverses de matrice, resolution de systemes)
+  implicit none
+  integer::NMAX,NS,NS1,NS2,IOPT,MONOC
+  integer::NG(8),NB(10)
+  real(dp)::CN,HBRUIT, DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA
+  real(dp)::GRASS(10)
+  !variables locales
+  integer::ind
+  
+  character(len=*)::fichier_sortie='fit.out'
+  !-----------------------------------------------------------------------
+  !Lecture des options 
+  call lecture_options(CN,NMAX,NS,NS1,NS2,IOPT,HBRUIT,GRASS)
+  !-----------------------------------------------------------------------
+  !Lecture des sous-spectres
+  do NT=1,NS
+    !(re)initialisations
+    MONOC=0
+    IOGV=0
+    NG=0
+    NB=0
+    if(NT==NS1)then  ! lecture des parametres 
+      read(5,* ) DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA0,TETA0,PTETA,GAMA0,BETA0,ALFA0,MONOC0
+      read(5,*) (NB0(I), I=1,10)
+    endif
+    if((NT>=NS1)&&(NT<=NS2))then 
+      call super
+    else
+!~     niveau du label 110.....
+    endif
+    
+    
+    
+    
+  enddo
+!~   call lecture_spectre( DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA)
+!~   call ecriture_options(CN,NMAX,NS,NS1,NS2,IOPT,HBRUIT,'test.out')
 end program mosfit
