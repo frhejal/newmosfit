@@ -1,10 +1,10 @@
 program mosfit
-!********************************************************************
+!**********************************************************************!
 !         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57
-!                     VERSION  FEV  86
+!                     VERSION  MAI  2016
 !**********************************************************************!
 !
-! MODIFICATIONS********************************************************
+! MODIFICATIONS********************************************************!
 !
 ! INDIQUER DATE  NOM  MODIFICATION
 !
@@ -21,8 +21,8 @@ program mosfit
 !    FEV 94  NR  TRACE DES SOUS-SPECTRES
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
 !  1995-2016 ??  ???
-!   MAI 2016 FL  REECRITURE EN FORTRAN 95
-!********************OPTIONS*******************************************
+!    MAI 2016 FL  REECRITURE EN FORTRAN 95
+!********************OPTIONS*******************************************!
 !    IO(1)=N  AJOUT N MILLIONS
 !     IO(2)=1  TRACE SUR LARGEUR 12OCX
 !    IO(3)=1  SN119
@@ -42,53 +42,89 @@ program mosfit
 !    IO(16)=N  (N=NBRE DE SOUS CANAUX)  CONVOLUTION GAUSS*LORENZ
 !    IO(17)=1  TRACE DES SOUS-SPECTRES
 !    IO(20)=1  HORIZONTALISATION FOND CONTINU
-!*********************************************************************
+!**********************************************************************!
   use precision
   use options         ! variables pour choix des options
-  use param_hyperfins ! variables des parametres hyperfins
+  use variablesAjustables ! variables des parametres hyperfins
   use lecture         ! routines de lecture du fichier .coo
   use ecriture        ! routines d'ecriture du fichier résultat
-  use algebre         ! routines d'algebre lineraire (inverses de matrice, resolution de systemes)
+  use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
+  use spectres         ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
   implicit none
-  integer::NMAX,NS,NS1,NS2,IOPT,IOGV,NT
-  !IOGV : type d'ajustement des largeurs de raie dans un sous-spectre
-  integer::NG(8)
-  real(dp)::CN,HBRUIT
-  real(dp)::GRASS(10),GV(8)
+!**********************************************************************!
+  !variables qu'ils faudra probablement ranger dans d'autres modules
+  integer::NMAX,NS1,NS2,NT
+  real(dp)::CN
+  real(dp)::GRASS(10)
+  real(dp)::E ! critere de convergence
   !variables locales
   character(len=*),parameter::fichier='test.out'
 !~   fichier_sortie='pouet'
-  !-----------------------------------------------------------------------
+  !---------------------------------------------------------------------
+  !initialisations
+  call raz
+  call options_raz
+  call variablesAjustables_raz
+  !---------------------------------------------------------------------
   !Lecture des options 
+  call lecture_titre
+  call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
-  call lecture_options(CN,NMAX,NS,NS1,NS2,IOPT,HBRUIT,GRASS)
-  call ecriture_options(CN,NMAX,NS,NS1,NS2,IOPT,HBRUIT)
-  !-----------------------------------------------------------------------
-  !Lecture (ou construction en progression arithmetique) des sous-spectres
+  call ecriture_options(CN,NMAX,NS,NS1,NS2,HBRUIT)
+  !---------------------------------------------------------------------
+  !Lecture des parametres ajustables des sous-spectres (ou construction en progression arithmetique)
   do NT=1,NS
-  !(re)initialisations
     MONOC=0
     IOGV=0
-    NG=0
-    NB=0
-    ! lecture des parametres  hyperfins
-    if((NT>=NS1) .AND. (NT<=NS2))then !progression arithmetique demandee du spectre NS1 au spectre NS2
-      if(NT==NS1)then
-        call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
-      endif
-      call super(NT,NS1) ! calcul des parametres des spectres NS1 à NS2
+    if((NT>=NS1) .AND. (NT<=NS2))then
+      ! Progression arithmetique demandee, du spectre NS1 au spectre NS2
+      if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
+      call variablesAjustables_super(NT,NS1)
     else
-      if(IO(2)/=2) call razhyp ! remize à zero des parametres hyperfins
-      call lecture_param( DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV )
+      if(IO(10)/=2) call variablesAjustables_raz
+      call lecture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV )
       call ecriture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB)
-      if(IOGV/=0) GV(1:8) = GA  
-      if((IOGV==1) .OR. (IOGV==2)) NB(2)=0
     endif
-    
-    
-    
-    
+    call variablesAjustables_definir_largeurs_raies
+    ! Mise en tableau des parametres hyperfins et des largeurs variables
+    call variablesAjustables_ranger(NT) 
   enddo
-!~   call lecture_spectre( DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA)
-!~   call ecriture_options(CN,NMAX,NS,NS1,NS2,IOPT,HBRUIT,'test.out')
+  !---------------------------------------------------------------------
+  ! lecture de bruit
+  if(IO(4)/=0)then
+    if(IO(4)/=1) call variablesAjustables_ranger_bruit
+    call ecriture_bruit
+    call lecture_titre
+    call ecriture_titre
+    call lecture_spectre(BF,N)
+    call spectres_preparer_bruit
+  endif
+  !Chargement du spectre experimental
+  if(IO(10)==0) call lecture_spectre(Y,N)  
+  Y = Y + real(IO(1),dp)*1000000_dp  ! ajout de IO(1) million(s) demandé en option
+  if(IO(10)==1)  Y=0.0_dp      ! pas de spectre experimental
+  !Defnition du niveau zero
+  !modification des poids
+  !ajout du niveau zero en parametre
+  
+  
+
+!~   call ecriture_spectre(Y)
+  contains 
+    subroutine raz
+    !remise a zero des variables
+      E = 0.001_dp
+  !~     P=1.0_dp
+  !~     Q=0.0_dp
+      B=0.0_dp
+      HBRUIT=0.0_dp
+      CN=0.078125_dp
+  !~     N=256
+      NS=1
+      NS1=0
+      NS2=0
+      K=1
+  !~     NPAS=0
+  !~     NMAX=20
+    end subroutine raz
 end program mosfit
