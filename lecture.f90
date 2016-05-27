@@ -54,7 +54,6 @@ module lecture
       integer::i,j,dump
       do i=1,n,8
         read(NIN,'(I5,8I8)') dump , (temp(j),j=i,i+7)
-!~         write(6,*), temp(j:j+7)
       enddo
       spectre= real(temp,dp)
     end subroutine lecture_spectre

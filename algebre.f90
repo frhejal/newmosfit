@@ -7,7 +7,6 @@
 module algebre
   use precision
   implicit none
-
   contains
 !     ..................................................................
 !        SUBROUTINE MINV

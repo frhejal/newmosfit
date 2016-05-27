@@ -11,6 +11,7 @@ module spectres
   real(dp)::Y(N)
   real(dp)::BF(N)
   real(dp)::P(N)  ! poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
+  real(dp)::GR(N)
   integer::NS ! nombre de sous-spectres theoriques utilisé pour l'ajsutement d'un spectre experimental.
   contains
   !---------------------------------------------------------------------
@@ -38,6 +39,6 @@ module spectres
   end subroutine spectres_poids
   !---------------------------------------------------------------------
   subroutine spectres_calculer
-    
+    write(6,*) "Attention, appel d'une fonction vide"
   end subroutine spectres_calculer
 end module spectres

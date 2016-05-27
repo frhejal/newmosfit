@@ -43,7 +43,7 @@ contains
       V( (j-1)*N+1 :  N*j ) =  A(1:N,j)
     enddo
   end subroutine mat2Vect
-  ! vect2mat : construit une une matrice A(N,N) à partir d'un vecteur V(N*N), supposé rangé colonne par colonne
+  ! vect2mat : construit une matrice A(N,N) à partir d'un vecteur V(N*N), supposé rangé colonne par colonne
   ! chemin inverse: mat2Vect
   subroutine vect2mat(V,A,N)
     integer,intent(in)::N

@@ -5,6 +5,7 @@ module variablesAjustables
 !       et des parametres ajustables (largeur de raie, hbruit)
 !......................................................................
   use precision
+  use connex
   implicit none
   integer:: K  ! nombre courant de parametres ajustables stockés dans B
     ! hauteur de bruit
@@ -191,8 +192,8 @@ module variablesAjustables
   end subroutine variablesAjustables_nivzer
   !--------------------------------------------------------------------- 
   subroutine variablesAjustables_actualiser_largeur_raies(nt)
-  ! prends en compte la valeur de IOGVT(NT) pour respecter les relations demander
-  ! entre les largeur de raies (spectre quadrupolaire, spectre magnétique...)
+  ! en fonction de IOGVT(NT),applique les relations demandées entre les 
+  ! largeurs de raies (spectre quadrupolaire, spectre magnétique...)
     integer,intent(in)::nt
     if(IOGVT(nt)==1)then 
       GVT(2,nt)=GVT(1,nt)
@@ -207,4 +208,11 @@ module variablesAjustables
       GVT(5,nt)=GVT(4,nt)
     endif
   endsubroutine variablesAjustables_actualiser_largeur_raies
+  !---------------------------------------------------------------------
+  subroutine variablesAjustables_habiller_raies
+  ! Calcule la position des raies dans les cannaux,
+  ! habille les raies par des lorentziennes 
+  ! ou des convolutions gaussiennes*lorentziennes
+  end subroutine variablesAjustables_habiller_raies
+  
 end module variablesAjustables

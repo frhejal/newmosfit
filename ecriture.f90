@@ -14,6 +14,9 @@ module ecriture
     character(len=*)::nom
     if( len( trim( nom ) )>255) stop "ERREUR dans ecriture_nommer_fichier_de_sortie  : nom de fichier trop long"
     fichier_sortie = nom
+    open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted')
+    write(NOUT,*) ' VERSION MAI 2016 '
+    close(NOUT)
   end subroutine ecriture_nommer_fichier_de_sortie
   !-----------------------------------------------------------------------
   subroutine ecriture_titre
@@ -30,8 +33,7 @@ module ecriture
     real(dp),intent(in)::cn,hbruit
 !~     character(len=*),intent(in)::fichier_sortie
     integer::i
-    open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted')
-    write(NOUT,*) titre
+    open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     if(IZZ==1) print *, ' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
     if(IOPT==1) print *, ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
     print *, 'VITESSE PAR CANAL=', cn, ' NBRE DE COMPOSANTES =',ns

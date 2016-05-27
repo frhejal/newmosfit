@@ -9,6 +9,7 @@ module options
   integer::IOPT   ! indique si des options sont spécifiées.
   integer::IZZ    ! indique si il y a des canaux à ignorer
   integer::IZ(10) ! plages de canaux a ignorer
+  real(dp)::CN    ! largeur du canal (mm/s)
   character::titre(256) !en-tete du fichier .coo (date, echantillon, temperature, etc...)
   contains
   subroutine options_raz

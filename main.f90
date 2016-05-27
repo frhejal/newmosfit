@@ -54,7 +54,6 @@ program mosfit
 !**********************************************************************!
   !variables qu'ils faudra probablement ranger dans d'autres modules
   integer::NMAX,NS1,NS2,NT
-  real(dp)::CN
   real(dp)::GRASS(10)
   real(dp)::E ! critere de convergence
   !variables locales
@@ -70,6 +69,7 @@ program mosfit
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
+  call ecriture_titre
   call ecriture_options(CN,NMAX,NS,NS1,NS2,HBRUIT)
   !---------------------------------------------------------------------
   !Lecture des parametres ajustables des sous-spectres (ou construction en progression arithmetique)
@@ -104,10 +104,36 @@ program mosfit
   Y = Y + real(IO(1),dp)*1000000_dp  ! ajout de IO(1) million(s) demandé en option
   if(IO(10)==1)  Y=0.0_dp      ! pas de spectre experimental
   !Defnition du niveau zero
-  !modification des poids
-  !ajout du niveau zero en parametre
-  
-  
+  if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
+  !modification des poids pour canaux ignorés
+  call spectres_poids(IZ)
+  if(NMAX==0) then 
+!~     CALL CALC(E,*122)  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
+  else
+!~     CALL MAMAGT (Q,256,B,Y,N,K,E,CALC,P)
+!~       III=0
+!~       DO 420 J=1,K
+!~       DO 420 I=1,K
+!~       III=III+1
+!~       AA(III)=VQ(I,J)
+!~  420  CONTINUE
+!~       CALL MINV(AA,K,D)
+!~       III=0
+!~       DO 421 J=1,K
+!~       DO 421 I=1,K
+!~       III=III+1
+!~       VQ(I,J)=AA(III)
+!~  421  CONTINUE
+!~ C     REMISE DES BONNES VALEURS DANS LES TABLEAUX X0,H,G
+!~       DO 101 NT=1,NS
+!~       CALL DERIV(NT,1)
+!~       CALL RTH(NT)
+!~       DI=BT(1,NT)
+!~       GA=BT(2,NT)
+!~       H1=BT(3,NT) 
+!~  101  CALL GRAPH(DI,GA,H1,N,NT)
+  endif
+  WRITE (NOUT,*)'1'
 
 !~   call ecriture_spectre(Y)
   contains 
