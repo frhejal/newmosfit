@@ -18,8 +18,8 @@ module variablesAjustables
   real(dp)::ETA    ! parametre d'asymétrie
   real(dp)::TETA  !  TETA et GAMA :    angles polaires du chp interne
   real(dp)::GAMA  !    dans les axes principaux du gradient (degres)
-  real(dp)::BETA  !  ALFA et BETA : angles polaires de la direction 
-  real(dp)::ALFA  ! du rayonnement (meme axes que pour ETA, THETA)
+  real(dp)::BETA  !  ALFA et BETA : angles polaires de la direction du
+  real(dp)::ALFA  !          rayonnement (meme axes que pour ETA, THETA)
   real(dp)::TY    ! niveau moyen hors d'absorption
   integer::NB(10) ! indique le type d'ajustement des 10 PHF (pour le sous-spectre en cours de lecture)
       ! parametre           DI GA H1 SQ CH ETA TETA GAMA BETA ALFA
@@ -63,6 +63,7 @@ module variablesAjustables
   real(dp)::GVT(8,40) ! valeur des largeurs variables, pour tout les sous-spectres
   integer::NGT(8,40)  ! equivalent de NG, pour tout les sous-spectres 
   integer::IADG(8,40) ! IADG(i,n) = emplacement de la largeur variable GVT(i,n) dans B
+  !gestion d'erreur
   character(len=*),parameter:: erreur_kmax='Nombre de parametres ajustables superieur à 40'
   contains
   !---------------------------------------------------------------------
@@ -129,6 +130,7 @@ module variablesAjustables
     !rangement des parametres hyperfins dans les tableaux BT,NBT et B
     integer,intent(in)::nt
     integer::i
+    !rangement dans BT
     BT(1,nt)=DI
     BT(2,nt)=GA
     BT(3,nt)=H1
@@ -141,6 +143,7 @@ module variablesAjustables
     BT(10,nt)=ALFA
     MONOT(nt)=MONOC
     IOGVT(nt)=IOGV
+    ! Rangement dans B (parametres ajustables)
     do i=1,10
       if(k>40) stop erreur_kmax
       NBT(i,nt)=NB(i)
@@ -162,7 +165,6 @@ module variablesAjustables
         B(K)=GVT(i,nt)
         K=K+1
       endif
-!~       k=41
     enddo
   end subroutine variablesAjustables_ranger
   !---------------------------------------------------------------------
@@ -171,4 +173,38 @@ module variablesAjustables
       B(K)=HBRUIT
       K=K+1
   end subroutine variablesAjustables_ranger_bruit
+  !---------------------------------------------------------------------
+  subroutine variablesAjustables_nivzer(Y)
+  ! Evaluation du taux maxi de comptage à partir des 10 premiers et 10 derniers canaux
+    real(dp),intent(in)::Y(:)
+    integer::i,ny
+    ny=size(Y)
+    do i=2,11
+      TY=TY+0.05_dp*Y(i)
+    enddo
+    do i=ny-9,ny
+          TY=TY+0.05_dp*Y(i)
+    enddo
+    !rangement dans les parametres variables B
+    if(k>40)  stop erreur_kmax
+    B(K)=TY
+  end subroutine variablesAjustables_nivzer
+  !--------------------------------------------------------------------- 
+  subroutine variablesAjustables_actualiser_largeur_raies(nt)
+  ! prends en compte la valeur de IOGVT(NT) pour respecter les relations demander
+  ! entre les largeur de raies (spectre quadrupolaire, spectre magnétique...)
+    integer,intent(in)::nt
+    if(IOGVT(nt)==1)then 
+      GVT(2,nt)=GVT(1,nt)
+      GVT(5,nt)=GVT(1,nt)
+      GVT(6,nt)=GVT(1,nt)
+      GVT(4,nt)=GVT(3,nt)
+      GVT(7,nt)=GVT(3,nt)
+      GVT(8,nt)=GVT(3,nt)
+    elseif(IOGVT(nt)==2) then
+      GVT(7,nt)=GVT(2,nt)
+      GVT(6,nt)=GVT(3,nt)
+      GVT(5,nt)=GVT(4,nt)
+    endif
+  endsubroutine variablesAjustables_actualiser_largeur_raies
 end module variablesAjustables
