@@ -82,7 +82,7 @@ module variablesAjustables
       ALFA=0.0_dp
       MONOC=0
       TY=0.0_dp
-      NB=0.0_dp
+      NB=0
       MONOC=0
   end subroutine variablesAjustables_raz
   !---------------------------------------------------------------------

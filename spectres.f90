@@ -19,7 +19,6 @@ module spectres
     ! retire le bruit moyen brumoy du spectre de bruit de fond BF
     ! le bruit moyen est la moyenne des 10 premieres mesures de BF
     real(dp)::brumoy
-    integer::j
     brumoy=0.1_dp*sum(BF(1:10))
     BF=BF-brumoy
   end subroutine spectres_preparer_bruit

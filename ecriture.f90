@@ -24,7 +24,7 @@ module ecriture
     write(NOUT,*) titre
     close(NOUT)
   end subroutine ecriture_titre
-  !-----------------------------------------------------------------------
+  !----------------------------------------------------------------------
   subroutine ecriture_options(cn,nmax,ns,ns1,ns2,hbruit)
   ! Ecriture des options precedement lues 
   ! L'ecriture se fait dans le fichier_sortie
