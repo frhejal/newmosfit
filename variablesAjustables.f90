@@ -209,10 +209,4 @@ module variablesAjustables
     endif
   endsubroutine variablesAjustables_actualiser_largeur_raies
   !---------------------------------------------------------------------
-  subroutine variablesAjustables_habiller_raies
-  ! Calcule la position des raies dans les cannaux,
-  ! habille les raies par des lorentziennes 
-  ! ou des convolutions gaussiennes*lorentziennes
-  end subroutine variablesAjustables_habiller_raies
-  
 end module variablesAjustables

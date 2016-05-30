@@ -5,6 +5,7 @@ module spectres
 !    ..................................................................
   use precision
   use options
+  use algebre
   implicit none
   integer,parameter::N=256 ! nombre de mesures par spectre
   real(dp)::Q(N,42)
@@ -36,6 +37,10 @@ module spectres
       enddo
     enddo canaux
   end subroutine spectres_poids
+  !---------------------------------------------------------------------
+  subroutine spectre_theorique
+    write(6,*) "Attention, appel d'une fonction vide"
+  end subroutine spectre_theorique
   !---------------------------------------------------------------------
   subroutine spectres_calculer
     write(6,*) "Attention, appel d'une fonction vide"

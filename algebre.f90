@@ -8,7 +8,7 @@ module algebre
   use precision
   implicit none
   contains
-!     ..................................................................
+!---------------------------------------------------------------------
 !        SUBROUTINE MINV
 !        DESCRIPTION OF PARAMETERS
 !           A - INPUT MATRIX, DESTROYED IN COMPUTATION AND REPLACED BY
@@ -148,7 +148,7 @@ module algebre
     enddo
     return
   end subroutine minv
-!..................................................................
+!---------------------------------------------------------------------
 !        SUBROUTINE ALSB
 !   RESOLUTION DE SYSTEMES LINEAIRES A ELEMENTS REELS
 !   METHODE DU PIVOT DE GAUSS.
@@ -262,6 +262,90 @@ module algebre
         enddo
       enddo
     end subroutine alsb
+  !---------------------------------------------------------------------
+  subroutine cegren(a,r,n,mv)
+  ! calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire
+  ! la matrice est stockée colonne par colonne dans un vecteur
+  !   exemple:
+  !   le vecteur 
+  !    V = [ 1 2 3 4 5 6 7 8 9 10]  
+  !   code la matrice
+  !    A = | 1  2  4  7 |
+  !        | 0  3  5  8 |
+  !        | 0  0  6  9 |
+  !        | 0  0  0 10 |
+    integer,intent(in)::n,mv
+    complex(dp),intent(inout)::a(10)
+    complex(dp),intent(out)::r(16)
+    integer::i,ii,ip,j,k,mvk,nn,nnl
+    real(dp)::anorm,anrmx,thr,uw,y,yu,yz,z,zu
+    ip=0
+    mvk=0
+    if(mv/=1)then 
+      ! diagonale de R=1, le reste=0
+      r=(0.0_dp,0.0_dp)
+      do i=1,n
+        ii= (i-1)*n + i
+        r(ii)=(1.0_dp , 0.0_dp)
+      enddo
+    endif
+    !normalisation du plus grand terme de la diagonale
+    do i=1,n
+      k=((i+1)*i)/2 !position sur la diagonale
+      z=max(abs(a(k)),z)
+    enddo
+    !normalisation du plus grand terme extradiagonal
+    zu=abs(a(2))
+    do i=1,n-1
+      do j=i+1,n
+        k=i+(j*j-j)/2 
+        zu=max(abs(a(k)),zu)
+      enddo
+    enddo
+    if(zu/=0.0_dp)then
+      y=1.D30
+      nn=((n-1)*n)/2 ! nbre element non diagonaux
+      nnl=nn+n       ! nbre elements dans a
+      yz=real(nn,dp)
+      yu=1D37/sqrt(yz)
+      uw=1.0D-37/sqrt(yz)
+      if(z>=1.0D-44)then
+        z=z/y
+        if(zu>=uw) zu=zu/yu
+      else
+        if(zu<uw)then
+          mvk=mvk+1
+          do k=1,nnl
+            a(k)=a(k)*1.0D50
+          enddo
+          z=z*1.0D50
+          zu=zu*1.0D50
+          z=z/y
+          zu=zu/yu
+          z=max(z,zu)
+        else
+          z=zu/yu
+        endif
+      endif
+      mvk=mvk+1
+      do k=1,nnl
+        a(k)=a(k)/z
+      enddo
+      anorm=0.0._dp
+      do i=1,n
+        do j=i+1,n
+          k=i+(j*j-j)/2 
+          anorm=anorm+abs(a(k))*abs(a(k))
+        enddo
+      enddo
+      anorm=sqrt(2.0_dp)*sqrt(anorm)
+      anrmx=anorm*1.0D-7/real(n,dp)
+      ind=0
+      thr=anorm
+      thr=thr/real(n,dp)
+    endif  ! label 165
+  end subroutine cegren
+  
 end module algebre
 !**********************************************************************
 !

@@ -24,13 +24,13 @@ module ecriture
     write(NOUT,*) titre
     close(NOUT)
   end subroutine ecriture_titre
-  !----------------------------------------------------------------------
-  subroutine ecriture_options(cn,nmax,ns,ns1,ns2,hbruit)
+  !-----------------------------------------------------------------------
+  subroutine ecriture_options(cn,nmax,ns,ns1,ns2)
   ! Ecriture des options precedement lues 
   ! L'ecriture se fait dans le fichier_sortie
   ! Le fichier est effacé avant le debut de l'ecriture.
     integer,intent(in)::nmax,ns,ns1,ns2
-    real(dp),intent(in)::cn,hbruit
+    real(dp),intent(in)::cn
 !~     character(len=*),intent(in)::fichier_sortie
     integer::i
     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
