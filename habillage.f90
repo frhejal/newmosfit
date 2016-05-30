@@ -18,7 +18,7 @@ module habillage
     integer,intent(in)::n,nt
     real(dp),intent(in)::diso,largeur,hauteur
     real(dp),intent(in)::energies(8)  ! "energie" (i.e. vitesse effet doppler) theorique des 8 raies du NTieme spectre
-    real(dp),intent(in)::intensites(8)! intensité theorique des 8 raies du NTieme spectre
+    real(dp),intent(in)::intensites(8)! intensité théorique des 8 raies du NTième spectre
     real(dp),intent(out)::spectre(n)
     if(IO(16)==0)then 
       call habillage_lorentz(diso,largeur,hauteur,n,nt,energies,intensites,spectre)

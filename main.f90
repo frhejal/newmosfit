@@ -70,9 +70,10 @@ program mosfit
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
   call ecriture_titre
-  call ecriture_options(CN,NMAX,NS,NS1,NS2,HBRUIT)
+  call ecriture_options(CN,NMAX,NS,NS1,NS2)
   !---------------------------------------------------------------------
-  !Lecture des parametres ajustables des sous-spectres (ou construction en progression arithmetique)
+  !Lecture des parametres ajustables des sous-spectres
+  !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
     MONOC=0
     IOGV=0

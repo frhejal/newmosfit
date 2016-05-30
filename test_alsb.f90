@@ -3,10 +3,9 @@ program test_alsb
 use precision
 use algebre
 implicit none
-integer::i,j,N=3,erreur
+integer::N=3,erreur
 integer,dimension(100)::K
-real(dp)::A(3,3),V(3),  AA(3,4),solution(3), true_solution(3)
-real(dp)::D
+real(dp)::A(3,3),V(3),  AA(3,4)
 A= reshape((/1.0_dp, 3.0_dp, 4.0_dp, 3.0_dp, 5.0_dp, 7.0_dp, 4.0_dp, -4.0_dp, -2.0_dp/), shape(A))
 V=(/50.0_dp,2.0_dp ,31.0_dp/)
 write(6,*) "Premier test : systeme à une solution"
@@ -38,7 +37,7 @@ contains
     integer,intent(in)::N
     real(dp),intent(in)::A(N,N)
     real(dp),intent(out)::V(N*N)
-    integer ::i,j
+    integer ::j
     do j=1,N
       V( (j-1)*N+1 :  N*j ) =  A(1:N,j)
     enddo
@@ -49,7 +48,7 @@ contains
     integer,intent(in)::N
     real(dp),intent(out)::A(N,N)
     real(dp),intent(in)::V(N*N)
-    integer ::i,j
+    integer ::j
     do j=1,N
       A(1:N,j) = V( (j-1)*N+1 :  N*j )
     enddo

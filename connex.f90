@@ -39,7 +39,7 @@ contains
         BT(3,3)=BT(2,1)*BT(3,1)/3.0_dp/BT(2,3)
         BT(3,4)=BT(2,6)*BT(3,6)/3.0_dp/BT(2,4)
       case (0) 
-        print, *, 'Un appel inutile à CONNEX a été fait'
+        print *, 'Un appel inutile à CONNEX a été fait'
       case default
         stop 'OPTION 5 : VALEUR INCONNUE'
     end select
