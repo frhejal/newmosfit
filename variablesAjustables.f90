@@ -82,7 +82,7 @@ module variablesAjustables
       ALFA=0.0_dp
       MONOC=0
       TY=0.0_dp
-      NB=0.0_dp
+      NB=0
       MONOC=0
   end subroutine variablesAjustables_raz
   !---------------------------------------------------------------------
@@ -209,10 +209,4 @@ module variablesAjustables
     endif
   endsubroutine variablesAjustables_actualiser_largeur_raies
   !---------------------------------------------------------------------
-  subroutine variablesAjustables_habiller_raies
-  ! Calcule la position des raies dans les cannaux,
-  ! habille les raies par des lorentziennes 
-  ! ou des convolutions gaussiennes*lorentziennes
-  end subroutine variablesAjustables_habiller_raies
-  
 end module variablesAjustables
