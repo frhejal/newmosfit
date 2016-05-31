@@ -274,11 +274,13 @@ module algebre
   !        | 0  3  5  8 |
   !        | 0  0  6  9 |
   !        | 0  0  0 10 |
+  ! les GOTO font reference à l'ancienne version F66 de mosfit, 
+  ! au cas où un courageux voudrait decrypter l'algorithme.
     integer,intent(in)::n,mv
     complex(dp),intent(inout)::a(10)
     complex(dp),intent(out)::r(16)
     integer::i,ii,il,ilq,ilr,im,imq,imr,ind,ip,iq
-    integer::j,k,l,ll,lm,lq,m,mm,mq,mvk,nn,nnl
+    integer::j,jq,k,l,ll,lm,lq,m,mm,mq,mvk,nn,nnl
     real(dp)::anorm,anrmx,sinus,thr,uw,x,y,yp,yu,yz,z,zu
     complex(dp)::co,cosinus,cp,tmp
     ip=0
@@ -340,99 +342,142 @@ module algebre
           anorm=anorm+abs(a(k))*abs(a(k))
         enddo
       enddo
-      anorm=sqrt(2.0_dp)*sqrt(anorm)
+!~       anorm=sqrt(2.0_dp)*sqrt(anorm)
+      anorm=1.414*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
-      ind=1
+      ind=0
       thr=anorm
     outer: do while(thr>anrmx)
-      thr=thr/real(n,dp)
-      do while(ind==1)
-        ind=0
-        L=1
-        LQ=0
-        do while(l/=n)
-          m=l+1
-          lq=lq+l-1
-          do while(m<=n)
-            mq=(m*m-m)/2
-            lm=l+mq
-            x=abs(a(lm))
-            if(abs(a(lm))<thr)then
-              ip=ip+1
-              if(ip>=nn) ind=0
-            else !goto 65
-              ind=1
-              ll=l+lq
-              mm=m+mq
-              x=0.5_dp*real(A(ll)-a(mm),dp)
-              y=sqrt(x*x + abs(a(lm))*abs(a(lm)))
-              if(x<0)then     !goto 70
-                co=a(lm)/(x-y)
-              elseif(x>0)then !goto 76
-                co=a(lm)/(x+y)
-              else            !goto 75
-                cp=a(lm)/abs(a(lm))
-              endif           !goto 81
-              yp=1.0_dp + abs(co)*abs(co)
-              sinus=1.0_dp/sqrt(yp)
-              cosinus=co*sinus
-              if(abs(cosinus)==0)then
+        thr=thr/real(n,dp)
+        inner: do while(ind==0)
+          L=1
+          LQ=0
+          write(6,*) "debug cegren",thr,ind
+          do while(l/=n)
+            m=l+1
+            lq=lq+l-1
+            do while(m/=n+1)
+              mq=(m*m-m)/2
+              lm=l+mq
+              x=abs(a(lm))
+              if(abs(a(lm))<thr)then
                 ip=ip+1
-              else !goto 83
-                ip=0
-                ilq=n*(l-1)
-                imq=n*(m-1)
-                do i=1,n
-                  iq=(i*i-i)/2
-                  if(i<l)then !goto 80
-                    im=i+mq
-                    il=i+lq
-                    tmp=sinus*a(il) + conjg(cosinus)*a(im)
-                    a(im)=-cosinus*a(il) + sinus*a(im)
-                    a(il)=tmp
-                  elseif(i>l)then   !goto 96
-                    if(i<m)then     !goto 85
+                if(ip>=nn) ind=0
+              else !goto 65
+                ind=1
+                ll=l+lq
+                mm=m+mq
+                x=0.5_dp*real(A(ll)-a(mm),dp)
+                y=sqrt(x*x + abs(a(lm))*abs(a(lm)))
+                if(x<0)then     !goto 70
+                  co=a(lm)/(x-y)
+                elseif(x>0)then !goto 76
+                  co=a(lm)/(x+y)
+                else            !goto 75
+                  cp=a(lm)/abs(a(lm))
+                endif           !goto 81
+                yp=1.0_dp + abs(co)*abs(co)
+                sinus=1.0_dp/sqrt(yp)
+                cosinus=co*sinus
+                if(abs(cosinus)==0)then
+                  ip=ip+1
+                else !goto 83
+                  ip=0
+                  ilq=n*(l-1)
+                  imq=n*(m-1)
+                  do i=1,n
+                    iq=(i*i-i)/2
+                    if(i<l)then !goto 80
                       im=i+mq
-                      il=l+iq
-                      tmp=sinus*a(il) + cosinus*conjg(a(im))
-                      a(im)=-cosinus*conjg(a(il)) + sinus*a(im)
-                      a(il)=tmp  
-                    elseif(i>m)then !goto 86
-                      im=m+iq
-                      il=l+iq
-                      tmp=sinus*a(il) + cosinus*a(im)
-                      a(im)=-conjg(cosinus)*a(il) + sinus*a(im)
+                      il=i+lq
+                      tmp=sinus*a(il) + conjg(cosinus)*a(im)
+                      a(im)=-cosinus*a(il) + sinus*a(im)
                       a(il)=tmp
+                    elseif(i>l)then   !goto 96
+                      if(i<m)then     !goto 85
+                        im=i+mq
+                        il=l+iq
+                        tmp=sinus*a(il) + cosinus*conjg(a(im))
+                        a(im)=-cosinus*conjg(a(il)) + sinus*a(im)
+                        a(il)=tmp  
+                      elseif(i>m)then !goto 86
+                        im=m+iq
+                        il=l+iq
+                        tmp=sinus*a(il) + cosinus*a(im)
+                        a(im)=-conjg(cosinus)*a(il) + sinus*a(im)
+                        a(il)=tmp
+                      endif
+                    endif !goto 115
+                    if(mv/=1)then !goto 120
+                      ilr=ilq+i
+                      imr=imq+i
+                      tmp=r(ilr)*sinus+r(imr)*conjg(cosinus)
+                      r(imr)=-r(ilr)*cosinus + r(imr)*sinus
+                      r(ilr)=tmp
+                      write(6,*) "coucou"
                     endif
-                  endif !goto 115
-                  if(mv/=0)then !goto 120
-                    ilr=ilq+i
-                    imr=imq+i
-                    tmp=r(ilr)*sinus+r(imr)*conjg(cosinus)
-                    r(imr)=-r(ilr)*cosinus + r(imr)*sinus
-                    r(ilr)=tmp
-                  endif
-                enddo !goto 125
-                y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_dp) + 2.0_dp*real(conjg(co)*a(lm)))/yp
-                x=(real(a(mm),dp) +  real(a(ll),dp)*(yp-1.0_dp) - 2.0_dp*real(conjg(co)*a(lm)))/yp
-                a(lm)=(a(lm)-co*co*conjg(a(lm)) +co*(a(mm)-a(ll)))/yp
-                a(ll)=cmplx(y,0.0_dp,dp)
-                a(mm)=cmplx(x,0.0_dp,dp)
+                  enddo !goto 125
+                  y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_dp) + 2.0_dp*real(conjg(co)*a(lm)))/yp
+                  x=(real(a(mm),dp) +  real(a(ll),dp)*(yp-1.0_dp) - 2.0_dp*real(conjg(co)*a(lm)))/yp
+                  a(lm)=(a(lm)-co*co*conjg(a(lm)) +co*(a(mm)-a(ll)))/yp
+                  a(ll)=cmplx(y,0.0_dp,dp)
+                  a(mm)=cmplx(x,0.0_dp,dp)
+                endif
               endif
-            endif
-            !goto 130
-            m=m+1
+              !goto 130
+              m=m+1
+            enddo
+            !label 140
+            l=l+1
           enddo
-          !label 140
-          l=l+1
-        enddo
-        !label 150
-      enddo
-      ! label 160
-      if(sinus==1.0_dp) exit outer ! quelle proba que ça arrive ?
+          !label 150
+          ! inversion de la condition d'arret de la boucle 
+          ! (voilà ce qui se passe quand on traduit les gotos de f66)
+          if(ind==1)then 
+            ind = 0
+          else
+            exit inner  
+          endif
+        enddo inner
+        ! label 160
+        if(sinus==1.0_dp) exit outer ! quelle proba que ça arrive ?
       enddo outer
     endif
     ! label 165
+    iq=-n
+    write(6,*) a
+    write(6,*) iq, n, mvk
+    do i=1,n
+      iq=iq+n
+      ll=(i*i+i)/2
+      jq=n*(i-2)
+      do j=i,n
+        jq=jq+n
+        mm=(j*j+j)/2
+        if(real(a(ll),dp) < real(a(mm),dp))then
+          tmp=a(ll)
+          a(ll)=a(mm)
+          a(mm)=tmp
+          write(6,*) ll, mm
+          if(mv/=1)then
+            do k=1,n
+              ilr=iq+k
+              imr=jq+k
+              tmp=r(ilr)
+              r(ilr)=r(imr)
+              r(imr)=tmp
+            enddo
+          endif
+        endif
+      enddo
+    enddo !goto 185
+    if(mvk/=0)then
+      if(mvk/=1) a=a*1.0D-50
+      a=a*z
+    endif
+    write(6,*)nnl
+    write(6,*) a
+    write(6,*) r
   end subroutine cegren
   
 end module algebre
