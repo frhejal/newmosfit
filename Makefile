@@ -10,28 +10,28 @@ precision.o: precision.f90
 	$(CF) $(CFLAGS) -c precision.f90
 
 connex.o: connex.f90 precision.o
-	$(CF) $(CFLAGS) -c connex.f90 precision.o
+	$(CF) $(CFLAGS) -c connex.f90 
 	
 options.o: options.f90 precision.o
-	$(CF) $(CFLAGS) -c options.f90  precision.o
+	$(CF) $(CFLAGS) -c options.f90  
 
 lecture.o: lecture.f90  precision.o
-	$(CF) $(CFLAGS) -c lecture.f90  precision.o
+	$(CF) $(CFLAGS) -c lecture.f90  
 
 ecriture.o: ecriture.f90  precision.o  options.o
-	$(CF) $(CFLAGS) -c ecriture.f90 precision.o options.o
+	$(CF) $(CFLAGS) -c ecriture.f90
 
 algebre.o: algebre.f90 precision.o
-	$(CF) $(CFLAGS) -c algebre.f90 precision.o
+	$(CF) $(CFLAGS) -c algebre.f90 
 
 variablesAjustables.o: variablesAjustables.f90  precision.o connex.o
-	$(CF) $(CFLAGS) -c variablesAjustables.f90 precision.o connex.o
+	$(CF) $(CFLAGS) -c variablesAjustables.f90
 
 spectres.o: spectres.f90 precision.o
-	$(CF) $(CFLAGS) -c spectres.f90 precision.o
+	$(CF) $(CFLAGS) -c spectres.f90
 
 habillage.o: habillage.f90  precision.o
-	$(CF) $(CFLAGS) -c habillage.f90 precision.o
+	$(CF) $(CFLAGS) -c habillage.f90
 	
 test_lecture_ecriture.exec: test_lecture_ecriture.f90 ecriture.o lecture.o variablesAjustables.o precision.o options.o
 	$(CF) $(LFLAGS) -o $@ test_lecture_ecriture.f90 ecriture.o lecture.o variablesAjustables.o precision.o options.o

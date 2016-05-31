@@ -277,8 +277,10 @@ module algebre
     integer,intent(in)::n,mv
     complex(dp),intent(inout)::a(10)
     complex(dp),intent(out)::r(16)
-    integer::i,ii,ip,j,k,mvk,nn,nnl
-    real(dp)::anorm,anrmx,thr,uw,y,yu,yz,z,zu
+    integer::i,ii,il,ilq,ilr,im,imq,imr,ind,ip,iq
+    integer::j,k,l,ll,lm,lq,m,mm,mq,mvk,nn,nnl
+    real(dp)::anorm,anrmx,sinus,thr,uw,x,y,yp,yu,yz,z,zu
+    complex(dp)::co,cosinus,cp,tmp
     ip=0
     mvk=0
     if(mv/=1)then 
@@ -331,7 +333,7 @@ module algebre
       do k=1,nnl
         a(k)=a(k)/z
       enddo
-      anorm=0.0._dp
+      anorm=0.0_dp
       do i=1,n
         do j=i+1,n
           k=i+(j*j-j)/2 
@@ -340,10 +342,97 @@ module algebre
       enddo
       anorm=sqrt(2.0_dp)*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
-      ind=0
+      ind=1
       thr=anorm
+    outer: do while(thr>anrmx)
       thr=thr/real(n,dp)
-    endif  ! label 165
+      do while(ind==1)
+        ind=0
+        L=1
+        LQ=0
+        do while(l/=n)
+          m=l+1
+          lq=lq+l-1
+          do while(m<=n)
+            mq=(m*m-m)/2
+            lm=l+mq
+            x=abs(a(lm))
+            if(abs(a(lm))<thr)then
+              ip=ip+1
+              if(ip>=nn) ind=0
+            else !goto 65
+              ind=1
+              ll=l+lq
+              mm=m+mq
+              x=0.5_dp*real(A(ll)-a(mm),dp)
+              y=sqrt(x*x + abs(a(lm))*abs(a(lm)))
+              if(x<0)then     !goto 70
+                co=a(lm)/(x-y)
+              elseif(x>0)then !goto 76
+                co=a(lm)/(x+y)
+              else            !goto 75
+                cp=a(lm)/abs(a(lm))
+              endif           !goto 81
+              yp=1.0_dp + abs(co)*abs(co)
+              sinus=1.0_dp/sqrt(yp)
+              cosinus=co*sinus
+              if(abs(cosinus)==0)then
+                ip=ip+1
+              else !goto 83
+                ip=0
+                ilq=n*(l-1)
+                imq=n*(m-1)
+                do i=1,n
+                  iq=(i*i-i)/2
+                  if(i<l)then !goto 80
+                    im=i+mq
+                    il=i+lq
+                    tmp=sinus*a(il) + conjg(cosinus)*a(im)
+                    a(im)=-cosinus*a(il) + sinus*a(im)
+                    a(il)=tmp
+                  elseif(i>l)then   !goto 96
+                    if(i<m)then     !goto 85
+                      im=i+mq
+                      il=l+iq
+                      tmp=sinus*a(il) + cosinus*conjg(a(im))
+                      a(im)=-cosinus*conjg(a(il)) + sinus*a(im)
+                      a(il)=tmp  
+                    elseif(i>m)then !goto 86
+                      im=m+iq
+                      il=l+iq
+                      tmp=sinus*a(il) + cosinus*a(im)
+                      a(im)=-conjg(cosinus)*a(il) + sinus*a(im)
+                      a(il)=tmp
+                    endif
+                  endif !goto 115
+                  if(mv/=0)then !goto 120
+                    ilr=ilq+i
+                    imr=imq+i
+                    tmp=r(ilr)*sinus+r(imr)*conjg(cosinus)
+                    r(imr)=-r(ilr)*cosinus + r(imr)*sinus
+                    r(ilr)=tmp
+                  endif
+                enddo !goto 125
+                y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_dp) + 2.0_dp*real(conjg(co)*a(lm)))/yp
+                x=(real(a(mm),dp) +  real(a(ll),dp)*(yp-1.0_dp) - 2.0_dp*real(conjg(co)*a(lm)))/yp
+                a(lm)=(a(lm)-co*co*conjg(a(lm)) +co*(a(mm)-a(ll)))/yp
+                a(ll)=cmplx(y,0.0_dp,dp)
+                a(mm)=cmplx(x,0.0_dp,dp)
+              endif
+            endif
+            !goto 130
+            m=m+1
+          enddo
+          !label 140
+          l=l+1
+        enddo
+        !label 150
+      enddo
+      ! label 160
+      if(sinus==1.0_dp) exit outer ! quelle proba que ça arrive ?
+      enddo outer
+    endif
+    ! label 165
   end subroutine cegren
   
 end module algebre
