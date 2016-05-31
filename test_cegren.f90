@@ -6,7 +6,7 @@ program test_cegren
   complex(dp)::A(10),Aold(10),V(16),Vold(16)
   integer::k,n,mv
   n=4
-  mv=0
+  mv=1
   A=(0.0_dp,0.0_dp)
   V=(0.0_dp,0.0_dp)
   Vold=(0.0_dp,0.0_dp)

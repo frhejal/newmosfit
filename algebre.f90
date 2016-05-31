@@ -181,6 +181,12 @@ module algebre
       JMAX=I
       I1=I+1
       if(I <= N)then
+!   SELECTER DANS LA LIGNE I L'INDICE DE COLONNE JMAX DU TERME
+!   DE PLUS GRANDE VALEUR ABSOLUE AMAX PARMI LES TERMES
+!   SITUES A DROITE DE LA DIAGONALE
+!   SI , EN COURS DE TRIANGULARISATION , UN TERME DIAGONAL EST NUL
+!   AINSI QUE TOUS LES TERMES A SA DROITE ET DANS SA LIGNE ,
+!   LA MATRICE A EST SINGULIERE **********
         do J=I1,N
           if (AMAX <= ABS(A(I,J))  ) then
             AMAX=ABS(A(I,J))
@@ -224,6 +230,10 @@ module algebre
         A(I,J2)=A(I,J2)/A(I,I)
       enddo
 !     SUBSTITUTION DES LIGNES
+!  SUBSTITUTION DES LIGNES
+!   DIVISER LES TERMES DE LA LIGNE I SITUES A DROITE DE LA
+!   DIAGONALE AINSI QUE LA I-EME COMPOSANTE DES SECONDS MEMBRES
+!   PAR LE TERME DE LA DIAGONALE
       if(I<N)then
         do I3=I1,N
           do J3=I1,NM
@@ -241,6 +251,8 @@ module algebre
     if(N == 1) return ! Pour eviter un plantage de l'agorithme pour I=J-1=0.
                       ! (Comme si on allait résoudre un systeme de rang 1 ...)
 !   CALCUL DES SOLUTIONS
+!   RESOLUTION DU SYSTEME TRIANGULAIRE
+!   VECTEUR SOLUTION REMPLACE VECTEUR SECOND MEMBRE
       do KC=NDEB,NM
         do J=N, 2, -1
            do I=J-1, 1, -1
@@ -264,18 +276,21 @@ module algebre
     end subroutine alsb
   !---------------------------------------------------------------------
   subroutine cegren(a,r,n,mv)
-  ! calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire
-  ! la matrice est stockée colonne par colonne dans un vecteur
-  !   exemple:
+  ! Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
+  ! En sortie, les valeurs propres sont sur la diagonale de a.
+  ! Si mv = 0, les vecteurs prorpes sont calculés et placés dans les colonnes de r. 
+  ! La matrice est de rang n, elle est stockée colonne par colonne dans un vecteur
+  !   exemple: pour n=4, 
   !   le vecteur 
   !    V = [ 1 2 3 4 5 6 7 8 9 10]  
-  !   code la matrice
+  !   code la matrice 4*4 :
   !    A = | 1  2  4  7 |
   !        | 0  3  5  8 |
   !        | 0  0  6  9 |
   !        | 0  0  0 10 |
+  ! 
   ! les GOTO font reference à l'ancienne version F66 de mosfit, 
-  ! au cas où un courageux voudrait decrypter l'algorithme.
+  ! au cas où des courageux voudraient decrypter l'algorithme.
     integer,intent(in)::n,mv
     complex(dp),intent(inout)::a(10)
     complex(dp),intent(out)::r(16)
@@ -342,8 +357,8 @@ module algebre
           anorm=anorm+abs(a(k))*abs(a(k))
         enddo
       enddo
-!~       anorm=sqrt(2.0_dp)*sqrt(anorm)
-      anorm=1.414*sqrt(anorm)
+      anorm=sqrt(2.0_dp)*sqrt(anorm)
+!~       anorm=1.414*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
       ind=0
       thr=anorm
@@ -352,7 +367,6 @@ module algebre
         inner: do while(ind==0)
           L=1
           LQ=0
-          write(6,*) "debug cegren",thr,ind
           do while(l/=n)
             m=l+1
             lq=lq+l-1
@@ -407,14 +421,13 @@ module algebre
                         a(im)=-conjg(cosinus)*a(il) + sinus*a(im)
                         a(il)=tmp
                       endif
-                    endif !goto 115
+                    endif !label 115
                     if(mv/=1)then !goto 120
                       ilr=ilq+i
                       imr=imq+i
                       tmp=r(ilr)*sinus+r(imr)*conjg(cosinus)
                       r(imr)=-r(ilr)*cosinus + r(imr)*sinus
                       r(ilr)=tmp
-                      write(6,*) "coucou"
                     endif
                   enddo !goto 125
                   y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_dp) + 2.0_dp*real(conjg(co)*a(lm)))/yp
@@ -424,7 +437,7 @@ module algebre
                   a(mm)=cmplx(x,0.0_dp,dp)
                 endif
               endif
-              !goto 130
+              !label 130
               m=m+1
             enddo
             !label 140
@@ -440,13 +453,13 @@ module algebre
           endif
         enddo inner
         ! label 160
-        if(sinus==1.0_dp) exit outer ! quelle proba que ça arrive ?
+        if(sinus==1.0_dp) exit outer
       enddo outer
     endif
     ! label 165
     iq=-n
-    write(6,*) a
-    write(6,*) iq, n, mvk
+    ! rangement des valeurs propres dans l'ordre croissant
+    !les vp sont sur la diagonale de a.
     do i=1,n
       iq=iq+n
       ll=(i*i+i)/2
@@ -458,7 +471,6 @@ module algebre
           tmp=a(ll)
           a(ll)=a(mm)
           a(mm)=tmp
-          write(6,*) ll, mm
           if(mv/=1)then
             do k=1,n
               ilr=iq+k
@@ -475,9 +487,6 @@ module algebre
       if(mvk/=1) a=a*1.0D-50
       a=a*z
     endif
-    write(6,*)nnl
-    write(6,*) a
-    write(6,*) r
   end subroutine cegren
   
 end module algebre
