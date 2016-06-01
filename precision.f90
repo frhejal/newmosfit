@@ -22,4 +22,8 @@ module precision
 !     compilateurs la procurent encore (ex : gfortran)  )
   implicit none
   integer,parameter:: dp=kind(1.0D0)
+  real(dp),parameter:: PI=4.*atan(1.0_dp)
+  real(dp),parameter:: RPD=PI/180.0_dp
+  real(dp),parameter:: ROOT2 = sqrt(2.0_dp)
+  real(dp),parameter:: ROOT3 = sqrt(3.0_dp)
 end module precision

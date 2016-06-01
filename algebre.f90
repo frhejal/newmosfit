@@ -357,7 +357,7 @@ module algebre
           anorm=anorm+abs(a(k))*abs(a(k))
         enddo
       enddo
-      anorm=sqrt(2.0_dp)*sqrt(anorm)
+      anorm=ROOT2*sqrt(anorm)
 !~       anorm=1.414*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
       ind=0
