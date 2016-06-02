@@ -6,7 +6,7 @@ module spectres
   use precision
   use options
   use algebre
-!~   use hamiltonien
+  use hamiltonien
   use habillage
   use variablesAjustables
   implicit none
@@ -16,7 +16,9 @@ module spectres
   real(dp)::BF(N)
   real(dp)::P(N)  ! poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
   real(dp)::GR(N)
-  rel(dp)::
+  real(dp)::ENERGIES(8,40)
+  real(dp)::INTENSITES(8,40)
+!~   rel(dp)::
   integer::NS ! nombre de sous-spectres theoriques utilisé pour l'ajsutement d'un spectre experimental.
   
   contains
@@ -46,36 +48,44 @@ module spectres
   subroutine spectre_theorique(nt)  !(parametres hyper fins ?)
   ! calcule le spectre theorique à partir des parametres hypers fins
     !Choix du rapport gyromagnétique------------------------------------
-    real(dp)::sq,ch,eta,teta,gama,beta
+    integer,intent(in)::nt
+    real(dp)::ze,zf
+    real(dp)::sq,ch,eta,theta,gama,beta,alpha
+    real(dp)::energ(8),intens(8)
     if(io(3)==0)then
       ! Fe57
-      zf = 3.915_dp/330.0_dp
-      ze = -2.236/330.0_dp
+      zf = 3.915_dp/330.0_dp 
+      ze = -2.236_dp/330.0_dp
     else
       ! sn119
-      zf = -0.08278_dp
+      zf = -0.08278_dp ! Unités : mm/s/kOe
       ze = 0.0180_dp
     endif
     !recuperation des parametres hyperfins du module variableAjustalbles
     sq=BT(4,nt)
     ch=BT(5,nt)
     eta=BT(6,nt)
-    teta=BT(7,nt)*RPD  ! les angles sont donnes en degres
+    theta=BT(7,nt)*RPD  ! les angles sont donnes en degres
     gama=BT(8,nt)*RPD
     beta=BT(9,nt)*RPD
-    alfa=BT(10,nt)*RPD 
+    alpha=BT(10,nt)*RPD 
 ! /!\ ! ajouter ici une boucle sur theta si on ajoute une option cycloide (cf routine DIST modifiée )
     !Calcul du champ hyperfin------------------------------------------- 
-    call hamiltonien_definition_champ_hyperfin(ch,sq,ch,teta,gama)
+    call hamiltonien_definition_champ_hyperfin(ch,teta,gama)
     !Calcul d'energie et intensités-------------------------------------
-    call hamiltonien_calculer_fonction_onde(ze,zf,sq,eta,gama)
+    call hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
     !Calcul des energies par recherche des valeurs propres
-!~     call hamiltonien_energie(e_fond,e_exci)
-!~     call hamiltonien_intensite(intensite)
-
+    call hamiltonien_energies(energ)
+    call hamiltonien_intensites(alpha, beta, MONOT(nt) , intens )
+    ENERGIES(1:8,nt) = energ(1:8)
+    INTENSITES(1:8,nt) = intens(1:8)
   end subroutine spectre_theorique
   !---------------------------------------------------------------------
   subroutine spectres_calculer
+    integer::nt
     write(6,*) "Attention, appel d'une fonction vide"
+    do nt=1,NS
+      call spectre_theorique(nt)
+    enddo
   end subroutine spectres_calculer
 end module spectres

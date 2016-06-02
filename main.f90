@@ -91,7 +91,7 @@ program mosfit
     call variablesAjustables_ranger(NT) 
   enddo
   !---------------------------------------------------------------------
-  ! lecture de bruit
+! lecture de bruit
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_bruit
@@ -100,17 +100,25 @@ program mosfit
     call lecture_spectre(BF,N)
     call spectres_preparer_bruit
   endif
-  !Chargement du spectre experimental
+!Chargement du spectre experimental
   if(IO(10)==0) call lecture_spectre(Y,N)  
-  Y = Y + real(IO(1),dp)*1000000_dp  ! ajout de IO(1) million(s) demandé en option
-  if(IO(10)==1)  Y=0.0_dp      ! pas de spectre experimental
-  !Defnition du niveau zero
+  if(IO(10)==1)then   ! pas de spectre experimental
+    Y=0.0_dp
+  else    ! ajout de IO(1) million(s) demandé en option
+    Y = Y + real(IO(1),dp)*1000000_dp  
+  endif
+!Defnition du niveau zero
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
-  !modification des poids pour canaux ignorés
+!modification des poids pour canaux ignorés
   call spectres_poids(IZ)
+     open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
   if(NMAX==0) then 
+!~       call spectres_calculer
+      write(6,*) "coucou"
 !~     CALL CALC(E,*122)  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
   else
+      write(6,*) "Hello"
+      call spectres_calculer
 !~     CALL MAMAGT (Q,256,B,Y,N,K,E,CALC,P)
 !~       III=0
 !~       DO 420 J=1,K
@@ -135,7 +143,7 @@ program mosfit
 !~  101  CALL GRAPH(DI,GA,H1,N,NT)
   endif
   WRITE (NOUT,*)'1'
-
+close(6)
 !~   call ecriture_spectre(Y)
   contains 
     subroutine raz

@@ -27,23 +27,23 @@ module lecture
       if(IO(17)/=0) read(5,*) (grass(i), i=1,10)
     end subroutine lecture_options
 !-----------------------------------------------------------------------
-    subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb,iogv)
+    subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc,nb,iogv)
     ! Lecture des parametres hyperfins et de leurs options d'ajustement (ajustable vs fixe)
       integer,intent(out)::monoc,iogv
-      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alfa
+      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha
       integer,intent(out)::nb(10)
       integer::i
-      read(5,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc
+      read(5,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc
       read(5,*) (nb(i), i=1,10), iogv
     end subroutine lecture_param
 !-----------------------------------------------------------------------    
-    subroutine lecture_param0( di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alfa,monoc,nb)
+    subroutine lecture_param0( di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha,monoc,nb)
     ! Lecture des parametres hyperfins à partir desquels construire une progression arithmetique 
       integer,intent(out):: monoc
-      real(dp),intent(out)::di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alfa
+      real(dp),intent(out)::di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha
       integer,intent(out)::nb(10)
       integer::i
-      read(NIN,*)  di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alfa,monoc
+      read(NIN,*)  di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha,monoc
       read(NIN,*) (nb(i), i=1,10)
     end subroutine lecture_param0
 !-----------------------------------------------------------------------    

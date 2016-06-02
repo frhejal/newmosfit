@@ -1,6 +1,6 @@
 module variablesAjustables
 !**********************************************************************
-!       module hyperfins
+!       module variablesAjustables
 !       Rangements et manipulation des parametres hyperfins (PHF)
 !       et des parametres ajustables (largeur de raie, hbruit)
 !......................................................................
