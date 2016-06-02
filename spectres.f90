@@ -83,9 +83,13 @@ module spectres
   !---------------------------------------------------------------------
   subroutine spectres_calculer
     integer::nt
-    write(6,*) "Attention, appel d'une fonction vide"
     do nt=1,NS
-      call spectre_theorique(nt)
+      call spectre_deriver(nt,0)
     enddo
   end subroutine spectres_calculer
+  !---------------------------------------------------------------------
+  subroutine spectre_deriver(nt,m)
+    integer,intent(in)::nt,m
+    call spectre_theorique(nt)
+  end subroutine spectre_deriver
 end module spectres
