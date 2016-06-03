@@ -1,8 +1,8 @@
 module connex
 !**********************************************************************
-!        Ancienne routine CONNEX.
-!        laissé à la disposition de l'utilisateur.
-!        Contient des relations entre paramètres connectés. 
+!        Ancienne routine CONNEX, laissée à la disposition de l'utilisateur.
+! Permet a l utilisateur d'imposer des relations (intensités, parametres hyperfins,...)
+! entre les differentes composantes du spectre (Voir manuel).
 ! Rappel des indices de BT(i,nt) :
 !         nt = numero du sous-spectre
 !         i  = identifiant du parametres hyperfin

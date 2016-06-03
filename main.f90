@@ -101,7 +101,7 @@ program mosfit
     call spectres_preparer_bruit
   endif
 !Chargement du spectre experimental
-  if(IO(10)==0) call lecture_spectre(Y,N)  
+  if(IO(10)==0)call lecture_spectre(Y,N)  
   if(IO(10)==1)then   ! pas de spectre experimental
     Y=0.0_dp
   else    ! ajout de IO(1) million(s) demandé en option
