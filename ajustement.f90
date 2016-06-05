@@ -6,13 +6,15 @@ module ajustement
   use precision
   use option
   implicit none
+  real(dp)::VQ(100,100) 
+  real(dp)::phi
   contains 
   subroutine ajustement_verifier_convergence(npas)
     integer,intent(in)::npas ! numero du pas
-  
+  end subroutine ajustement_verifier_convergence
   ! l'equivalent de MAMAGT ?
   ! la fonction qui calcule le KHI**2
-   SUBROUTINE MAMAGT(Q,ID,B,Y,N,K,E,CALC,P)
+   subroutine(Q,ID,B,Y,N,K,E,CALC,P)
    ! Recherche de moindres carrés utilisant l'agorithme de Marquardt
    ! Reference :
    ! [1] D.W. MARQUARDT- J. Soc. Indust. Appl. Math 11, 431 (1963)
@@ -35,7 +37,7 @@ module ajustement
       if(int >1) then ! si on a passe les deux premieres iterations
         if( ph < phi )then
         ! Choix du multiplicateur de Lagrande (cf lambda dans [1]) :
-        !   - si on a laisse int=int+1 se faire à l'iteration precedente, on est en train de tester :
+        !   - si on a laissé int=int+1 se faire à l'iteration precedente, on est en train de tester :
         !       A:   phi(lamda/nu) < phi_actuel
         !   - si on a int inchangé depuis l'itération précedente, on est en train de tester 
         !       B:  phi( lambda ) < phi_actuel) 

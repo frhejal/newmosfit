@@ -82,14 +82,27 @@ module spectres
   end subroutine spectre_theorique
   !---------------------------------------------------------------------
   subroutine spectres_calculer
+  ! 
     integer::nt
     do nt=1,NS
       call spectre_deriver(nt,0)
     enddo
   end subroutine spectres_calculer
   !---------------------------------------------------------------------
-  subroutine spectre_deriver(nt,m)
-    integer,intent(in)::nt,m
+  subroutine spectre_deriver(phi,nt,m)
+  ! calcule le spectre et le tableau des dérivées par rapport aux parametres variables
+    integer,intent(in)::nt ! numero du sous-spectre
+    integer,intent(in)::m
+    real(dp),intent(in)::phi
+    integer::i,l
+    do i=1,N
+      if(NBT(i,nt)/=0)then
+        l=IAD(i,nt)
+        BT(i,nt)=B(l)
+        
+      endif
+    enddo
+    
     call spectre_theorique(nt)
   end subroutine spectre_deriver
 end module spectres
