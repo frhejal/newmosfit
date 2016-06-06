@@ -12,7 +12,7 @@ module connex
 use precision
 IMPLICIT NONE  !!!  DECLAREZ VOS VARIABLES !
 contains
-  subroutine connex_connex(BT,IO)
+  subroutine connex_connexions(BT,IO)
     real(dp),intent(inout)::BT(10,40) 
     integer,intent(in)::IO(20)
     !=====================================================================
@@ -46,5 +46,5 @@ contains
     !=====================================================================
     !     FIN DE ZONE A MODIFIER
     !=====================================================================
-  end subroutine connex_connex
+  end subroutine connex_connexions
 end module connex

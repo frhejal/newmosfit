@@ -3,8 +3,8 @@ CFLAGS= -Wall
 LFLAGS= -Wall
 
 
-main: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o
-	$(CF) $(LFLAGS) -o $@  main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o hamiltonien.o
+main: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o
+	$(CF) $(LFLAGS) -o $@  main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o
 
 precision.o: precision.f90
 	$(CF) $(CFLAGS) -c precision.f90
@@ -24,14 +24,17 @@ ecriture.o: ecriture.f90  precision.o  options.o
 algebre.o: algebre.f90 precision.o
 	$(CF) $(CFLAGS) -c algebre.f90 
 
-variablesAjustables.o: variablesAjustables.f90  precision.o connex.o
+variablesAjustables.o: variablesAjustables.f90  precision.o connex.o options.o
 	$(CF) $(CFLAGS) -c variablesAjustables.f90
 
-spectres.o: spectres.f90 precision.o habillage.o algebre.o hamiltonien.o
+spectres.o: spectres.f90 precision.o habillage.o algebre.o hamiltonien.o connex.o
 	$(CF) $(CFLAGS) -c spectres.f90
 
 habillage.o: habillage.f90  precision.o options.o variablesAjustables.o
 	$(CF) $(CFLAGS) -c habillage.f90
+	
+ajustement.o: ajustement.f90 precision.o options.o variablesAjustables.o spectres.o ecriture.o
+	$(CF) $(CFLAGS) -c ajustement.f90
 	
 hamiltonien.o: hamiltonien.f90 precision.o options.o
 	$(CF) $(CFLAGS) -c hamiltonien.f90

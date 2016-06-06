@@ -46,6 +46,7 @@ program mosfit
   use precision
   use options         ! variables pour choix des options
   use variablesAjustables ! variables des parametres hyperfins
+  use ajustement      ! moindres carres
   use lecture         ! routines de lecture du fichier .coo
   use ecriture        ! routines d'ecriture du fichier résultat
   use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
@@ -59,19 +60,19 @@ program mosfit
   !variables locales
   character(len=*),parameter::fichier='test.out'
 !~   fichier_sortie='pouet'
-  !---------------------------------------------------------------------
+  !=====================================================================
   !initialisations
   call raz
   call options_raz
   call variablesAjustables_raz
-  !---------------------------------------------------------------------
+  !=====================================================================
   !Lecture des options 
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
   call ecriture_titre
   call ecriture_options(CN,NMAX,NS,NS1,NS2)
-  !---------------------------------------------------------------------
+  !=====================================================================
   !Lecture des parametres ajustables des sous-spectres
   !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
@@ -90,7 +91,7 @@ program mosfit
     ! Mise en tableau des parametres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-  !---------------------------------------------------------------------
+  !=====================================================================
 ! lecture de bruit
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
@@ -113,12 +114,13 @@ program mosfit
   call spectres_poids(IZ)
      open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
   if(NMAX==0) then 
-!~       call spectres_calculer
+      call ecriture_info_iteration(0,nmax,B)
+      call spectres_theorique_total(PH)
       write(6,*) "coucou"
 !~     CALL CALC(E,*122)  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
   else
       write(6,*) "Hello"
-      call spectres_calculer
+      call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX)
 !~     CALL MAMAGT (Q,256,B,Y,N,K,E,CALC,P)
 !~       III=0
 !~       DO 420 J=1,K

@@ -9,7 +9,7 @@ module ecriture
   integer::NOUT=6  ! label du fichier de sortie (sortie par defaut)
   character(len=255),private::fichier_sortie !nom du fichier de sortie
   contains
-  !-----------------------------------------------------------------------
+  !=====================================================================
   subroutine ecriture_nommer_fichier_de_sortie(nom)
     character(len=*)::nom
     if( len( trim( nom ) )>255) stop "ERREUR dans ecriture_nommer_fichier_de_sortie  : nom de fichier trop long"
@@ -24,7 +24,7 @@ module ecriture
     write(NOUT,*) titre
     close(NOUT)
   end subroutine ecriture_titre
-  !-----------------------------------------------------------------------
+  !=====================================================================
   subroutine ecriture_options(cn,nmax,ns,ns1,ns2)
   ! Ecriture des options precedement lues 
   ! L'ecriture se fait dans le fichier_sortie
@@ -43,7 +43,7 @@ module ecriture
     if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
     close(NOUT)
   end subroutine ecriture_options
-  !---------------------------------------------------------------------
+  !=====================================================================
   subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb)
   ! Ecriture des valeurs des parametres hyperfins dans fichier_sortie.
   ! Le fichier n'est pas effacé, les données sont ajoutées à la fin.
@@ -60,14 +60,14 @@ module ecriture
     close(NOUT)
     cpt=cpt+1
   end subroutine ecriture_param
-  !---------------------------------------------------------------------
+  !=====================================================================
   subroutine ecriture_bruit
     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
  1  FORMAT('1','   COMPOSANTE  DONNEE  ',///)
     write(NOUT,1)
     close(NOUT)
   end subroutine ecriture_bruit
-  !---------------------------------------------------------------------
+  !=====================================================================
   subroutine ecriture_spectre(spectre)
     real(dp),intent(in)::spectre(:)
     integer::i,j,n
@@ -78,6 +78,18 @@ module ecriture
     enddo
     close(NOUT)
   end subroutine ecriture_spectre
-  
+  !=====================================================================
+  subroutine ecriture_info_iteration(npas,nmax,b)
+    integer,intent(in)::npas 
+    integer,intent(in)::nmax
+    real(dp),intent(in)::b(:)
+    integer::i,k
+    k=size(b)
+    open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
+    write(NOUT,'(1X, A,I6)') 'NUMERO DU PASSAGE', npas
+    write(NOUT,'(1X, A , 8(2X,E13.5))')' B CALC ', (b(I),i=1,k)
+    if(npas==nmax) write(NOUT,'(1X, A )') ' COUPURE   PAR    NMAX '
+    close(NOUT)
+  end subroutine ecriture_info_iteration
   
 end module ecriture

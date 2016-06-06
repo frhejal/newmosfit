@@ -274,7 +274,7 @@ module algebre
         enddo
       enddo
     end subroutine alsb
-  !---------------------------------------------------------------------
+  !=====================================================================
   subroutine cegren(a,r,n,mv)
   ! Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
   ! En sortie, les valeurs propres sont sur la diagonale de a.
