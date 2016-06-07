@@ -56,7 +56,7 @@ program mosfit
   !variables qu'ils faudra probablement ranger dans d'autres modules
   integer::NMAX,NS1,NS2,NT
   real(dp)::GRASS(10)
-  real(dp)::E ! critere de convergence
+  real(dp)::CRITERE ! critere de convergence
   !variables locales
   character(len=*),parameter::fichier='test.out'
 !~   fichier_sortie='pouet'
@@ -113,14 +113,13 @@ program mosfit
 !modification des poids pour canaux ignorés
   call spectres_poids(IZ)
      open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
-  if(NMAX==0) then 
+  if(NMAX==0) then  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
       call ecriture_info_iteration(0,nmax,B)
       call spectres_theorique_total(PH)
       write(6,*) "coucou"
-!~     CALL CALC(E,*122)  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
   else
-      write(6,*) "Hello"
-      call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX)
+!~       write(6,*) "Hello"
+      call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
 !~     CALL MAMAGT (Q,256,B,Y,N,K,E,CALC,P)
 !~       III=0
 !~       DO 420 J=1,K
@@ -150,8 +149,8 @@ close(6)
   contains 
     subroutine raz
     !remise a zero des variables
-      E = 0.001_dp
-  !~     P=1.0_dp
+      CRITERE = 0.001_dp
+      POIDS=1.0_dp
   !~     Q=0.0_dp
       B=0.0_dp
       HBRUIT=0.0_dp

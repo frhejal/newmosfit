@@ -192,8 +192,8 @@ module variablesAjustables
     do i=1,8
       GVT(i,nt)=BT(2,nt)
       if(NGT(i,nt)/=0)then 
-        L=IADG(I,NT)
-        GVT(I,NT)=B(L)
+        l=IADG(i,nt)
+        GVT(i,nt)=B(l)
       endif
     enddo
     ! option beta=theta, alpha=gama ------------------------------------

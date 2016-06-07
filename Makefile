@@ -33,7 +33,7 @@ spectres.o: spectres.f90 precision.o habillage.o algebre.o hamiltonien.o connex.
 habillage.o: habillage.f90  precision.o options.o variablesAjustables.o
 	$(CF) $(CFLAGS) -c habillage.f90
 	
-ajustement.o: ajustement.f90 precision.o options.o variablesAjustables.o spectres.o ecriture.o
+ajustement.o: ajustement.f90 precision.o options.o variablesAjustables.o spectres.o ecriture.o algebre.o
 	$(CF) $(CFLAGS) -c ajustement.f90
 	
 hamiltonien.o: hamiltonien.f90 precision.o options.o

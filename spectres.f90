@@ -34,10 +34,10 @@ module spectres
   subroutine spectres_poids(iz)
   ! met à zero le poids statistique des canaux à ignorer
     integer,intent(in)::iz(10)
-    integer::i,k
+    integer::i,kz
     canaux : do i=2,N
-      do k=1,9,2
-        if((i>= IZ(k)) .AND. (i<=IZ(k+1))) then
+      do kz=1,9,2
+        if((i>= IZ(kz)) .AND. (i<=IZ(kz+1))) then
           POIDS(i)=0.0_dp
           cycle canaux
         endif
@@ -86,12 +86,15 @@ module spectres
     ! par appel répété de spectres_derivee (qui appelle spectres_theorique et l'habille avec des gaussiennes)
     real(dp),intent(in)::phi
     integer::nt
-    integer::i
-    Q=0.0_dp
+    integer::i,j
+!~     Q=0.0_dp
     ! remplissage initial du tableau de travail Q-----------------------
     do i=1,N
       Q(i,K+2)=B(K) ! niveau moyen hors d'absorption
       Q(i,K)=1.0_dp
+      do j=1,K-1
+        Q(i,j)=0.0_dp
+      enddo
     enddo
     ! calcul du spectre theorique---------------------------------------
     do nt=1,NS
@@ -106,12 +109,12 @@ module spectres
     !Spectre de bruit---------------------------------------------------
     if(IO(4)==1)then  ! ajout du spectre de bruit non ajustable
       do i=1,N
-        Q(i,k+2) = Q(i,k+2)+B(K-1)*BF(i)
+        Q(i,K+2) = Q(i,K+2)+B(K-1)*BF(i)
         Q(i,K-1) = BF(i)
       enddo
     elseif(IO(4)/=0)then ! ajout du spectre de bruit ajustable
       do i=1,N
-        Q(i,k+2)=Q(i,k+2)+ HBRUIT * BF(i)
+        Q(i,K+2)=Q(i,K+2)+ HBRUIT * BF(i)
       enddo
     endif
   end subroutine spectres_theorique_total
@@ -130,6 +133,8 @@ module spectres
       spectre=0.0_dp
       !calcul de la fonction -------------------------------------------
       call spectres_theorique(nt)
+!~       write(6,*) 'energie',ENERGIES(:,nt)
+!~       write(6,*) 'intensite',INTENSITES(:,nt)
       call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
       do i=1,N
         Q(i,K+2)=Q(i,K+2)-spectre(i)
@@ -141,13 +146,13 @@ module spectres
         if(NGT(j,nt) /=0) then
           l=IADG(j,nt)
           diff=CN*1.0D-3 !element infiniment petit = 1/1000e d'un canal
-          GVT(j,nt)=B(L)+diff !
+          GVT(j,nt)=B(l)+diff !
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
           call habillage_raies(DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
           do i=1,N
-            Q(I,l)=(spectre0(I)-spectre(I))/diff ! ecart sur le spectre engendre par l'ecart sur la largeur
+            Q(i,l)=(spectre0(i)-spectre(i))/diff ! ecart sur le spectre engendre par l'ecart sur la largeur
           enddo
-          GVT(j,nt)=B(L) !retour à la valeur initiale de  la largeur
+          GVT(j,nt)=B(l) !retour à la valeur initiale de  la largeur
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
         endif
       enddo
@@ -167,19 +172,21 @@ module spectres
             case(2) ! largeur de raie
               diff=pm*CN*1.0D-3
               gb=GA+diff
-              call habillage_raies(DI,gb,H1,N,nt,ENERGIES,INTENSITES,spectre)
+              call habillage_raies(DI,gb,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
             case(3)  ! hauteur de raie
                 derivee(jj,:)=-spectre0/H1
             case(4:10) ! interaction quadrupolaire, chp interne, angles (tous sans unité)
               diff=pm*1.0D-2
+!~               write(6,*) j
               BT(j,nt)=BT(j,nt)+diff
               call spectres_theorique(nt)
               BT(j,nt)=BT(j,nt)-diff
-              call habillage_raies(DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
+              call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
           end select
         enddo
+!~         write(6,*)j, derivee(1,:)
         Q(:,l)=Q(:,l)+0.5_dp*(derivee(1,:)+derivee(2,:))
       enddo parametres
   end subroutine spectres_derivee

@@ -30,6 +30,7 @@ module hamiltonien
     HY=ch*sint*sing
     HZ=ch*cost
 !~     end select
+!~ write(6,*) HX,  HY, HZ
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
@@ -37,7 +38,7 @@ module hamiltonien
     real(dp),intent(in)::ze,zf ! rapports gyromagnétiques de l'element étudié
     real(dp),intent(in)::sq !interaction quadripolaire
     real(dp),intent(in)::eta !
-    real(dp)::rac,Q
+    real(dp)::Q
     !Etats fondamentaux-------------------------------------------------
     hamilF=(0.0_dp,0.0_dp)
     hamilF(1)= cmplx( -0.5_dp*HZ*zf, 0.0_dp      ,dp) !Etat <1/2|1/2>
@@ -47,9 +48,7 @@ module hamiltonien
     call cegren(hamilF,fctF,2,0)
     !Etats  Excités-----------------------------------------------------
     hamilE=(0.0_dp,0.0_dp)
-!~     à traduire :
-    rac=1.0_dp+eta**2/3.0_dp                                                 
-    Q=0.5_dp*sq/SQRT(rac)                                               
+    Q=0.5_dp*sq/sqrt(1.0_dp+eta**2/3.0_dp)
     hamilE(1) = cmplx( -1.5_dp*HZ*ze+Q, 0.0_dp , dp)
     hamilE(2) = cmplx( -0.5_dp*Root3*HX*ze , 0.5_dp*root3*HY*ze, dp )
     hamilE(3) = cmplx( -0.5_dp*HZ*ze-Q, 0.0_dp,dp)
@@ -60,7 +59,7 @@ module hamiltonien
     hamilE(9) = hamilE(2)
     hamilE(10)= cmplx(1.5_dp*HZ*ze+Q, 0.0_dp,dp)
     !recherche energies et fonctions d'onde
-  call cegren(hamilE,fctE,4,0)
+    call cegren(hamilE,fctE,4,0)
   endsubroutine hamiltonien_calculer_fonction_onde
   !---------------------------------------------------------------------
   subroutine hamiltonien_energies(energies)  
@@ -72,8 +71,8 @@ module hamiltonien
     do i=1,2
       do j=1,4
         k=k+1
-        ii=(i*i+i)
-        jj=(j*j+j)
+        ii=(i*i+i)/2
+        jj=(j*j+j)/2
         energies(k)=real(hamilE(jj),dp)-real(hamilF(ii),dp)
       enddo
     enddo
@@ -116,7 +115,7 @@ module hamiltonien
         tMp(i,j)=cu*conjg(tMm(ii,jj))
       enddo
     enddo
-    if(monoc==1)then
+    if(monoc==0)then
     ! Calcul de TM0 si on est dans une poudre---------------------------
     ! remarque : si alpha=0, beta=0, on retrouve l'expression de M0 donnée par la F.Varret (thèse, p48)
       tM0(1,1) = cmplx( -cosa*sinb/Root2, -sina*cosb/Root2, dp )
@@ -131,6 +130,7 @@ module hamiltonien
     ! Calcul des intensités---------------------------------------------
     !   I(f->e) = |<F|Mp|E>|**2  + |<F|M0|E>|**2 + |<F|Mm|E>|**2
     k=0
+    intensites=0.0_dp
     do i=1,2
     ! Transition du niveau fondamental i...
       do j=1,4
@@ -138,6 +138,9 @@ module hamiltonien
         k=k+1 ! numero de raie
         ik=2*(i-1)+1  ! debut du  ieme vecteur propre dans fctF
         jk=4*(j-1)+1  ! debut du jieme vecteur propre dans fctE
+        ap=(0.0_dp,0.0_dp)
+        a0=(0.0_dp,0.0_dp)
+        am=(0.0_dp,0.0_dp)
         !Multiplication vecteur-matrice-vecteur :        
         do jj=1,4
           do ii=1,2
@@ -148,11 +151,10 @@ module hamiltonien
             am=am+ conjg(fctF(il))*tMm(ii,jj)*fctE(jl)
           enddo
         enddo
-        intensites(k)=real( ap*conjg(ap)+a0*conjg(a0) + am*conjg(am) )
+        intensites(k)=intensites(k)+real( ap*conjg(ap)+a0*conjg(a0) + am*conjg(am) )
       enddo
     enddo
     intensites =intensites*8.0_dp/sum(intensites)
-    write(6,*) intensites, monoc
   end subroutine hamiltonien_intensites
 end module hamiltonien
 
