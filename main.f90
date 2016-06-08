@@ -56,24 +56,23 @@ program mosfit
   !variables qu'ils faudra probablement ranger dans d'autres modules
   integer::NMAX,NS1,NS2,NT
   real(dp)::GRASS(10)
+  real(dp)::AA(1600)
   real(dp)::CRITERE ! critere de convergence
-  !variables locales
+  real(dp)::dump ! variable-poubelle
+  integer::i,j,ij
+  !variables locales----------------------------------------------------
   character(len=*),parameter::fichier='test.out'
-!~   fichier_sortie='pouet'
-  !=====================================================================
-  !initialisations
+  !initialisations------------------------------------------------------
   call raz
   call options_raz
   call variablesAjustables_raz
-  !=====================================================================
-  !Lecture des options 
+  !Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
-  call ecriture_titre
+  call ecriture_titre(0)
   call ecriture_options(CN,NMAX,NS,NS1,NS2)
-  !=====================================================================
-  !Lecture des parametres ajustables des sous-spectres
+  !Lecture des parametres ajustables des sous-spectres------------------
   !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
     MONOC=0
@@ -91,61 +90,66 @@ program mosfit
     ! Mise en tableau des parametres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-  !=====================================================================
-! lecture de bruit
+  ! lecture de bruit----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_bruit
     call lecture_titre
-    call ecriture_titre
+    call ecriture_titre(0)
     call lecture_spectre(BF,N)
     call spectres_preparer_bruit
   endif
-!Chargement du spectre experimental
+!Chargement du spectre experimental-------------------------------------
   if(IO(10)==0)call lecture_spectre(Y,N)  
   if(IO(10)==1)then   ! pas de spectre experimental
     Y=0.0_dp
-  else    ! ajout de IO(1) million(s) demandé en option
+  else ! ajout de IO(1) million(s) demandé en option
     Y = Y + real(IO(1),dp)*1000000_dp  
   endif
-!Defnition du niveau zero
+!Defnition du niveau zero-----------------------------------------------
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
-!modification des poids pour canaux ignorés
+!modification des poids pour canaux ignorés-----------------------------
   call spectres_poids(IZ)
-     open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
   if(NMAX==0) then  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
-      call ecriture_info_iteration(0,nmax,B)
+      call ecriture_info_iteration(NMAX,NMAX,B)
       call spectres_theorique_total(PH)
+     open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
       write(6,*) "coucou"
+    close(6)
   else
-!~       write(6,*) "Hello"
       call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
-!~     CALL MAMAGT (Q,256,B,Y,N,K,E,CALC,P)
-!~       III=0
-!~       DO 420 J=1,K
-!~       DO 420 I=1,K
-!~       III=III+1
-!~       AA(III)=VQ(I,J)
-!~  420  CONTINUE
-!~       CALL MINV(AA,K,D)
-!~       III=0
-!~       DO 421 J=1,K
-!~       DO 421 I=1,K
-!~       III=III+1
-!~       VQ(I,J)=AA(III)
-!~  421  CONTINUE
-!~ C     REMISE DES BONNES VALEURS DANS LES TABLEAUX X0,H,G
-!~       DO 101 NT=1,NS
-!~       CALL DERIV(NT,1)
-!~       CALL RTH(NT)
-!~       DI=BT(1,NT)
-!~       GA=BT(2,NT)
-!~       H1=BT(3,NT) 
-!~  101  CALL GRAPH(DI,GA,H1,N,NT)
+      !inversion de la matrice des variances-covariances
+      ij=0
+      do j=1,K
+        do i=1,K
+          ij=ij+1
+          AA(ij)=VQ(i,j)
+        enddo
+      enddo
+      call minv(AA,K,dump)
+      ij=0
+      do j=1,K
+        do i=1,K
+          ij=ij+1
+          VQ(i,j)=AA(ij)
+        enddo
+      enddo
+      ! remise des bonnes valeurs dans les tableaux X0,H,G
+      do nt=1,NS
+        call variablesAjustables_calculer_ecart_type(PH,nt,n) 
+        call variablesAjustables_actualiser_rangement(nt)
+        if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
+        DI=BT(1,nt)
+        GA=BT(2,nt)
+        H1=BT(3,nt)
+        call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SPECTRE_THEO)
+      enddo
   endif
-  WRITE (NOUT,*)'1'
-close(6)
+  call ecriture_titre(1)
+  call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
 !~   call ecriture_spectre(Y)
+  call ecriture_fin
+  
   contains 
     subroutine raz
     !remise a zero des variables

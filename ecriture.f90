@@ -18,9 +18,11 @@ module ecriture
     write(NOUT,'(A)') ' VERSION MAI 2016 '
 !~     close(NOUT)
   end subroutine ecriture_nommer_fichier_de_sortie
-  !-----------------------------------------------------------------------
-  subroutine ecriture_titre
+  !=====================================================================
+  subroutine ecriture_titre(option)
+    integer::option
 !~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
+    if(option==1)write(NOUT,'(A)')'1'
     write(NOUT,'(A)') titre
 !~     close(NOUT)
   end subroutine ecriture_titre
@@ -97,4 +99,35 @@ module ecriture
     write (NOUT,'(1X,A,I4)') ' LA FONCTION EST INDEPENDANTE DU PARAMETRE NO', i
 !~     close(NOUT)
   end subroutine ecriture_fonction_independante
+  !=====================================================================
+  subroutine ecriture_ecart_type(ns,bt,etbt,gvt,etgvt,iogvt)
+  ! ecriture des ecarts type de chaque sous-spectre
+    integer,intent(in)::ns
+    real(dp),intent(in)::bt(10,40)
+    real(dp),intent(in)::etbt(10,40)
+    real(dp),intent(in)::gvt(8,40)
+    real(dp),intent(in)::etgvt(8,40)
+    integer,intent(in)::iogvt(40)
+    integer::i,nt
+    write(NOUT,'(//,50X,A,//)') 'CARACTERISTIQUES DES SPECTRES'
+    write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')
+    write(NOUT,'(1X,20X,"MMS",8X,"MMS",8X,"COUPS",6X,"MMS",9X,"KG",25X,"DEG",23X,"DEG",8X,///)')
+    do nt=1,NS
+      write(NOUT,'(//," SPECTRE ",I2,2X,10F12.3,/)') nt,(bt(i,nt),i=1,10)
+      write(NOUT,'(" ECART TYPE  ",10E12.3,//)') (etbt(i,nt),i=1,10)
+      if(iogvt(nt)/=0)then
+        write(NOUT,'(21X,"GVT(1)",8X,"GVT(2)",8X,"GVT(3)",8X,"GVT(4)",8X,"GVT(5) ",8X,"GVT(6)",8X,"GVT(7)",8X,"GVT(8)",/)'      ) 
+        write(NOUT,'(13X,8(8x,F6.4),/)') (gvt(i,nt),i=1,8)
+        write(NOUT,'(" ECART TYPE  ",8(2X,E12.3),//)') (etgvt(i,nt),i=1,8)
+      endif
+    enddo
+  end subroutine ecriture_ecart_type
+  !=====================================================================
+  subroutine ecriture_raies_covariance
+    
+  subroutine ecriture_raies_covariance
+  !=====================================================================
+  subroutine ecriture_fin
+    close(NOUT)
+  end subroutine ecriture_fin
 end module ecriture

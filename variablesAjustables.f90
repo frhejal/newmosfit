@@ -38,13 +38,15 @@ module variablesAjustables
   real(dp)::VQ(40,40)  ! matrice de variance/covariance des variables ajustables
 
   !indications supplementaires :
-  integer::MONOC  !   MONOC=1 : monocristal
-                  !   MONOC=0 : poudre
-  integer::IOGV   ! type d'ajustement des raies
-                  !   IOGV=0 : largeur unique pour toutes les raies (ajustable si NB(2)= 1 ou 2)
-                  !   IOGV=1 : spectre quadrupolaire à raies de largeurs differentes (2 largeurs independantes)
-                  !   IOGV=2 : spectre magnetique formé de 3 doublets symetriques d'entensité 3,2,1 (3 largeur independantes)
-                  !   IOGV=3 : cas general
+  integer::MONOC      !   MONOC=1 : monocristal
+                      !   MONOC=0 : poudre
+  integer::MONOT(40)  ! indication cristal/non cristal de chaque sous-spectre, cf. MONOC
+  integer::IOGV       ! type d'ajustement des raies
+                      !   IOGV=0 : largeur unique pour toutes les raies (ajustable si NB(2)= 1 ou 2)
+                      !   IOGV=1 : spectre quadrupolaire à raies de largeurs differentes (2 largeurs independantes)
+                      !   IOGV=2 : spectre magnetique formé de 3 doublets symetriques d'entensité 3,2,1 (3 largeur independantes)
+                      !   IOGV=3 : cas general
+  integer::IOGVT(40)  ! type d'ajustement des raies de chaque sous-spectre, cf IOGV
   
   ! PHF initiaux dans le cas d'une progression arithmetique du spectre
   integer::NB0(10)
@@ -58,11 +60,10 @@ module variablesAjustables
   real(dp)::PTETA ! increment de TETA
 
   !PHF pour tout les spectre (une fois la lecture des données terminées)
-  integer::MONOT(40) ! indication cristal/non cristal de chaque sous-spectre, cf. MONOC
-  integer::IOGVT(40) ! type d'ajustement des raies de chaque sous-spectre, cf IOGV
-  real(dp)::BT(10,40) ! PHF de tous les spectres (cf. DI à ALFA)
+
+  real(dp)::BT(10,40) ! parametres hyper fins de tous les spectres (cf. DI à ALFA)
   real(dp)::ETBT(10,40)! Ecart type de BT
-  real(dp)::NBT(10,40) ! type d'ajustement des PHF de tous les spectres (cf. NB)
+  integer(dp)::NBT(10,40) ! type d'ajustement des PHF de tous les spectres (cf. NB)
   integer ::IAD(10,40) ! IAD(i,n) = emplacement du PHF ajustable BT(i,n) dans B
 
   !largeur des raies
@@ -70,7 +71,7 @@ module variablesAjustables
                       ! NG(i)=1 : ajustement de la ieme largeur , valeur initiale GV(i)
   real(dp)::GV(8)     ! GV(i)=valeur initiale de la ieme largeur, si NG(i)=1
   real(dp)::GVT(8,40) ! valeur des largeurs variables, pour tout les sous-spectres
-  real(dp)::ETGVT(10,40)! Ecart type de GVT
+  real(dp)::ETGVT(8,40)! Ecart type de GVT
   integer::NGT(8,40)  ! equivalent de NG, pour tout les sous-spectres 
   integer::IADG(8,40) ! IADG(i,n) = emplacement de la largeur variable GVT(i,n) dans B
   !gestion d'erreur
@@ -243,7 +244,7 @@ module variablesAjustables
     endif
   endsubroutine variablesAjustables_actualiser_largeur_raies
   !=====================================================================
-  subroutine variablesAjustables_calculer_variance(phi,nt,n)
+  subroutine variablesAjustables_calculer_ecart_type(phi,nt,n)
   ! Calcul des variances des parametres ajustables
     integer,intent(in)::nt
     integer,intent(in)::n
@@ -261,5 +262,5 @@ module variablesAjustables
         ETGVT(i,nt) = sqrt(VQ(l,l)*phi/(n-K))
       endif
     enddo
-  end subroutine variablesAjustables_calculer_variance
+  end subroutine variablesAjustables_calculer_ecart_type
 end module variablesAjustables

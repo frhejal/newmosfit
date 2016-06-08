@@ -23,7 +23,6 @@ module ajustement
 !~     real(dp)::petit=1.0D-12 ! pour eviter la division par zero
     real(dp)::petit=1.0D-5 ! pour eviter la division par zero
     logical::convergence
-    write(6,*) "critere", maxval(abs(B(1:K)-oldB(1:K))/(abs(B(1:K))+petit))
     if(  maxval(abs(B(1:K)-oldB(1:K))/(abs(B(1:K))+petit)) > CRITERE)  then
       convergence= .FALSE.
     else
@@ -70,11 +69,6 @@ module ajustement
         npas=npas+1
         ! premier calcul du spectre theorique---------------------------
         call spectres_theorique_total(PH)
-!~         do i=1,N
-!~         write(6,*) Q(i,:)
-!~         enddo
-!~         write(6,*) "coupure nmax", coupureNmax
-!~         write(6,*) "fin 1:", fin
         if(fin) exit marquardt  ! sortie sans calculer le reste (nmax ou critere atteint)
         !calcul de phi--------------------------------------------------
         PH=0.0_dp
@@ -82,12 +76,10 @@ module ajustement
           PH= PH + p(i)*(y(i)-q(i,K+2))**2  ! equation (3) de ref.[1]
         enddo
         iter=iter+1
-        write(6,*) 'iter',iter
         if(iter >1) then ! si on a passe les deux premieres iterations 
           if( PH < phi )then
             phi = PH
             lambda=lambda/nu 
-            write(6,*) 'lambda=',lambda, 'phi=', phi
           else 
               lambda=lambda*nu  ! on revient à lambda precedent ou on fait lambda*nu
               iter=iter-1 ! annule l'incrementation de int
@@ -95,7 +87,6 @@ module ajustement
               call ecriture_info_iteration(npas,nmax,B)
               fin = convergence(critere) .OR. (npas>=nmax)
               npas=npas+1
-              write(6,*) "appel 2"
               call spectres_theorique_total(PH)
               if(fin)exit marquardt
           endif
@@ -130,7 +121,6 @@ module ajustement
         enddo
         do i=1,K
           if (Q(i,i)==0.0_dp)then 
-            write(6,*)i, Q(i,i)
             ! la fonction est independante du parametre i
             call ecriture_fonction_independante(i)
             do m=1,K
@@ -162,6 +152,5 @@ module ajustement
           b(i)=b(i)+q(i,K+1)  !  b[r+1] = b[r] +delta[r]
         enddo
     enddo marquardt
-!~   101 RETURN
   end subroutine ajustement_moindres_carres
 end module ajustement

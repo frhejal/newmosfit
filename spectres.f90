@@ -16,7 +16,7 @@ module spectres
   real(dp)::Y(N)
   real(dp)::BF(N)
   real(dp)::POIDS(N)  ! poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
-  real(dp)::GR(N)
+  real(dp)::SPECTRE_THEO(N)
   real(dp)::ENERGIES(8,40)
   real(dp)::INTENSITES(8,40)
   integer::NS ! nombre de sous-spectres theoriques utilisé pour l'ajustement d'un spectre experimental.
@@ -98,7 +98,7 @@ module spectres
     enddo
     ! calcul du spectre theorique---------------------------------------
     do nt=1,NS
-      call variablesAjustables_calculer_variance(phi,nt,n) 
+!~       call variablesAjustables_calculer_ecart_type(phi,nt,n) 
       call variablesAjustables_actualiser_rangement(nt)
       if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
       call spectres_derivee(nt)
