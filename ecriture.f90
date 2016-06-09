@@ -32,18 +32,17 @@ module ecriture
 !~     close(NOUT)
   end subroutine ecriture_titre
   !=====================================================================
-  subroutine ecriture_options(cn,nmax,ns,ns1,ns2)
+  subroutine ecriture_options(nmax,ns,ns1,ns2)
   ! Ecriture des options precedement lues 
   ! L'ecriture se fait dans le fichier_sortie
   ! Le fichier est effacé avant le debut de l'ecriture.
     integer,intent(in)::nmax,ns,ns1,ns2
-    real(dp),intent(in)::cn
 !~     character(len=*),intent(in)::fichier_sortie
     integer::i
 !~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     if(IZZ==1) print *, ' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
     if(IOPT==1) print *, ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
-    print *, 'VITESSE PAR CANAL=', cn, ' NBRE DE COMPOSANTES =',ns
+    print *, 'VITESSE PAR CANAL=', CN, ' NBRE DE COMPOSANTES =',ns
     print *, 'NBRE MAX ITERATIO=', nmax
     if(IO(4)/=0) print *, 'IL Y A UN SPECTRE DE BRUIT'
     if(ns1/=0) print *, 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2
@@ -305,6 +304,7 @@ module ecriture
   end subroutine ecriture_spectres
   !=====================================================================
   subroutine ecriture_fin
+    write(NOUT,'("1")')
     close(NOUT)
   end subroutine ecriture_fin
 end module ecriture

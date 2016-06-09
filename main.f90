@@ -73,14 +73,14 @@ program mosfit
   call options_raz
   call variablesAjustables_raz
 !***********************************************************************
-! Entree des options et des données
+! Entree des options et des données, et copie dans le fichier de sortie
 !***********************************************************************
   !Lecture des options--------------------------------------------------
   call lecture_titre
-  call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
+  call lecture_options(NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie(fichier)
   call ecriture_titre(0)
-  call ecriture_options(CN,NMAX,NS,NS1,NS2)
+  call ecriture_options(NMAX,NS,NS1,NS2)
   !Lecture des parametres ajustables des sous-spectres------------------
   !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
@@ -99,7 +99,7 @@ program mosfit
     ! Mise en tableau des parametres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-  !lecture de bruit-----------------------------------------------------
+  ! Lecture de bruit-----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_bruit
@@ -125,10 +125,11 @@ program mosfit
 ! Ajustement par moindres-carres
 !***********************************************************************
   if(NMAX==0) then
-      ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
-      call ecriture_info_iteration(NMAX,NMAX,B)
-      call spectres_theorique_total
+    ! Pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
+    call ecriture_info_iteration(NMAX,NMAX,B)
+    call spectres_theorique_total
   else
+    ! Algorithme d'estimation moindres-carrés de Marquardt
     call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
     !inversion de la matrice des variances-covariances------------------
     ij=0
@@ -178,7 +179,6 @@ program mosfit
     !remise a zero des variables
       CRITERE = 0.001_dp
       POIDS=1.0_dp
-  !~     Q=0.0_dp
       B=0.0_dp
       HBRUIT=0.0_dp
       CN=0.078125_dp
