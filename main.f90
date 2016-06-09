@@ -1,15 +1,15 @@
 program mosfit
-!**********************************************************************!
+!***********************************************************************
 !              __  __  ___  ____  _____ ___ _____ 
 !             |  \/  |/ _ \/ ___||  ___|_ _|_   _|
 !             | |\/| | | | \___ \| |_   | |  | |
 !             | |  | | |_| |___) |  _|  | |  | |
 !             |_|  |_|\___/|____/|_|   |___| |_|
 !
-!**********************************************************************!
+!***********************************************************************
 !         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57/SN 119
 !                     VERSION  MAI  2016
-! MODIFICATIONS********************************************************!
+! MODIFICATIONS*********************************************************
 !
 ! INDIQUER DATE  NOM  MODIFICATION
 !
@@ -27,7 +27,7 @@ program mosfit
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
 !    1995-2016 ??  ???
 !    MAI 2016 FL  REECRITURE EN FORTRAN 95
-!********************OPTIONS*******************************************!
+!********************OPTIONS********************************************
 !    IO(1)=N  AJOUT N MILLIONS
 !    IO(2)=1  TRACE SUR LARGEUR 12OCX
 !    IO(3)=1  SN119
@@ -47,7 +47,7 @@ program mosfit
 !    IO(16)=N  (N=NBRE DE SOUS CANAUX)  CONVOLUTION GAUSS*LORENZ
 !    IO(17)=1  TRACE DES SOUS-SPECTRES
 !    IO(20)=1  HORIZONTALISATION FOND CONTINU
-!**********************************************************************!
+!***********************************************************************
   use precision
   use options         ! variables pour choix des options
   use variablesAjustables ! variables des parametres hyperfins
@@ -57,20 +57,24 @@ program mosfit
   use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
   use spectres         ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
   implicit none
-!**********************************************************************!
-  !variables qu'ils faudra probablement ranger dans d'autres modules
+!***********************************************************************
+  !variables locales----------------------------------------------------
   integer::NMAX,NS1,NS2,NT
   real(dp)::GRASS(10)
   real(dp)::AA(1600)
   real(dp)::CRITERE ! critere de convergence
+  real(dp)::KHI2   ! ecart statistique de l'ajustement en moindres carrés
   real(dp)::dump ! variable-poubelle
+  real(dp)::cmin,cmax
   integer::i,j,ij
-  !variables locales----------------------------------------------------
   character(len=*),parameter::fichier='test.out'
   !initialisations------------------------------------------------------
   call raz
   call options_raz
   call variablesAjustables_raz
+!***********************************************************************
+! Entree des options et des données
+!***********************************************************************
   !Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
@@ -95,7 +99,7 @@ program mosfit
     ! Mise en tableau des parametres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-!lecture de bruit----------------------------------------------------
+  !lecture de bruit-----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_bruit
@@ -104,23 +108,26 @@ program mosfit
     call lecture_spectre(BF,N)
     call spectres_preparer_bruit
   endif
-!Chargement du spectre experimental-------------------------------------
+  !Chargement du spectre experimental-----------------------------------
   if(IO(10)==0)call lecture_spectre(Y,N)  
-  if(IO(10)==1)then   ! pas de spectre experimental
-    Y=0.0_dp
-  else ! ajout de IO(1) million(s) demandé en option
-    Y = Y + real(IO(1),dp)*1000000_dp  
+  if(IO(10)==1)then
+    ! pas de spectre experimental
+    Y=0.0_dp          
+  else
+    ! ajout de IO(1) million(s) demandé en option
+    Y = Y + real(IO(1),dp)*1000000_dp 
   endif
 !Defnition du niveau zero-----------------------------------------------
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
 !modification des poids pour canaux ignorés-----------------------------
   call spectres_poids(IZ)
-  if(NMAX==0) then  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
+!***********************************************************************
+! Ajustement par moindres-carres
+!***********************************************************************
+  if(NMAX==0) then
+      ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
       call ecriture_info_iteration(NMAX,NMAX,B)
       call spectres_theorique_total
-     open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
-      write(6,*) "coucou"
-    close(6)
   else
     call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
     !inversion de la matrice des variances-covariances------------------
@@ -150,13 +157,20 @@ program mosfit
       call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SPECTRE_THEO)
     enddo
   endif
-  ! Sorties-------------------------------------------------------------
+!***********************************************************************
+! Sorties
+!***********************************************************************
   call ecriture_titre(1)
+  !ecarts type
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
+  ! largeurs, hauteur et energie des raies
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
-  io(4)=2
+  ! Absorptions des differents sous-spectres
   call ecriture_rapports_absorption(NS,NS2,K,N,B,BT,Y,Q(:,K+2),BF,TY,HBRUIT)
-!~     call ecriture_spectre(Y)
+  ! Calcul du khi**2
+  KHI2=ajustement_ecart_stat(K,N,Y,Q(:,K+2),POIDS)
+  call ecriture_ecart_stat(KHI2)
+  call ecriture_spectres(N,Y,Q(:,k+2),cmin,cmax)
   call ecriture_fin
   
   contains 
@@ -168,12 +182,9 @@ program mosfit
       B=0.0_dp
       HBRUIT=0.0_dp
       CN=0.078125_dp
-  !~     N=256
       NS=1
       NS1=0
       NS2=0
       K=1
-  !~     NPAS=0
-  !~     NMAX=20
     end subroutine raz
 end program mosfit

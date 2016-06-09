@@ -31,6 +31,24 @@ module ajustement
     oldB=B
   end function convergence
   !=====================================================================
+  function ajustement_ecart_stat(k,n,spectre_exp,spectre_fit,p)
+  ! Calcul du KHI2 
+    integer,intent(in)::k
+    integer,intent(in)::n
+    real(dp),intent(in)::spectre_exp(n)
+    real(dp),intent(in)::spectre_fit(n)
+    real(dp),intent(in)::p(n) !poids 
+    real(dp)::khi2
+    real(dp)::ajustement_ecart_stat
+    integer::i
+    khi2=0.0_dp
+    do i=1,n
+      if(spectre_exp(i)/=0.0_dp) khi2=khi2+p(i)*(spectre_fit(i) -spectre_exp(i))**2 /spectre_exp(i)
+    enddo
+    khi2=khi2/(n-k)
+    ajustement_ecart_stat=khi2
+  end function ajustement_ecart_stat
+  !=====================================================================
   subroutine ajustement_moindres_carres(q,n,b,y,k,p,nmax,critere)
    ! Recherche de moindres carrés utilisant l'agorithme de Marquardt
    ! Basée sur la routine en F77 MAMAGT (codes Relfej,Mosfit)

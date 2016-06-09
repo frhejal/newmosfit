@@ -73,17 +73,15 @@ module ecriture
     write(NOUT,'(A,A,///)')'1','   COMPOSANTE  DONNEE  '
 !~     close(NOUT)
   end subroutine ecriture_bruit
-  !=====================================================================
-  subroutine ecriture_spectre(spectre)
-    real(dp),intent(in)::spectre(:)
-    integer::i,j,n
-    N=size(spectre)
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
-    do i=1,n,8
-      write(NOUT,'(I4,8I8)')  I, (int(spectre(j)),j=i,i+7)
-    enddo
-!~     close(NOUT)
-  end subroutine ecriture_spectre
+!~   !=====================================================================
+!~   subroutine ecriture_spectre(spectre)
+!~     real(dp),intent(in)::spectre(:)
+!~     integer::i,j,n
+!~     N=size(spectre)
+!~     do i=1,n,8
+!~       write(NOUT,'(I4,8I8)')  I, (int(spectre(j)),j=i,i+7)
+!~     enddo
+!~   end subroutine ecriture_spectre
   !=====================================================================
   subroutine ecriture_info_iteration(npas,nmax,b)
     integer,intent(in)::npas 
@@ -166,7 +164,7 @@ module ecriture
     real(dp)::ordS,ordT
     real(dp)::s(40),sl(42),t(44)
     real(dp)::btm(7,2)
-    integer::i,ic,nt,cmax,colonneS,colonneT,nss
+    integer::i,ic,nt,colMax,colonneS,colonneT,nss
     character::chaine(256)
     s=0.0_dp
     st=0.0_dp
@@ -239,17 +237,18 @@ module ecriture
           if(colonneT>256) colonneT=21
           if(colonneS<-20) colonneS=21
           if(colonneT<-20) colonneT=21
-          cMax = max(colonneS,colonneT)
-          do ic=1,cmax
+          colMax = max(colonneS,colonneT)
+          do ic=1,colMax
             chaine(ic)=' '
           enddo
           chaine(colonneT)='X'
           chaine(colonneS)='*'
           chaine(21)='!'
-          write(NOUT,'(8X,2(6X,F6.2),4X,A1,256A1)') t(i+1), sl(i), (chaine(ic),ic=1,cmax)
-          write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,cmax)
+          write(NOUT,'(8X,2(6X,F6.2),4X,A1,256A1)') t(i+1), sl(i), (chaine(ic),ic=1,colMax)
+          write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,colMax)
         enddo
       endif
+      !calcul des moyennes arithmétiques et quadratiques des differents parametres 
       nss=ns
       btm=0.0_dp
       if(ns2/=0)nss=ns2
@@ -269,6 +268,41 @@ module ecriture
       write(NOUT,'(//," QUADRATIQUE",2X,7F12.3,//)')(BTM(i,2),i=1,7)
     endif
   end subroutine ecriture_rapports_absorption
+  !=====================================================================
+  subroutine ecriture_ecart_stat(khi2)
+    real(dp),intent(in)::khi2
+    write(NOUT,'("1",//,50X,"KHI2 = ",E13.8)') khi2
+  end subroutine ecriture_ecart_stat
+  !=====================================================================
+  subroutine ecriture_spectres(n,spectre_exp,spectre_fit,cmin,cmax)
+  ! tracé des deux spectres experimentaux dans un fichier texte, parceque les interfaces graphiques c'est pour les faibles.
+    integer,intent(in)::n
+    real(dp),intent(in)::spectre_exp(n)
+    real(dp),intent(in)::spectre_fit(n)
+    real(dp),intent(out)::cmin,cmax
+    character::chaine(120)
+    integer::i,ic,colExp,colFit,colMax
+    real(dp)::echelle,ordExp,ordFit
+    Cmin=min(minval(spectre_exp),minval(spectre_fit))
+    Cmax=max(maxval(spectre_exp),maxval(spectre_fit))
+    write(6,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)')cmax,cmin
+    echelle=119.0
+    if(IO(2)==1)echelle=107.0
+    do i=n,1,-1
+      ordExp=(cmax-spectre_exp(i))*echelle/(cmax-cmin)
+      ordFit=(cmax-spectre_fit(i))*echelle/(cmax-cmin)
+      colExp = 1+int(ordExp)
+      colFit = 1+int(ordFit)
+      colMax = max(colExp,colFit)
+      do ic=1,colMax
+        chaine(ic)=' '
+      enddo
+      chaine(colFit)='X'
+      chaine(colExp)='*'
+      write(NOUT,'(1X,I4,2X,A1,120A1)')i,(chaine(ic),ic=1,colMax)
+    enddo
+    
+  end subroutine ecriture_spectres
   !=====================================================================
   subroutine ecriture_fin
     close(NOUT)
