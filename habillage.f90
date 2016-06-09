@@ -100,7 +100,7 @@ module habillage
       do j=1,m
         xj=real(j,dp)
         b=xi-xj
-        lorentz(i) = lorentz(i)+gauss(j)*(0.1_dp/cm)**2 /(b*b + ((0.1/cm))**2)
+        lorentz(i) = lorentz(i)+gauss(j)*(0.1_dp/cm)**2 /(b*b + ((0.1_dp/cm))**2)
       enddo
     enddo
     j=1

@@ -81,10 +81,9 @@ module spectres
     INTENSITES(1:8,nt) = intens(1:8)
   end subroutine spectres_theorique
   !=====================================================================
-  subroutine spectres_theorique_total(phi)
+  subroutine spectres_theorique_total
     ! calcul du spectre total et de ses derivees par rapport aux parametres variables,
     ! par appel répété de spectres_derivee (qui appelle spectres_theorique et l'habille avec des gaussiennes)
-    real(dp),intent(in)::phi
     integer::nt
     integer::i,j
 !~     Q=0.0_dp
@@ -133,8 +132,6 @@ module spectres
       spectre=0.0_dp
       !calcul de la fonction -------------------------------------------
       call spectres_theorique(nt)
-!~       write(6,*) 'energie',ENERGIES(:,nt)
-!~       write(6,*) 'intensite',INTENSITES(:,nt)
       call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
       do i=1,N
         Q(i,K+2)=Q(i,K+2)-spectre(i)
@@ -163,7 +160,7 @@ module spectres
         ! Approximation parabolique (moyenne sur deux acroissements opposes)
         do jj = 1,2
           pm=(-1.0_dp)**jj
-          select case(j) ! selon le parametre hyperfin dont on s'occupe, differente methode de calcul de la derivee
+          select case(j) ! selon le parametre hyperfin concerné, differentes méthodes de calcul de la dérivée
             case(1) !deplacement isomerique
               diff=pm*CN*1.0D-3
               di1=DI+diff
@@ -176,9 +173,8 @@ module spectres
               derivee(jj,:)=(spectre0-spectre)/diff
             case(3)  ! hauteur de raie
                 derivee(jj,:)=-spectre0/H1
-            case(4:10) ! interaction quadrupolaire, chp interne, angles (tous sans unité)
+            case(4:10) ! interaction quadrupolaire, champ interne, angles (tous sans unité)
               diff=pm*1.0D-2
-!~               write(6,*) j
               BT(j,nt)=BT(j,nt)+diff
               call spectres_theorique(nt)
               BT(j,nt)=BT(j,nt)-diff
@@ -186,7 +182,6 @@ module spectres
               derivee(jj,:)=(spectre0-spectre)/diff
           end select
         enddo
-!~         write(6,*)j, derivee(1,:)
         Q(:,l)=Q(:,l)+0.5_dp*(derivee(1,:)+derivee(2,:))
       enddo parametres
   end subroutine spectres_derivee

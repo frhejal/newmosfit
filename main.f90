@@ -1,9 +1,14 @@
 program mosfit
 !**********************************************************************!
-!         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57
-!                     VERSION  MAI  2016
-!**********************************************************************!
+!              __  __  ___  ____  _____ ___ _____ 
+!             |  \/  |/ _ \/ ___||  ___|_ _|_   _|
+!             | |\/| | | | \___ \| |_   | |  | |
+!             | |  | | |_| |___) |  _|  | |  | |
+!             |_|  |_|\___/|____/|_|   |___| |_|
 !
+!**********************************************************************!
+!         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57/SN 119
+!                     VERSION  MAI  2016
 ! MODIFICATIONS********************************************************!
 !
 ! INDIQUER DATE  NOM  MODIFICATION
@@ -20,17 +25,17 @@ program mosfit
 !    JAN 94  NR  SORTIE DES SPECTRES SOUS MATLAB 4.0 IBM RISC/6000
 !    FEV 94  NR  TRACE DES SOUS-SPECTRES
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
-!  1995-2016 ??  ???
+!    1995-2016 ??  ???
 !    MAI 2016 FL  REECRITURE EN FORTRAN 95
 !********************OPTIONS*******************************************!
 !    IO(1)=N  AJOUT N MILLIONS
-!     IO(2)=1  TRACE SUR LARGEUR 12OCX
+!    IO(2)=1  TRACE SUR LARGEUR 12OCX
 !    IO(3)=1  SN119
 !    IO(4)=1  HBRUIT NON AJUSTABLE
 !          2         AJUSTABLE
 !    IO(5)=N  CONNEXIONS PARAMETRES
 !    IO(6)=1  PERFORATION YEXP-YCALC
-!   IO(7)=1  PERFORATION YCALC
+!    IO(7)=1  PERFORATION YCALC
 !    IO(8)=1  X0,G,H,MATRICE DE VARIANCE COVARIANCE
 !    IO(9)=1  BETA=TETA ; ALFA=GAMA
 !    IO(10)=1  PAS DE SPECTRE EXPERIMENTAL
@@ -38,7 +43,7 @@ program mosfit
 !    IO(11)=1  TRACE YEXP YCALC
 !    IO(12)=1  SORTIE BENSON
 !    IO(13)=1  DISTRIBUTION
-!    IO(14)=1  DISTRIBUTION
+!    IO(14)=1  DISTRIBUTION avec tracé du diagramme en cartouches
 !    IO(16)=N  (N=NBRE DE SOUS CANAUX)  CONVOLUTION GAUSS*LORENZ
 !    IO(17)=1  TRACE DES SOUS-SPECTRES
 !    IO(20)=1  HORIZONTALISATION FOND CONTINU
@@ -78,7 +83,7 @@ program mosfit
     MONOC=0
     IOGV=0
     if((NT>=NS1) .AND. (NT<=NS2))then
-      ! Progression arithmetique demandee, du spectre NS1 au spectre NS2
+      ! Progression arithmetique demandee du sous-spectre NS1 au sous-spectre NS2
       if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
@@ -90,7 +95,7 @@ program mosfit
     ! Mise en tableau des parametres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-  ! lecture de bruit----------------------------------------------------
+!lecture de bruit----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_bruit
@@ -112,42 +117,46 @@ program mosfit
   call spectres_poids(IZ)
   if(NMAX==0) then  ! pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
       call ecriture_info_iteration(NMAX,NMAX,B)
-      call spectres_theorique_total(PH)
+      call spectres_theorique_total
      open(6,file=trim(fichier), status='unknown', form='formatted',access='append')
       write(6,*) "coucou"
     close(6)
   else
-      call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
-      !inversion de la matrice des variances-covariances
-      ij=0
-      do j=1,K
-        do i=1,K
-          ij=ij+1
-          AA(ij)=VQ(i,j)
-        enddo
+    call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
+    !inversion de la matrice des variances-covariances------------------
+    ij=0
+    do j=1,K
+      do i=1,K
+        ij=ij+1
+        AA(ij)=VQ(i,j)
       enddo
-      call minv(AA,K,dump)
-      ij=0
-      do j=1,K
-        do i=1,K
-          ij=ij+1
-          VQ(i,j)=AA(ij)
-        enddo
+    enddo
+    call minv(AA,K,dump)
+    ij=0
+    do j=1,K
+      do i=1,K
+        ij=ij+1
+        VQ(i,j)=AA(ij)
       enddo
-      ! remise des bonnes valeurs dans les tableaux X0,H,G
-      do nt=1,NS
-        call variablesAjustables_calculer_ecart_type(PH,nt,n) 
-        call variablesAjustables_actualiser_rangement(nt)
-        if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
-        DI=BT(1,nt)
-        GA=BT(2,nt)
-        H1=BT(3,nt)
-        call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SPECTRE_THEO)
-      enddo
+    enddo
+    ! remise des bonnes valeurs dans les tableaux X0,H,G----------------
+    do nt=1,NS
+      call variablesAjustables_calculer_ecart_type(PH,nt,n) 
+      call variablesAjustables_actualiser_rangement(nt)
+      if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
+      DI=BT(1,nt)
+      GA=BT(2,nt)
+      H1=BT(3,nt)
+      call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SPECTRE_THEO)
+    enddo
   endif
+  ! Sorties-------------------------------------------------------------
   call ecriture_titre(1)
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
-!~   call ecriture_spectre(Y)
+  if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
+  io(4)=2
+  call ecriture_rapports_absorption(NS,NS2,K,N,B,BT,Y,Q(:,K+2),BF,TY,HBRUIT)
+!~     call ecriture_spectre(Y)
   call ecriture_fin
   
   contains 

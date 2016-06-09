@@ -58,7 +58,7 @@ module ajustement
       saveB=0.0_dp
       Q=0.0_dp
       VQ(1:K,1:K)=0.0_dp
-      nu=5.0
+      nu=5.0_dp
       lambda=0.01_dp
       iter=0
       marquardt: do while(.NOT. fin)
@@ -68,7 +68,7 @@ module ajustement
         fin = coupureNmax .OR. convergence(critere)
         npas=npas+1
         ! premier calcul du spectre theorique---------------------------
-        call spectres_theorique_total(PH)
+        call spectres_theorique_total
         if(fin) exit marquardt  ! sortie sans calculer le reste (nmax ou critere atteint)
         !calcul de phi--------------------------------------------------
         PH=0.0_dp
@@ -87,7 +87,7 @@ module ajustement
               call ecriture_info_iteration(npas,nmax,B)
               fin = convergence(critere) .OR. (npas>=nmax)
               npas=npas+1
-              call spectres_theorique_total(PH)
+              call spectres_theorique_total
               if(fin)exit marquardt
           endif
         else
