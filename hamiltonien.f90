@@ -30,7 +30,6 @@ module hamiltonien
     HY=ch*sint*sing
     HZ=ch*cost
 !~     end select
-!~ write(6,*) HX,  HY, HZ
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
@@ -45,7 +44,7 @@ module hamiltonien
     hamilF(2)= cmplx( -0.5_dp*HX*zf, 0.5_dp*HY*zf, dp)!Etat <1/2|-1/2>
     hamilF(3)= cmplx( 0.5_dp*HZ*zf , 0.0_dp      , dp)!Etat <-1/2|-1/2>
     !recherche energies (valeurs propres) et fonctions d'onde (vecteurs propres)
-    call cegren(hamilF,fctF,2,0)
+    call algebre_eigenvalues(hamilF,fctF,2,0)
     !Etats  Excités-----------------------------------------------------
     hamilE=(0.0_dp,0.0_dp)
     Q=0.5_dp*sq/sqrt(1.0_dp+eta**2/3.0_dp)
@@ -58,8 +57,8 @@ module hamiltonien
     hamilE(8) = cmplx( eta*root3*Q/3.0_dp, 0.0_dp,dp)
     hamilE(9) = hamilE(2)
     hamilE(10)= cmplx(1.5_dp*HZ*ze+Q, 0.0_dp,dp)
-    !recherche energies et fonctions d'onde
-    call cegren(hamilE,fctE,4,0)
+    !recherche des energies et fonctions d'onde par recherche des valeurs
+    call algebre_eigenvalues(hamilE,fctE,4,0)
   endsubroutine hamiltonien_calculer_fonction_onde
   !---------------------------------------------------------------------
   subroutine hamiltonien_energies(energies)  

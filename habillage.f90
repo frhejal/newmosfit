@@ -14,22 +14,24 @@ module habillage
   
   contains
 !---------------------------------------------------------------------
-  subroutine habillage_raies(diso,largeur,hauteur,n,nt,energies,intensites,spectre)
+  subroutine habillage_raies(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     integer,intent(in)::n,nt
+    real(dp),intent(in)::cn
     real(dp),intent(in)::diso,largeur,hauteur
     real(dp),intent(in)::energies(8)  ! "energie" (i.e. vitesse effet doppler) theorique des 8 raies du NTieme spectre
     real(dp),intent(in)::intensites(8)! intensité théorique des 8 raies du NTième spectre
     real(dp),intent(out)::spectre(n)
     if(IO(16)==0)then 
-      call habillage_lorentz(diso,largeur,hauteur,n,nt,energies,intensites,spectre)
+      call habillage_lorentz(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     else
-      call habillage_convol(diso,largeur,hauteur,n,nt,energies,intensites,spectre)
+      call habillage_convol(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     endif
   end subroutine habillage_raies
 !---------------------------------------------------------------------
-  subroutine habillage_lorentz(diso,largeur,hauteur,n,nt,energies,intensites,spectre)
+  subroutine habillage_lorentz(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
   ! Habillage par une Lorentzienne
     integer,intent(in)::n,nt
+    real(dp),intent(in)::cn
     real(dp),intent(in)::diso,largeur,hauteur
     real(dp),intent(in)::energies(8)
     real(dp),intent(in)::intensites(8)
@@ -39,7 +41,7 @@ module habillage
     spectre=0.0_dp
     d0= 0.5_dp*(real(N,dp) + 1.0_dp)   !milieu du spectre
     do l=1,8
-      G(l,nt)=largeur/CN
+      G(l,nt)=largeur/cn
       H(l,nt)=hauteur*intensites(l)/8.0_dp
       if(  ((IOGVT(nt)==3 ) .AND. (NGT(l,nt) /=0) )&
           &   .OR.      (IOGVT(nt)==1)             &
@@ -56,9 +58,10 @@ module habillage
     enddo
   end subroutine habillage_lorentz
 !---------------------------------------------------------------------
-  subroutine habillage_convol(diso,largeur,hauteur,n,nt,energies,intensites,spectre)
+  subroutine habillage_convol(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
   ! Habillage par une convolution Gauss*Lorentz
     integer,intent(in)::n,nt
+    real(dp),intent(in)::cn
     real(dp),intent(in)::diso,largeur,hauteur
     real(dp),intent(in)::energies(8)
     real(dp),intent(in)::intensites(8)

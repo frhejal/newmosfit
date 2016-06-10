@@ -15,13 +15,14 @@ module lecture
       read(NIN,'(256A)') titre      
     end subroutine lecture_titre
 !-----------------------------------------------------------------------
-    subroutine lecture_options(nmax,ns,ns1,ns2,hbruit,grass)
+    subroutine lecture_options(cn,nmax,ns,ns1,ns2,hbruit,grass)
     ! Lecture des options et des valeurs initiales des parametres hyperfins ajustables
       integer,intent(out)::nmax,ns,ns1,ns2
+      real(dp),intent(out)::cn
       real(dp),intent(out)::hbruit
-      real(dp),intent(out)::grass(10)
+      integer,intent(out)::grass(10)
       integer::i
-      read(NIN,*) CN,nmax,ns,ns1,ns2,IZZ,IOPT,hbruit
+      read(NIN,*) cn,nmax,ns,ns1,ns2,IZZ,IOPT,hbruit
       if(IZZ==1) read(5,*) (IZ(i),i=1,10)
       if(IOPT==1) read(5,*) (IO(i),i=1,20)
       if(IO(17)/=0) read(5,*) (grass(i), i=1,10)

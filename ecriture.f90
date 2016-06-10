@@ -8,10 +8,6 @@ module ecriture
   implicit none
   integer::NOUT=6  ! label du fichier de sortie (sortie par defaut)
   character(len=255),private::fichier_sortie !nom du fichier de sortie
-!~   character(len=1),private::STAR='*'
-!~   character(len=1),private::BLANC=' '
-!~   character(len=1),private::AX='X'
-!~   character(len=1),private::AT='!'
   
   contains
   !=====================================================================
@@ -21,25 +17,29 @@ module ecriture
     fichier_sortie = nom
     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted')
     write(NOUT,'(A)') ' VERSION MAI 2016 '
-!~     close(NOUT)
   end subroutine ecriture_nommer_fichier_de_sortie
   !=====================================================================
   subroutine ecriture_titre(option)
     integer::option
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
-    if(option==1)write(NOUT,'(A)')'1'
-    write(NOUT,'(A)') titre
-!~     close(NOUT)
+    select case(option)
+      case(0)
+        write(NOUT,'(A)') titre
+      case(1)
+        write(NOUT,'(A)')'1'
+      case(2)
+        write(NOUT,'(A,A,///)')'1','   COMPOSANTE  DONNEE  '
+      case default
+        stop "Valeur inconnue pour l'option dans ecriture_titre"
+    end select
   end subroutine ecriture_titre
   !=====================================================================
-  subroutine ecriture_options(nmax,ns,ns1,ns2)
+  subroutine ecriture_options(cn,nmax,ns,ns1,ns2)
   ! Ecriture des options precedement lues 
   ! L'ecriture se fait dans le fichier_sortie
   ! Le fichier est effacé avant le debut de l'ecriture.
+    real(dp),intent(in)::cn
     integer,intent(in)::nmax,ns,ns1,ns2
-!~     character(len=*),intent(in)::fichier_sortie
     integer::i
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     if(IZZ==1) print *, ' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
     if(IOPT==1) print *, ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
     print *, 'VITESSE PAR CANAL=', CN, ' NBRE DE COMPOSANTES =',ns
@@ -47,7 +47,6 @@ module ecriture
     if(IO(4)/=0) print *, 'IL Y A UN SPECTRE DE BRUIT'
     if(ns1/=0) print *, 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2
     if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
-!~     close(NOUT)
   end subroutine ecriture_options
   !=====================================================================
   subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb)
@@ -58,29 +57,12 @@ module ecriture
     integer,intent(in)::nb(10)
     integer::i
     integer,save::cpt=0
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     if(cpt==0) write(NOUT,'(A)')  '   DI          GA          H1        SQ        &
                &CH       ETA      TETA      GAMA      BETA      ALFA    MONOC '
     write(NOUT, '(2(F8.3,2X),F11.2,7(2X,F8.3),3X,I4)' ) di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc
     write(NOUT,'(10(5X,I3,2X))')(nb(i), i=1,10)
-!~     close(NOUT)
     cpt=cpt+1
   end subroutine ecriture_param
-  !=====================================================================
-  subroutine ecriture_bruit
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
-    write(NOUT,'(A,A,///)')'1','   COMPOSANTE  DONNEE  '
-!~     close(NOUT)
-  end subroutine ecriture_bruit
-!~   !=====================================================================
-!~   subroutine ecriture_spectre(spectre)
-!~     real(dp),intent(in)::spectre(:)
-!~     integer::i,j,n
-!~     N=size(spectre)
-!~     do i=1,n,8
-!~       write(NOUT,'(I4,8I8)')  I, (int(spectre(j)),j=i,i+7)
-!~     enddo
-!~   end subroutine ecriture_spectre
   !=====================================================================
   subroutine ecriture_info_iteration(npas,nmax,b)
     integer,intent(in)::npas 
@@ -88,18 +70,14 @@ module ecriture
     real(dp),intent(in)::b(:)
     integer::i,k
     k=size(b)
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     write(NOUT,'(1X,A,I6)') '  NUMERO DU PASSAGE ', npas
     write(NOUT,'(1X,A , 8(2X,E13.5))')' B CALC ', (b(I),i=1,k)
     if(npas==nmax) write(NOUT,'(1X, A )') ' COUPURE   PAR    NMAX '
-!~     close(NOUT)
   end subroutine ecriture_info_iteration
   !=====================================================================
   subroutine ecriture_fonction_independante(i)
     integer,intent(in)::i
-!~     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted',access='append')
     write (NOUT,'(1X,A,I4)') ' LA FONCTION EST INDEPENDANTE DU PARAMETRE NO', i
-!~     close(NOUT)
   end subroutine ecriture_fonction_independante
   !=====================================================================
   subroutine ecriture_ecart_type(ns,bt,etbt,gvt,etgvt,iogvt)
@@ -162,7 +140,7 @@ module ecriture
     real(dp)::st,sExp,sFit,sBruit,sInt, difExp, difFit, daExp,daFit
     real(dp)::ordS,ordT
     real(dp)::s(40),sl(42),t(44)
-    real(dp)::btm(7,2)
+    real(dp)::btmoy(7,2)
     integer::i,ic,nt,colMax,colonneS,colonneT,nss
     character::chaine(256)
     s=0.0_dp
@@ -249,22 +227,22 @@ module ecriture
       endif
       !calcul des moyennes arithmétiques et quadratiques des differents parametres 
       nss=ns
-      btm=0.0_dp
+      btmoy=0.0_dp
       if(ns2/=0)nss=ns2
       do i=1,7
         select case(i)
           case(1,4,5,7)
             do nt=1,nss
-              btm(i,1)=btm(i,1)+bt(i,nt)*s(nt)/sInt
-              btm(i,2)=btm(i,2)+(bt(i,nt)**2)*s(nt)/sInt
+              btmoy(i,1)=btmoy(i,1)+bt(i,nt)*s(nt)/sInt
+              btmoy(i,2)=btmoy(i,2)+(bt(i,nt)**2)*s(nt)/sInt
             enddo
         end select
       enddo
       write(NOUT,'(//," CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')nss
       write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
                                 &"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')
-      write(NOUT,'(//," MOYENNE",6X,7F12.3,//)')(BTM(i,1),i=1,7)
-      write(NOUT,'(//," QUADRATIQUE",2X,7F12.3,//)')(BTM(i,2),i=1,7)
+      write(NOUT,'(//," MOYENNE",6X,7F12.3,//)')(btmoy(i,1),i=1,7)
+      write(NOUT,'(//," QUADRATIQUE",2X,7F12.3,//)')(btmoy(i,2),i=1,7)
     endif
   end subroutine ecriture_rapports_absorption
   !=====================================================================
@@ -273,7 +251,7 @@ module ecriture
     write(NOUT,'("1",//,50X,"KHI2 = ",E13.8)') khi2
   end subroutine ecriture_ecart_stat
   !=====================================================================
-  subroutine ecriture_spectres(n,spectre_exp,spectre_fit,cmin,cmax)
+  subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cmin,cmax)
   ! tracé des deux spectres experimentaux dans un fichier texte, parceque les interfaces graphiques c'est pour les faibles.
     integer,intent(in)::n
     real(dp),intent(in)::spectre_exp(n)
@@ -284,7 +262,7 @@ module ecriture
     real(dp)::echelle,ordExp,ordFit
     Cmin=min(minval(spectre_exp),minval(spectre_fit))
     Cmax=max(maxval(spectre_exp),maxval(spectre_fit))
-    write(6,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)')cmax,cmin
+    write(6,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)') cmax,cmin
     echelle=119.0
     if(IO(2)==1)echelle=107.0
     do i=n,1,-1
@@ -300,26 +278,54 @@ module ecriture
       chaine(colExp)='*'
       write(NOUT,'(1X,I4,2X,A1,120A1)')i,(chaine(ic),ic=1,colMax)
     enddo
-    
-  end subroutine ecriture_spectres
+  end subroutine ecriture_tracer_spectres
+  !=====================================================================
+  subroutine ecriture_spectre_entier(spectre)
+    !ecriture des valeurs d'un spectre sous forme d'entiers, par groupe de 8 canaux
+    real(dp),intent(in)::spectre(:)
+    integer::i,j,n
+    n=size(spectre,1)
+    do i=1,n,8
+      write(NOUT,'(I4,8I8)') i,(int(spectre(j)),j=i,i+7)
+    enddo
+  end subroutine ecriture_spectre_entier
+  !=====================================================================
+  subroutine ecriture_pour_gnuplot(n,nts,cn,spectreExp,spectreFit,totalSousSpectres,nom)
+  ! Ecriture des spectres experimentaux, calculé et des sous-spectres
+    integer,intent(in)::n
+    integer,intent(in)::nts
+    real(dp),intent(in)::cn !vitesse par canaux
+    real(dp),intent(in)::spectreExp(n) !spectre experimental
+    real(dp),intent(in)::spectreFit(n) !spectre theorique
+    real(dp),intent(in)::totalSousSpectres(n,5)! sous-spectres choisis
+    real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau
+    character(len=*)::nom
+    integer::i,j
+    ! vitesse de la source
+    do i=1,N/2
+      tout(i,1)=(I-(N/2+1))*cn
+      tout(N/2+i,1)=i*cn
+    enddo
+    ! spectre theorique
+    tout(:,2)=spectreFit
+    ! spectre experimental
+    tout(:,3)=spectreExp
+    ! sous-spectres theoriques
+    if(IO(17)/=0)then
+      do i=1,nts
+        tout(:,i+3)=totalSousSpectres(:,i)
+      enddo
+    endif
+    ! ecriture dans le fichier 
+    open(42,file=trim(nom), status='unknown', form='formatted')
+    do i=1,n
+      write(42,'(2X,F6.2,7(1X,F12.2))') (tout(i,j),j=1,8)
+    enddo
+    close(42)
+  end subroutine ecriture_pour_gnuplot
   !=====================================================================
   subroutine ecriture_fin
     write(NOUT,'("1")')
     close(NOUT)
   end subroutine ecriture_fin
 end module ecriture
-!~    20 FORMAT(//,50X,'CARACTERISTIQUES DES SPECTRES',//)                
-!~  25   FORMAT(//,'  ABS TOT EXP ',F11.0,12X,' ABS TOT CALC ',F11.0,     
-!~      1 ' DONT BRUIT ',F11.0,/)
-!~  26   FORMAT('  ABSFIT/ABSEXP= ',F10.5,10X,' ABSBRUIT/ABSEXP= ',F10.5,/)
-!~    28 FORMAT(30X,' SPECTRE ',I2,10X,F6.2,' %','  TOTAL ',10X,F6.2,/)   
-!~    31 FORMAT (1X,20X,'MMS',8X,'MMS',8X,'COUPS',6X,'MMS',9X,'KG',25X,   
-!~      1'DEG',23X,'DEG',8X,///)                                          
-!~    30 FORMAT(//,' SPECTRE ',I2,2X,10F12.3,/)                           
-!~    22 FORMAT(1X,39X,F6.2,5X,F6.2,5X,F7.0,5X,F10.0,/)                     
-!~    27 FORMAT(/,'   SURFACE DISPERSEE/SURFACE ABSORPTION    EXP=',F11.5,1
-!~      *X,'FIT=',F11.5,/)                                                
-!~    21 FORMAT(/,42X,'X0',9X,'G',10X,'H',5X,'(CANAUX)',/)                
-!~  9    FORMAT(//,'  BRUIT DE FOND NON  HBRUIT= ',F10.3,///)             
-!~  10   FORMAT(//,'  BRUIT DE FOND  HBRUIT= ',F10.3,///)                 
-!~    29 FORMAT (1X,20X,'DI',9X,'GA',9X,'H1',9X,' SQ',9X,'CH',9X,' ETA',9X,

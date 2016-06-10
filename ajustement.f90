@@ -13,8 +13,10 @@ module ajustement
   use ecriture
   use algebre
   implicit none
-  real(dp)::PH=0.0_dp
-  contains 
+  real(dp)::PH  ! Phi dans [1]
+  real(dp)::CRITERE ! critere de convergence
+  real(dp)::KHI2   ! ecart statistique de l'ajustement en moindres carrés
+  contains
   function convergence(critere)
   ! la fonction qui calcule le KHI**2
     real(dp),intent(in)::critere
@@ -162,7 +164,7 @@ module ajustement
           enddo
         enddo
         !resolution de l'equation (32) de ref.[1]
-        call alsb(q,n,K,1,dump,ierr)
+        call algebre_resoudre_systeme(q,n,K,1,dump,ierr)
         if(ierr/=0) stop 'erreur de resolution de systeme lineraire dans ASLB'
         do i=1,K
           q(i,K+1)=q(i,K+1)/q(i,K+2)
@@ -171,4 +173,9 @@ module ajustement
         enddo
     enddo marquardt
   end subroutine ajustement_moindres_carres
+  !=====================================================================
+  subroutine ajustement_raz
+    PH=0.0_dp
+    CRITERE = 0.001_dp
+  end subroutine ajustement_raz
 end module ajustement

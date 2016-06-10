@@ -94,6 +94,9 @@ module variablesAjustables
       TY=0.0_dp
       NB=0
       MONOC=0
+      B=0.0_dp
+      HBRUIT=0.0_dp
+      K=1
   end subroutine variablesAjustables_raz
   !=====================================================================
   subroutine variablesAjustables_raz0
@@ -177,6 +180,7 @@ module variablesAjustables
         K=K+1
       endif
     enddo
+
   end subroutine variablesAjustables_ranger
   !=====================================================================
   subroutine variablesAjustables_actualiser_rangement(nt)

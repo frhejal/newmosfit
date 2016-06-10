@@ -24,8 +24,8 @@ module algebre
 !           THE STANDARD GAUSS-JORDAN METHOD IS USED. THE DETERMINANT
 !           IS ALSO CALCULATED. A DETERMINANT OF ZERO INDICATES THAT
 !           THE MATRIX IS SINGULAR.
-!        Translated from F77 by F.L, may 2016
-  subroutine minv(A,N,D)
+!        Translated from MINV (F77) by F.L, may 2016
+  subroutine algebre_inverser_matrice(A,N,D)
     integer,intent(in)    :: N
     real(dp),intent(inout):: A(N*N)
     real(dp),intent(out)  :: D
@@ -147,7 +147,7 @@ module algebre
       K=(K-1)
     enddo
     return
-  end subroutine minv
+  end subroutine algebre_inverser_matrice
 !---------------------------------------------------------------------
 !        SUBROUTINE ALSB
 !   RESOLUTION DE SYSTEMES LINEAIRES A ELEMENTS REELS
@@ -160,7 +160,7 @@ module algebre
 !    IER 0 SI MATRICE NON SINGULIERE. 1 SI MATRICE SINGULIERE
 !      INTEGER NM NDEB
 !        Translated from F66/F77 by F.L, may 2016
-  subroutine alsb(A,ID,NA,M,K,IER)
+  subroutine algebre_resoudre_systeme(A,ID,NA,M,K,IER)
     integer,intent(in)    ::ID,NA,M
     integer,intent(out)   ::IER
     real(dp),intent(inout),dimension(ID,*)::A
@@ -273,9 +273,9 @@ module algebre
           enddo
         enddo
       enddo
-    end subroutine alsb
+    end subroutine algebre_resoudre_systeme
   !=====================================================================
-  subroutine cegren(a,r,n,mv)
+  subroutine algebre_eigenvalues(a,r,n,mv)
   ! Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
   ! En sortie, les valeurs propres sont sur la diagonale de a.
   ! Si mv = 0, les vecteurs prorpes sont calculés et placés dans les colonnes de r. 
@@ -357,8 +357,8 @@ module algebre
           anorm=anorm+abs(a(k))*abs(a(k))
         enddo
       enddo
-      anorm=ROOT2*sqrt(anorm)
-!~       anorm=1.414*sqrt(anorm)
+!~       anorm=ROOT2*sqrt(anorm)
+      anorm=1.414*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
       ind=0
       thr=anorm
@@ -487,8 +487,43 @@ module algebre
       if(mvk/=1) a=a*1.0D-50
       a=a*z
     endif
-  end subroutine cegren
-  
+  end subroutine algebre_eigenvalues
+  !=====================================================================
+  subroutine algebre_matrice_vers_vecteur(mat,vec,m,n)
+  ! Recopie les valeurs d'une matrice dans un vecteur, colonne par colonne.
+    real(dp),intent(in)::mat(:,:)
+    real(dp),intent(out)::vec(:)
+    integer,intent(in)::m ! nombre de lignes de la matrice
+    integer,intent(in)::n ! nombre de colonnes de la matrice
+    integer::i,j,ij
+    if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
+    if(m*n> size(vec,1)) stop "La matrice est trop grande pour etre contenue dans ce vecteur"
+    ij=0
+    do j=1,n
+      do i=1,m
+        ij=ij+1
+        vec(ij)=mat(i,j)
+      enddo
+    enddo
+  end subroutine algebre_matrice_vers_vecteur
+  !=====================================================================
+  subroutine algebre_vecteur_vers_matrice(vec,mat,m,n)
+  ! Recopie les valeurs d'un vecteur dans une matrice, colonne par colonne.
+    real(dp),intent(in)::vec(:)
+    real(dp),intent(out)::mat(:,:)
+    integer,intent(in)::m ! nombre de lignes de la matrice
+    integer,intent(in)::n ! nombre de colonnes de la matrice
+    integer::i,j,ij
+    if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
+    if(m*n> size(vec,1)) stop "Le vecteur be correspond pas aux dimensions données pour la matrice"
+    ij=0
+    do j=1,n
+      do i=1,m
+        ij=ij+1
+        mat(i,j)=vec(ij)
+      enddo
+    enddo
+  end subroutine algebre_vecteur_vers_matrice
 end module algebre
 !**********************************************************************
 !

@@ -59,28 +59,26 @@ program mosfit
   implicit none
 !***********************************************************************
   !variables locales----------------------------------------------------
-  integer::NMAX,NS1,NS2,NT
-  real(dp)::GRASS(10)
+!~   integer::NMAX,NS1,NS2
   real(dp)::AA(1600)
-  real(dp)::CRITERE ! critere de convergence
-  real(dp)::KHI2   ! ecart statistique de l'ajustement en moindres carrés
   real(dp)::dump ! variable-poubelle
-  real(dp)::cmin,cmax
-  integer::i,j,ij
-  character(len=*),parameter::fichier='test.out'
+  real(dp)::cmin=0,cmax=0
+  integer::nt,nts
+  real(dp)::diffSpectres(N)
+  character(len=*),parameter::fichierOut='test.out'
+  character(len=*),parameter::fichierGnuplot='test.dat'
+  character(len=*),parameter::fichierResultats='test.doc'
   !initialisations------------------------------------------------------
   call raz
-  call options_raz
-  call variablesAjustables_raz
 !***********************************************************************
-! Entree des options et des données, et copie dans le fichier de sortie
+! Entree des options et des données, copie dans le fichier de sortie
 !***********************************************************************
   !Lecture des options--------------------------------------------------
   call lecture_titre
-  call lecture_options(NMAX,NS,NS1,NS2,HBRUIT,GRASS)
-  call ecriture_nommer_fichier_de_sortie(fichier)
+  call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
+  call ecriture_nommer_fichier_de_sortie(fichierOut)
   call ecriture_titre(0)
-  call ecriture_options(NMAX,NS,NS1,NS2)
+  call ecriture_options(CN,NMAX,NS,NS1,NS2)
   !Lecture des parametres ajustables des sous-spectres------------------
   !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
@@ -88,10 +86,11 @@ program mosfit
     IOGV=0
     if((NT>=NS1) .AND. (NT<=NS2))then
       ! Progression arithmetique demandee du sous-spectre NS1 au sous-spectre NS2
-      if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
+      if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,&
+                                      &TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
-      if(IO(10)/=2) call variablesAjustables_raz
+      if(IO(10)/=2) call variablesAjustables_raz0
       call lecture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV )
       call ecriture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB)
     endif
@@ -102,7 +101,7 @@ program mosfit
   ! Lecture de bruit-----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
-    call ecriture_bruit
+    call ecriture_titre(1)
     call lecture_titre
     call ecriture_titre(0)
     call lecture_spectre(BF,N)
@@ -112,10 +111,10 @@ program mosfit
   if(IO(10)==0)call lecture_spectre(Y,N)  
   if(IO(10)==1)then
     ! pas de spectre experimental
-    Y=0.0_dp          
+    Y=0.0_dp
   else
     ! ajout de IO(1) million(s) demandé en option
-    Y = Y + real(IO(1),dp)*1000000_dp 
+    Y = Y + real(IO(1),dp)*1000000_dp
   endif
 !Defnition du niveau zero-----------------------------------------------
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
@@ -132,59 +131,62 @@ program mosfit
     ! Algorithme d'estimation moindres-carrés de Marquardt
     call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
     !inversion de la matrice des variances-covariances------------------
-    ij=0
-    do j=1,K
-      do i=1,K
-        ij=ij+1
-        AA(ij)=VQ(i,j)
-      enddo
-    enddo
-    call minv(AA,K,dump)
-    ij=0
-    do j=1,K
-      do i=1,K
-        ij=ij+1
-        VQ(i,j)=AA(ij)
-      enddo
-    enddo
+    call algebre_matrice_vers_vecteur(VQ,AA,K,K)
+    call algebre_inverser_matrice(AA,K,dump)
+    call algebre_vecteur_vers_matrice(AA,VQ,K,K)
     ! remise des bonnes valeurs dans les tableaux X0,H,G----------------
     do nt=1,NS
-      call variablesAjustables_calculer_ecart_type(PH,nt,n) 
+      call variablesAjustables_calculer_ecart_type(PH,nt,N) 
       call variablesAjustables_actualiser_rangement(nt)
       if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
+      call spectres_theorique(nt)
       DI=BT(1,nt)
       GA=BT(2,nt)
       H1=BT(3,nt)
-      call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SPECTRE_THEO)
+      call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
     enddo
   endif
 !***********************************************************************
 ! Sorties
 !***********************************************************************
   call ecriture_titre(1)
-  !ecarts type
+  call ecriture_titre(0)
+  ! Ecarts type
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
-  ! largeurs, hauteur et energie des raies
+  ! Largeurs, hauteur et energie des raies
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
   ! Absorptions des differents sous-spectres
   call ecriture_rapports_absorption(NS,NS2,K,N,B,BT,Y,Q(:,K+2),BF,TY,HBRUIT)
   ! Calcul du khi**2
   KHI2=ajustement_ecart_stat(K,N,Y,Q(:,K+2),POIDS)
   call ecriture_ecart_stat(KHI2)
-  call ecriture_spectres(N,Y,Q(:,k+2),cmin,cmax)
+  call ecriture_tracer_spectres(N,Y,Q(:,k+2),cmin,cmax)
+  if((IO(6)==1) .OR. (IO(11)==1)) then
+    ! Ecriture des de la difference entre le spectre experimental et le spectre calculé
+    diffSpectres=Y-Q(:,K+2)
+    if(IO(6)==1) call ecriture_spectre_entier(diffSpectres)
+    if(IO(11)==1) call ecriture_tracer_spectres(N,diffSpectres,diffSpectres,cmin,cmax)
+  endif
+  ! Ecriture du spectre calculé
+  if(IO(7)==1) call ecriture_spectre_entier(Q(:,K+2))
+  ! Résumé et ecriture des sous-spectres dans un fichier gnuplot
+  if(IO(12)==1)then
+    if(IO(17)==1)then
+    ! Tracé des sous-spectres-------------------------------------------
+      call spectres_total_sous_spectres(GRASS,nts)
+    endif
+    call ecriture_pour_gnuplot(N,nts,CN,Y,Q(:,K+2),TOTAL_SOUS_SPECTRES,fichierGnuplot)
+!~     call ecriture_resultat_resumes(fichierResultats)
+  endif
   call ecriture_fin
-  
-  contains 
-    subroutine raz
-    !remise a zero des variables
-      CRITERE = 0.001_dp
-      POIDS=1.0_dp
-      B=0.0_dp
-      HBRUIT=0.0_dp
-      CN=0.078125_dp
-      NS=1
-      NS1=0
-      NS2=0
-      K=1
-    end subroutine raz
+  contains
+!=======================================================================
+  subroutine raz
+  ! Réinitialisation des variables
+    call options_raz
+    call spectre_raz
+    call ajustement_raz
+    call variablesAjustables_raz
+    call variablesAjustables_raz0
+  end subroutine raz
 end program mosfit

@@ -13,14 +13,19 @@ module spectres
   implicit none
   integer,parameter::N=256 ! nombre de mesures par spectre
   real(dp)::Q(N,42) ! tableau de travail pour les moindres carres.
-  real(dp)::Y(N)
-  real(dp)::BF(N)
-  real(dp)::POIDS(N)  ! poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
-  real(dp)::SPECTRE_THEO(N)
+  real(dp)::Y(N)  ! Spectre experimental
+  real(dp)::BF(N) ! Spectre de bruit de fond
+  real(dp)::POIDS(N)  ! Poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
+  real(dp)::SOUS_SPECTRES(N,40) ! sous spectres calculés
+  real(dp)::TOTAL_SOUS_SPECTRES(N,5) ! sommes des groupes de sous-spectres demandés par IO(17)
   real(dp)::ENERGIES(8,40)
   real(dp)::INTENSITES(8,40)
+  !variables lues en option
+  real(dp)::CN    ! largeur du canal (mm/s)
   integer::NS ! nombre de sous-spectres theoriques utilisé pour l'ajustement d'un spectre experimental.
-  
+  integer::NMAX   !
+  integer::NS1,NS2! On effectue une distribution de spectres entre NS1 et NS2
+  integer::GRASS(10) !plages de sous-spectres à sommer (si IO(17)=1)
   contains
   !=====================================================================
   subroutine spectres_preparer_bruit
@@ -45,7 +50,7 @@ module spectres
     enddo canaux
   end subroutine spectres_poids
   !=====================================================================
-  subroutine spectres_theorique(nt)  !(parametres hyper fins ?)
+  subroutine spectres_theorique(nt)
   ! calcule le spectre theorique à partir des parametres hypers fins
     !Choix du rapport gyromagnétique------------------------------------
     integer,intent(in)::nt
@@ -132,7 +137,7 @@ module spectres
       spectre=0.0_dp
       !calcul de la fonction -------------------------------------------
       call spectres_theorique(nt)
-      call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+      call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
       do i=1,N
         Q(i,K+2)=Q(i,K+2)-spectre(i)
       enddo
@@ -145,7 +150,7 @@ module spectres
           diff=CN*1.0D-3 !element infiniment petit = 1/1000e d'un canal
           GVT(j,nt)=B(l)+diff !
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
-          call habillage_raies(DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
+          call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
           do i=1,N
             Q(i,l)=(spectre0(i)-spectre(i))/diff ! ecart sur le spectre engendre par l'ecart sur la largeur
           enddo
@@ -164,12 +169,12 @@ module spectres
             case(1) !deplacement isomerique
               diff=pm*CN*1.0D-3
               di1=DI+diff
-              call habillage_raies(di1,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+              call habillage_raies(CN,di1,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
             case(2) ! largeur de raie
               diff=pm*CN*1.0D-3
               gb=GA+diff
-              call habillage_raies(DI,gb,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+              call habillage_raies(CN,DI,gb,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
             case(3)  ! hauteur de raie
                 derivee(jj,:)=-spectre0/H1
@@ -178,11 +183,37 @@ module spectres
               BT(j,nt)=BT(j,nt)+diff
               call spectres_theorique(nt)
               BT(j,nt)=BT(j,nt)-diff
-              call habillage_raies(DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+              call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
           end select
         enddo
         Q(:,l)=Q(:,l)+0.5_dp*(derivee(1,:)+derivee(2,:))
       enddo parametres
   end subroutine spectres_derivee
+  !=====================================================================
+  subroutine spectres_total_sous_spectres(grass,compteur)
+    integer,intent(in)::grass(10) !groupes de sous-spectres à sommer
+    integer,intent(out)::compteur
+    integer::i,nt
+      TOTAL_SOUS_SPECTRES=0.0_dp
+      compteur=0
+      do i=1,10,2
+        if(GRASS(i)/=0)then
+          compteur=compteur+1
+          do nt=GRASS(i),GRASS(i+1) ! Total des sous-spectres de nt=GRASS(i) à nt=GRASS(i+1)
+            TOTAL_SOUS_SPECTRES(:,compteur)=TOTAL_SOUS_SPECTRES(:,compteur)+SOUS_SPECTRES(:,nt)
+          enddo
+          TOTAL_SOUS_SPECTRES=TY-TOTAL_SOUS_SPECTRES
+        endif
+      enddo
+  end subroutine spectres_total_sous_spectres
+  !=====================================================================
+  subroutine spectre_raz
+    CN=0.078125_dp
+    NS=1
+    NS1=0
+    NS2=0
+    NMAX=0
+    POIDS=1.0_dp
+  end subroutine spectre_raz
 end module spectres
