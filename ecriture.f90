@@ -124,134 +124,92 @@ module ecriture
     enddo
   end subroutine ecriture_raies_covariance
   !=====================================================================
-  subroutine ecriture_rapports_absorption(ns,ns2,k,n,b,bt,spectre_exp,spectre_fit,spectre_bruit,nivzero,hbruit)
+  subroutine ecriture_lissage(ns,s,sl)
   ! Calcul des rapports d'absoption/dispersion (surfaces) entre le spectre expérimental et le spectre fitté
     integer,intent(in)::ns
-    integer,intent(in)::ns2
-    integer,intent(in)::k
-    integer,intent(in)::n
-    real(dp),intent(in)::b(40)
-    real(dp),intent(in)::bt(10,40)
-    real(dp),intent(in)::spectre_exp(n)
-    real(dp),intent(in)::spectre_fit(n)
-    real(dp),intent(in)::spectre_bruit(n)
-    real(dp),intent(in)::nivzero
-    real(dp),intent(inout)::hbruit
-    real(dp)::st,sExp,sFit,sBruit,sInt, difExp, difFit, daExp,daFit
+    real(dp),intent(in)::s(44)
+    real(dp),intent(in)::sl(42)
     real(dp)::ordS,ordT
-    real(dp)::s(40),sl(42),t(44)
-    real(dp)::btmoy(7,2)
-    integer::i,ic,nt,colMax,colonneS,colonneT,nss
+    integer::i,ic,colMax,colonneS,colonneT
     character::chaine(256)
-    s=0.0_dp
-    st=0.0_dp
-    do nt=1,ns
-      s(nt)=abs(BT(2,nt)*BT(3,nt))
-      st=st+s(nt)
-    enddo
-    if(io(4)==1) write(NOUT,'(//,"  BRUIT DE FOND NON  HBRUIT= ",F10.3,///)') hbruit
-    if(io(4)==2) then
-      hbruit=b(k-1)
-      write(NOUT,'(//,"  BRUIT DE FOND  HBRUIT= ",F10.3,///)') hbruit
+    ! Lissage de la distribution
+    if(IO(14)==0)then
+      write(NOUT,'(30X,"LISSAGE",19X,"%",22X,"%LISSE",/)')
+      do i=1,ns+2
+        write(NOUT,'(30X,2(20X,F6.2),/)') s(i+1),sl(i)
+      enddo
+    else
+      write(NOUT,'(9X,"LISSAGE",5X,"%",8X,"%LISSE",20X,"DIAGRAMME  EN  CARTOUCHES",//)')  
+      write(NOUT,'(56X,"0",19X,"5",18X,"10%",18X,"15%",18X,"20%",18X,"25%",18X,"30%")')
+      !tracé de la distribution en ASCII-art...
+      do i=1,ns+2
+        ordS=20.0_dp+4.0_dp*sl(i)
+        ordT=20.0_dp+4.0_dp*s(i+1)
+        colonneS=1+int(ordS)
+        colonneT=1+int(ordT)
+        if(colonneS>256) colonneS=21
+        if(colonneT>256) colonneT=21
+        if(colonneS<-20) colonneS=21
+        if(colonneT<-20) colonneT=21
+        colMax = max(colonneS,colonneT)
+        do ic=1,colMax
+          chaine(ic)=' '
+        enddo
+        chaine(colonneT)='X'
+        chaine(colonneS)='*'
+        chaine(21)='!'
+        write(NOUT,'(8X,2(6X,F6.2),4X,A1,256A1)') s(i+1), sl(i), (chaine(ic),ic=1,colMax)
+        write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,colMax)
+      enddo
     endif
+  end subroutine ecriture_lissage
+  !=====================================================================
+  subroutine ecriture_absorption_dispersion(ns,k,hbruit,daExp,daFit,sExp,sFit,sBruit,b,s,sInt)
+  !ecriture des absoprtions/dispersions( surfaces relatives des spectres)
+    integer,intent(in)::ns
+    integer,intent(in)::k
+    real(dp),intent(in)::hbruit
+    real(dp),intent(in)::daExp
+    real(dp),intent(in)::daFit
+    real(dp),intent(in)::sExp
+    real(dp),intent(in)::sFit
+    real(dp),intent(in)::sBruit
+    real(dp),intent(in)::b(40)
+    real(dp),intent(in)::s(44)
+    real(dp),intent(in)::sInt(40)
+    integer::nt
+    if(IO(4)==1) write(NOUT,'(//,"  BRUIT DE FOND NON  HBRUIT= ",F10.3,///)') hbruit
+    if(IO(4)==2) write(NOUT,'(//,"  BRUIT DE FOND  HBRUIT= ",F10.3,///)') b(k-1)
     ! Surfaces exprimant l'absorption
-    sExp=1.0_dp
-    sFit=0.0_dp
-    sBruit=1.0_dp
-    do i=1,n
-      sExp=sExp + b(k) - spectre_exp(i)
-      sFit=sFit + b(k) - spectre_fit(i)
-      if(hbruit/=0) sBruit =sBruit-hbruit*spectre_bruit(i)
-    enddo
     write(NOUT,'(//,"  ABS TOT EXP ",F11.0,12X," ABS TOT CALC ",F11.0, " DONT BRUIT ",F11.0,/)') sExp,sFit,sBruit
     write(NOUT,'("  ABSFIT/ABSEXP= ",F10.5,10X," ABSBRUIT/ABSEXP= ",F10.5,/)' ) sFit/sExp, sBruit/sExp
     ! Surfaces exprimant la dispersion
-    difFit=0.0_dp
-    difExp=1.0_dp
-    do i=1,n
-      difFit = difFit +(spectre_exp(i)-spectre_fit(i))**2 
-    enddo
-    do i=3,12
-      difExp=difExp+(nivzero-spectre_exp(i))**2
-    enddo
-    do i=n-9,n
-      difExp=difExp+(nivzero-spectre_exp(i))**2
-    enddo
-    ! Ratio dispersion/absorption
-    daFit= n*sqrt(difFit/n)/sFit
-    daExp= n*sqrt(difExp/20.0_dp)/sExp
     write(NOUT,'(/,"   SURFACE DISPERSEE/SURFACE ABSORPTION    EXP=",F11.5,1X,"FIT=",F11.5,/)') daExp, daFit
     ! Contribution de chaque sous-spectre (en pourcent)
-    sInt=0.0_dp
-    s=100.0_dp*s/st
-    t(3:ns+2)=s(:)
     do nt=1,ns
-      sInt=sInt+s(nt)
-      write(NOUT,'(30X," SPECTRE ",I2,10X,F6.2," %","  TOTAL ",10X,F6.2,/)')nt, s(nt),sInt
+      write(NOUT,'(30X," SPECTRE ",I2,10X,F6.2," %","  TOTAL ",10X,F6.2,/)')nt, s(nt+2),sInt(nt)
     enddo
-    ! Lissage de la distribution
-    if (IO(13)/=0)then
-      t(1:2)=0.0_dp
-      t(ns+3:ns+4)=0.0_dp
-      do i=1,ns+2
-        sl(i)=0.25_dp*(t(i)+2.0_dp*t(i+1)+t(i+2))
-      enddo
-      if(io(14)==0)then
-        write(NOUT,'(30X,"LISSAGE",19X,"%",22X,"%LISSE",/)')
-        do i=1,ns+2
-          write(NOUT,'(30X,2(20X,F6.2),/)') t(i+1),sl(i)
-        enddo
-      else
-        write(NOUT,'(9X,"LISSAGE",5X,"%",8X,"%LISSE",20X,"DIAGRAMME  EN  CARTOUCHES",//)')  
-        write(NOUT,'(56X,"0",19X,"5",18X,"10%",18X,"15%",18X,"20%",18X,"25%",18X,"30%")')
-        !tracé de la distribution en ASCII-art...
-        do i=1,ns+2
-          ordS=20.0_dp+4.0_dp*sl(i)
-          ordT=20.0_dp+4.0_dp*t(i+1)
-          colonneS=1+int(ordS)
-          colonneT=1+int(ordT)
-          if(colonneS>256) colonneS=21
-          if(colonneT>256) colonneT=21
-          if(colonneS<-20) colonneS=21
-          if(colonneT<-20) colonneT=21
-          colMax = max(colonneS,colonneT)
-          do ic=1,colMax
-            chaine(ic)=' '
-          enddo
-          chaine(colonneT)='X'
-          chaine(colonneS)='*'
-          chaine(21)='!'
-          write(NOUT,'(8X,2(6X,F6.2),4X,A1,256A1)') t(i+1), sl(i), (chaine(ic),ic=1,colMax)
-          write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,colMax)
-        enddo
-      endif
-      !calcul des moyennes arithmétiques et quadratiques des differents parametres 
-      nss=ns
-      btmoy=0.0_dp
-      if(ns2/=0)nss=ns2
-      do i=1,7
-        select case(i)
-          case(1,4,5,7)
-            do nt=1,nss
-              btmoy(i,1)=btmoy(i,1)+bt(i,nt)*s(nt)/sInt
-              btmoy(i,2)=btmoy(i,2)+(bt(i,nt)**2)*s(nt)/sInt
-            enddo
-        end select
-      enddo
-      write(NOUT,'(//," CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')nss
-      write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
-                                &"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')
-      write(NOUT,'(//," MOYENNE",6X,7F12.3,//)')(btmoy(i,1),i=1,7)
-      write(NOUT,'(//," QUADRATIQUE",2X,7F12.3,//)')(btmoy(i,2),i=1,7)
-    endif
-  end subroutine ecriture_rapports_absorption
+  end subroutine ecriture_absorption_dispersion
+  !=====================================================================
+  subroutine ecriture_moyennes(nss,btmoy,dash)
+    integer,intent(in)::nss
+    real(dp),intent(in)::btmoy(7,2)
+    character,intent(in)::dash(1)
+    integer::i
+      !Moyennes arithmétiques et quadratiques
+      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
+      write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
+                                &"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')dash
+      write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
+      write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+  end subroutine ecriture_moyennes
   !=====================================================================
   subroutine ecriture_ecart_stat(khi2)
     real(dp),intent(in)::khi2
     write(NOUT,'("1",//,50X,"KHI2 = ",E13.8)') khi2
   end subroutine ecriture_ecart_stat
   !=====================================================================
-  subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cmin,cmax)
+  subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cMin,cMax)
   ! tracé des deux spectres experimentaux dans un fichier texte, parceque les interfaces graphiques c'est pour les faibles.
     integer,intent(in)::n
     real(dp),intent(in)::spectre_exp(n)
@@ -260,14 +218,14 @@ module ecriture
     character::chaine(120)
     integer::i,ic,colExp,colFit,colMax
     real(dp)::echelle,ordExp,ordFit
-    Cmin=min(minval(spectre_exp),minval(spectre_fit))
-    Cmax=max(maxval(spectre_exp),maxval(spectre_fit))
+    cMin=min(minval(spectre_exp),minval(spectre_fit))
+    cMax=max(maxval(spectre_exp),maxval(spectre_fit))
     write(6,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)') cmax,cmin
     echelle=119.0
     if(IO(2)==1)echelle=107.0
     do i=n,1,-1
-      ordExp=(cmax-spectre_exp(i))*echelle/(cmax-cmin)
-      ordFit=(cmax-spectre_fit(i))*echelle/(cmax-cmin)
+      ordExp=(cMax-spectre_exp(i))*echelle/(cMax-cMin)
+      ordFit=(cMax-spectre_fit(i))*echelle/(cMax-cMin)
       colExp = 1+int(ordExp)
       colFit = 1+int(ordFit)
       colMax = max(colExp,colFit)
@@ -300,11 +258,13 @@ module ecriture
     real(dp),intent(in)::totalSousSpectres(n,5)! sous-spectres choisis
     real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau
     character(len=*)::nom
-    integer::i,j
+    integer::i,j,NoutSave
+    NoutSave=NOUT
+    NOUT=42
     ! vitesse de la source
-    do i=1,N/2
-      tout(i,1)=(I-(N/2+1))*cn
-      tout(N/2+i,1)=i*cn
+    do i=1,n/2
+      tout(i,1)=(i-(n/2+1))*cn
+      tout(n/2+i,1)=i*cn
     enddo
     ! spectre theorique
     tout(:,2)=spectreFit
@@ -317,12 +277,42 @@ module ecriture
       enddo
     endif
     ! ecriture dans le fichier 
-    open(42,file=trim(nom), status='unknown', form='formatted')
+    open(NOUT,file=trim(nom), status='unknown', form='formatted')
     do i=1,n
-      write(42,'(2X,F6.2,7(1X,F12.2))') (tout(i,j),j=1,8)
+      write(NOUT,'(2X,F6.2,7(1X,F12.2))') (tout(i,j),j=1,nts+3)
     enddo
-    close(42)
+    close(NOUT)
+    NOUT=NoutSave
   end subroutine ecriture_pour_gnuplot
+  !=====================================================================
+  subroutine ecriture_resultats_resume(ns,nss,s,sl,bt,btmoy,nom)
+  ! ecriture resumee des resultats
+    integer,intent(in)::ns
+    integer,intent(in)::nss
+    real(dp),intent(in)::s(44)
+    real(dp),intent(in)::sl(42)
+    real(dp),intent(in)::bt(10,40)
+    real(dp),intent(in)::btmoy(7,2)
+    character(len=*)::nom
+    integer::i,nt,NoutSave
+    NoutSave=NOUT
+    NOUT=42
+    open(NOUT,file=trim(nom), status='unknown', form='formatted')
+    call ecriture_titre(0)
+    write(NOUT,'(//,"#",50X,"CARACTERISTIQUES DES SPECTRES",//)') 
+    write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"GAMA",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
+    write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",25X,"DEG",19X,"DEG",16X," % ",/)')
+    do nt=1,ns
+      write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
+                                                                            & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
+    enddo
+    do i=1,ns+2
+      write(NOUT,*)i,sl(i)
+    enddo
+    if (IO(13)/=0)call ecriture_moyennes(nss,btmoy,'#')
+    close(NOUT)
+    NOUT=NoutSave
+  end subroutine ecriture_resultats_resume
   !=====================================================================
   subroutine ecriture_fin
     write(NOUT,'("1")')

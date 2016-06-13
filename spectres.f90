@@ -203,10 +203,108 @@ module spectres
           do nt=GRASS(i),GRASS(i+1) ! Total des sous-spectres de nt=GRASS(i) à nt=GRASS(i+1)
             TOTAL_SOUS_SPECTRES(:,compteur)=TOTAL_SOUS_SPECTRES(:,compteur)+SOUS_SPECTRES(:,nt)
           enddo
-          TOTAL_SOUS_SPECTRES=TY-TOTAL_SOUS_SPECTRES
+          TOTAL_SOUS_SPECTRES(:,compteur)=TY-TOTAL_SOUS_SPECTRES(:,compteur)
         endif
       enddo
   end subroutine spectres_total_sous_spectres
+  !=====================================================================
+  subroutine spectres_lissage_distribution(ns,s,sl,sInt)
+  !Calcul les contributions (surfaces) des sous-spectres et lisse la distribution
+    integer,intent(in)::ns
+    real(dp),intent(out)::s(44) ! distribution non lissée (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sl(42) !distribution lissée
+    real(dp),intent(out)::sInt(ns) !Somme intermediaire des surface
+    integer::i,nt
+    real(dp)::st
+    s=0.0_dp
+    st=0.0_dp
+    do nt=1,ns
+      s(nt+2)=abs(BT(2,nt)*BT(3,nt))
+      st=st+s(nt+2)
+    enddo
+    ! Contribution de chaque sous-spectre (en pourcent)
+    sInt=0.0_dp
+    s=100.0_dp*s/st
+    sInt(1)=s(3)
+    do nt=2,ns
+      sInt(nt)=sInt(nt-1)+s(nt+2)
+    enddo
+    !lissage
+    if (IO(13)/=0)then
+      s(1:2)=0.0_dp
+      s(ns+3:ns+4)=0.0_dp
+      do i=1,ns+2
+        sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
+      enddo
+    endif
+  end subroutine spectres_lissage_distribution
+  !=====================================================================
+  subroutine spectres_absoption_dispersion(k,n,b,spectre_exp,spectre_fit,spectre_bruit,nivzero,hbruit,sExp,sFit,sBruit,daExp,daFit)
+    integer,intent(in)::k
+    integer,intent(in)::n
+    real(dp),intent(in)::b(40)
+    real(dp),intent(in)::spectre_exp(n)
+    real(dp),intent(in)::spectre_fit(n)
+    real(dp),intent(in)::spectre_bruit(n)
+    real(dp),intent(in)::nivzero
+    real(dp),intent(out)::sExp
+    real(dp),intent(out)::sFit
+    real(dp),intent(out)::sBruit
+    real(dp),intent(out)::daExp
+    real(dp),intent(out)::daFit
+    real(dp),intent(in)::hbruit
+    real(dp)::difExp
+    real(dp)::difFit
+    integer::i
+    ! Surfaces exprimant l'absorption
+    sExp=1.0_dp
+    sFit=0.0_dp
+    sBruit=1.0_dp
+    do i=1,n
+      sExp=sExp + b(k) - spectre_exp(i)
+      sFit=sFit + b(k) - spectre_fit(i)
+      if(hbruit/=0) sBruit =sBruit-hbruit*spectre_bruit(i)
+    enddo
+    ! Surfaces exprimant la dispersion
+    difFit=0.0_dp
+    difExp=1.0_dp
+    do i=1,n
+      difFit = difFit +(spectre_exp(i)-spectre_fit(i))**2 
+    enddo
+    do i=3,12
+      difExp=difExp+(nivzero-spectre_exp(i))**2
+    enddo
+    do i=n-9,n
+      difExp=difExp+(nivzero-spectre_exp(i))**2
+    enddo
+    ! Ratio dispersion/absorption
+    daFit= n*sqrt(difFit/n)/sFit
+    daExp= n*sqrt(difExp/20.0_dp)/sExp
+  end subroutine spectres_absoption_dispersion
+  !=====================================================================
+  subroutine spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sTotal,nss,btmoy)
+  ! Calcul des moyennes des parametres hyperfins sur ns premiers spectres
+    integer,intent(in)::ns
+    integer,intent(in)::ns2
+    real(dp),intent(in)::s(44)
+    real(dp),intent(in)::sTotal
+    real(dp),intent(in)::bt(10,40)
+    integer,intent(out)::nss
+    real(dp),intent(out)::btmoy(7,2) ! bt(:,1) : moyenne arithmetique, bt(:,2) : moyenne quadratique
+    integer::i,nt
+      nss=ns
+      btmoy=0.0_dp
+      if(ns2/=0)nss=ns2
+      do i=1,7
+        select case(i)
+          case(1,4,5,7)
+            do nt=1,nss
+              btmoy(i,1)=btmoy(i,1)+bt(i,nt)*s(nt+2)/sTotal
+              btmoy(i,2)=btmoy(i,2)+(bt(i,nt)**2)*s(nt+2)/sTotal
+            enddo
+        end select
+      enddo
+  end subroutine spectres_moyennes_param_hyperfins
   !=====================================================================
   subroutine spectre_raz
     CN=0.078125_dp

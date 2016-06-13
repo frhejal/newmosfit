@@ -63,8 +63,13 @@ program mosfit
   real(dp)::AA(1600)
   real(dp)::dump ! variable-poubelle
   real(dp)::cmin=0,cmax=0
-  integer::nt,nts
+  integer::nt,nts,nss
+  real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
+  real(dp)::s(44)  ! Contributions des distributions (+4 cases vides)
+  real(dp)::sl(42)  ! Contributions lissées des distributions
+  real(dp)::sInt(40) ! Contributions intermediaires (=cumulées) 
+  real(dp)::btmoy(7,2) ! moyenne des parametres hyperfins sur les spectres choisis
   character(len=*),parameter::fichierOut='test.out'
   character(len=*),parameter::fichierGnuplot='test.dat'
   character(len=*),parameter::fichierResultats='test.doc'
@@ -144,6 +149,7 @@ program mosfit
       GA=BT(2,nt)
       H1=BT(3,nt)
       call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
+      write(NOUT,*) "cn=",CN,DI,GA,H1,N,nt,"ENE=",ENERGIES(1:2,nt),"INT=", INTENSITES(1:2,nt),"SSp=",SOUS_SPECTRES(1:2,nt)
     enddo
   endif
 !***********************************************************************
@@ -155,8 +161,15 @@ program mosfit
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
   ! Largeurs, hauteur et energie des raies
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
-  ! Absorptions des differents sous-spectres
-  call ecriture_rapports_absorption(NS,NS2,K,N,B,BT,Y,Q(:,K+2),BF,TY,HBRUIT)
+  ! Absorptions,moyenne et lissage des sous-spectres
+  if(IO(13)/=0)then
+    call spectres_lissage_distribution(NS,s,sl,sInt)
+    call spectres_absoption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
+    call spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sInt(NS),nss,btmoy)
+    call ecriture_absorption_dispersion(NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
+    call ecriture_lissage(NS,s,sl)
+    call ecriture_moyennes(nss,btmoy,' ')
+  endif
   ! Calcul du khi**2
   KHI2=ajustement_ecart_stat(K,N,Y,Q(:,K+2),POIDS)
   call ecriture_ecart_stat(KHI2)
@@ -176,7 +189,7 @@ program mosfit
       call spectres_total_sous_spectres(GRASS,nts)
     endif
     call ecriture_pour_gnuplot(N,nts,CN,Y,Q(:,K+2),TOTAL_SOUS_SPECTRES,fichierGnuplot)
-!~     call ecriture_resultat_resumes(fichierResultats)
+    call ecriture_resultats_resume(NS,nss,s,sl,BT,btmoy,fichierResultats)
   endif
   call ecriture_fin
   contains
