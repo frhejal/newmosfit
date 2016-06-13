@@ -244,7 +244,6 @@ module spectres
     sExp=1.0_dp
     sFit=0.0_dp
     sBruit=1.0_dp
-    write(6,*) b(K), TY, spectre_exp    
     do i=1,n
       sExp=sExp + b(k) - spectre_exp(i)
       sFit=sFit + b(k) - spectre_fit(i)
