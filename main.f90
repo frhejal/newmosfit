@@ -149,7 +149,6 @@ program mosfit
       GA=BT(2,nt)
       H1=BT(3,nt)
       call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
-      write(NOUT,*) "cn=",CN,DI,GA,H1,N,nt,"ENE=",ENERGIES(1:2,nt),"INT=", INTENSITES(1:2,nt),"SSp=",SOUS_SPECTRES(1:2,nt)
     enddo
   endif
 !***********************************************************************
@@ -162,11 +161,12 @@ program mosfit
   ! Largeurs, hauteur et energie des raies
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
   ! Absorptions,moyenne et lissage des sous-spectres
+  call spectres_absoption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
+  call spectres_contributions_distributions(NS,s,sInt)
+  call ecriture_absorption_dispersion_contributions(NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
   if(IO(13)/=0)then
-    call spectres_lissage_distribution(NS,s,sl,sInt)
-    call spectres_absoption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
+    call spectres_lissage_distribution(NS,s,sl)
     call spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sInt(NS),nss,btmoy)
-    call ecriture_absorption_dispersion(NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
     call ecriture_lissage(NS,s,sl)
     call ecriture_moyennes(nss,btmoy,' ')
   endif

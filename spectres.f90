@@ -74,7 +74,6 @@ module spectres
     gama=BT(8,nt)*RPD
     beta=BT(9,nt)*RPD
     alpha=BT(10,nt)*RPD 
-! /!\ ! ajouter ici une boucle sur theta si on ajoute une option cycloide (cf routine DIST modifiée )
     !Calcul du champ hyperfin------------------------------------------- 
     call hamiltonien_definition_champ_hyperfin(ch,teta,gama)
     !Calcul d'energie et intensités-------------------------------------
@@ -89,7 +88,9 @@ module spectres
   subroutine spectres_theorique_total
     ! calcul du spectre total et de ses derivees par rapport aux parametres variables,
     ! par appel répété de spectres_derivee (qui appelle spectres_theorique et l'habille avec des gaussiennes)
-    integer::nt
+    real(dp)::spectre(N)
+    real(dp)::spectre_theta(N)
+    integer::nt,ntheta
     integer::i,j
 !~     Q=0.0_dp
     ! remplissage initial du tableau de travail Q-----------------------
@@ -102,14 +103,35 @@ module spectres
     enddo
     ! calcul du spectre theorique---------------------------------------
     do nt=1,NS
-!~       call variablesAjustables_calculer_ecart_type(phi,nt,n) 
       call variablesAjustables_actualiser_rangement(nt)
       if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
-      call spectres_derivee(nt)
+      DI=BT(1,nt)
+      GA=BT(2,nt)
+      H1=BT(3,nt)
+      select case(IO(15))
+        case(0)!Cas classique-------------------------------------------
+          call spectres_theorique(nt)
+          call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+        case(1)!Cycloide------------------------------------------------
+          ntheta=50
+          do i=0,nTheta-1 !moyenne sur theta
+            BT(7,nt) = real(i)*2.0_dp*PI/nTheta
+            call spectres_theorique(nt)
+            call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre_theta)
+            spectre = spectre + spectre_theta
+          enddo
+          spectre = spectre/nTheta
+        case default! Erreur--------------------------------------------
+          stop "valeur de IO(15) inconnue"
+      end select
+      ! calcul des derivees du spectre theorique------------------------
+      call spectres_derivee(nt,spectre)
     enddo
+    !-------------------------------------------------------------------
     ! spectre theorique a present contenu dans Q(i,K+2) 
     ! matrice des coefficients de correlation  a present contenue dans Q(1:N,1:K)
     !             Q(i,j) = d(spectre[i])/dB[j]  
+    !-------------------------------------------------------------------
     !Spectre de bruit---------------------------------------------------
     if(IO(4)==1)then  ! ajout du spectre de bruit non ajustable
       do i=1,N
@@ -123,21 +145,14 @@ module spectres
     endif
   end subroutine spectres_theorique_total
   !=====================================================================
-  subroutine spectres_derivee(nt)
+  subroutine spectres_derivee(nt,spectre)
   ! calcule le spectre et le tableau des dérivées par rapport aux paramètres variables
     integer,intent(in)::nt ! numéro du sous-spectre
+    real(dp),intent(out)::spectre(N)
     integer::i,j,jj,l
     real(dp)::diff,di1,gb,pm
-    real(dp)::spectre(N),spectre0(N)
+    real(dp)::spectre0(N)
     real(dp)::derivee(2,N)
-!~     real(dp),intent(in)::phi
-      DI=BT(1,NT)
-      GA=BT(2,NT)
-      H1=BT(3,NT)
-      spectre=0.0_dp
-      !calcul de la fonction -------------------------------------------
-      call spectres_theorique(nt)
-      call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
       do i=1,N
         Q(i,K+2)=Q(i,K+2)-spectre(i)
       enddo
@@ -208,37 +223,6 @@ module spectres
       enddo
   end subroutine spectres_total_sous_spectres
   !=====================================================================
-  subroutine spectres_lissage_distribution(ns,s,sl,sInt)
-  !Calcul les contributions (surfaces) des sous-spectres et lisse la distribution
-    integer,intent(in)::ns
-    real(dp),intent(out)::s(44) ! distribution non lissée (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(out)::sl(42) !distribution lissée
-    real(dp),intent(out)::sInt(ns) !Somme intermediaire des surface
-    integer::i,nt
-    real(dp)::st
-    s=0.0_dp
-    st=0.0_dp
-    do nt=1,ns
-      s(nt+2)=abs(BT(2,nt)*BT(3,nt))
-      st=st+s(nt+2)
-    enddo
-    ! Contribution de chaque sous-spectre (en pourcent)
-    sInt=0.0_dp
-    s=100.0_dp*s/st
-    sInt(1)=s(3)
-    do nt=2,ns
-      sInt(nt)=sInt(nt-1)+s(nt+2)
-    enddo
-    !lissage
-    if (IO(13)/=0)then
-      s(1:2)=0.0_dp
-      s(ns+3:ns+4)=0.0_dp
-      do i=1,ns+2
-        sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
-      enddo
-    endif
-  end subroutine spectres_lissage_distribution
-  !=====================================================================
   subroutine spectres_absoption_dispersion(k,n,b,spectre_exp,spectre_fit,spectre_bruit,nivzero,hbruit,sExp,sFit,sBruit,daExp,daFit)
     integer,intent(in)::k
     integer,intent(in)::n
@@ -260,6 +244,7 @@ module spectres
     sExp=1.0_dp
     sFit=0.0_dp
     sBruit=1.0_dp
+    write(6,*) b(K), TY, spectre_exp    
     do i=1,n
       sExp=sExp + b(k) - spectre_exp(i)
       sFit=sFit + b(k) - spectre_fit(i)
@@ -281,6 +266,39 @@ module spectres
     daFit= n*sqrt(difFit/n)/sFit
     daExp= n*sqrt(difExp/20.0_dp)/sExp
   end subroutine spectres_absoption_dispersion
+  !=====================================================================
+  subroutine spectres_contributions_distributions(ns,s,sInt)
+  !calcul des contributions de chqeu sous-spectre
+    integer,intent(in)::ns
+    real(dp),intent(out)::s(44) ! distribution (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sInt(40)
+    integer::nt
+    real(dp)::st
+    s=0.0_dp
+    st=0.0_dp
+    do nt=1,ns
+      s(nt+2)=abs(BT(2,nt))*BT(3,nt)
+      st=st+s(nt+2)
+    enddo
+    ! Contribution de chaque sous-spectre (en pourcent)
+    sInt=0.0_dp
+    s=100.0_dp*s/st
+    sInt(1)=s(3)
+    do nt=2,ns
+      sInt(nt)=sInt(nt-1)+s(nt+2)
+    enddo
+  end subroutine spectres_contributions_distributions
+  !=====================================================================
+  subroutine spectres_lissage_distribution(ns,s,sl)
+  !Lissage des distributions
+    integer,intent(in)::ns
+    real(dp),intent(in)::s(44) ! distribution non lissée (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sl(42) !distribution lissée
+    integer::i
+      do i=1,ns+2
+        sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
+      enddo
+  end subroutine spectres_lissage_distribution
   !=====================================================================
   subroutine spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sTotal,nss,btmoy)
   ! Calcul des moyennes des parametres hyperfins sur ns premiers spectres

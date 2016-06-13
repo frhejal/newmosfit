@@ -164,7 +164,7 @@ module ecriture
     endif
   end subroutine ecriture_lissage
   !=====================================================================
-  subroutine ecriture_absorption_dispersion(ns,k,hbruit,daExp,daFit,sExp,sFit,sBruit,b,s,sInt)
+  subroutine ecriture_absorption_dispersion_contributions(ns,k,hbruit,daExp,daFit,sExp,sFit,sBruit,b,s,sInt)
   !ecriture des absoprtions/dispersions( surfaces relatives des spectres)
     integer,intent(in)::ns
     integer,intent(in)::k
@@ -189,7 +189,7 @@ module ecriture
     do nt=1,ns
       write(NOUT,'(30X," SPECTRE ",I2,10X,F6.2," %","  TOTAL ",10X,F6.2,/)')nt, s(nt+2),sInt(nt)
     enddo
-  end subroutine ecriture_absorption_dispersion
+  end subroutine ecriture_absorption_dispersion_contributions
   !=====================================================================
   subroutine ecriture_moyennes(nss,btmoy,dash)
     integer,intent(in)::nss

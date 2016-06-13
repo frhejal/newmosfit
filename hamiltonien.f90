@@ -20,16 +20,24 @@ module hamiltonien
   ! Toute modification du champ interne doit etre codée ici (exemple : dans le cas d'un champ cycloidal)
     real(dp),intent(in)::ch ! champ interne 
     real(dp),intent(in)::theta,gama !teta,gama angles polaires du champ interne dans les axes du gradient
-    real(dp)::sint,cost,sing,cosg
+    real(dp)::sint,cost,sing,cosg,rmh
     sint=sin(theta)  
     cost=cos(theta)  
     sing=sin(gama)
     cosg=cos(gama)
-!~     select case(io(...))     ajouter une option pour changer champ interne
-    HX=ch*sint*cosg
-    HY=ch*sint*sing
-    HZ=ch*cost
-!~     end select
+    select case(IO(15))
+    case(0)
+      HX=ch*sint*cosg
+      HY=ch*sint*sing
+      HZ=ch*cost
+    case(1)
+      rmh=(cost**2)+gama*(sint**2)
+      HZ=ch*rmh*cost
+      HX=ch*rmh*sint
+      HY=0.
+    case(2)
+      stop "valeur inconnue pour IO(15)"
+    end select
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
