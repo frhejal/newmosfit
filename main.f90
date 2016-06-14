@@ -50,6 +50,7 @@ program mosfit
 !***********************************************************************
   use precision
   use options         ! variables pour choix des options
+  use variablesFixes
   use variablesAjustables ! variables des parametres hyperfins
   use ajustement      ! moindres carres
   use lecture         ! routines de lecture du fichier .coo
@@ -59,7 +60,6 @@ program mosfit
   implicit none
 !***********************************************************************
   !variables locales----------------------------------------------------
-!~   integer::NMAX,NS1,NS2
   real(dp)::AA(1600)
   real(dp)::dump ! variable-poubelle
   real(dp)::cmin=0,cmax=0
@@ -68,7 +68,7 @@ program mosfit
   real(dp)::diffSpectres(N)
   real(dp)::s(44)  ! Contributions des distributions (+4 cases vides)
   real(dp)::sl(42)  ! Contributions lissées des distributions
-  real(dp)::sInt(40) ! Contributions intermediaires (=cumulées) 
+  real(dp)::sInt(40) ! Contributions intermediaires (=sommes cumulées) 
   real(dp)::btmoy(7,2) ! moyenne des parametres hyperfins sur les spectres choisis
   character(len=*),parameter::fichierOut='test.out'
   character(len=*),parameter::fichierGnuplot='test.dat'

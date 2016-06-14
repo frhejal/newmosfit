@@ -8,8 +8,10 @@ module spectres
   use algebre
   use hamiltonien
   use habillage
+  use variablesFixes
   use variablesAjustables
   use connex
+  
   implicit none
   integer,parameter::N=256 ! nombre de mesures par spectre
   real(dp)::Q(N,42) ! tableau de travail pour les moindres carres.
@@ -20,12 +22,7 @@ module spectres
   real(dp)::TOTAL_SOUS_SPECTRES(N,5) ! sommes des groupes de sous-spectres demandés par IO(17)
   real(dp)::ENERGIES(8,40)
   real(dp)::INTENSITES(8,40)
-  !variables lues en option
-  real(dp)::CN    ! largeur du canal (mm/s)
-  integer::NS ! nombre de sous-spectres theoriques utilisé pour l'ajustement d'un spectre experimental.
-  integer::NMAX   !
-  integer::NS1,NS2! On effectue une distribution de spectres entre NS1 et NS2
-  integer::GRASS(10) !plages de sous-spectres à sommer (si IO(17)=1)
+
   contains
   !=====================================================================
   subroutine spectres_preparer_bruit
@@ -324,11 +321,6 @@ module spectres
   end subroutine spectres_moyennes_param_hyperfins
   !=====================================================================
   subroutine spectre_raz
-    CN=0.078125_dp
-    NS=1
-    NS1=0
-    NS2=0
-    NMAX=0
     POIDS=1.0_dp
   end subroutine spectre_raz
 end module spectres

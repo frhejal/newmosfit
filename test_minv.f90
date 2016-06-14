@@ -15,7 +15,7 @@ write(6,*) "Inverse attendue :"
 call afficherMatrice(InvATrue,N)
 call mat2Vect(A,AA,N)
 write(6,*) "****CALCUL****"
-call minv(AA,N,d)
+call algebre_inverser_matrice(AA,N,d)
 write(6,*) "Matrice apres inversion :"
 call vect2mat(AA,A,N)
 call afficherMatrice(A,N)
@@ -31,7 +31,7 @@ call afficherMatrice(A,N)
 !~ call afficherMatrice(InvATrue,N)
 call mat2Vect(A,AA,N)
 write(6,*) "****CALCUL****"
-call minv(AA,N,d)
+call algebre_inverser_matrice(AA,N,d)
 write(6,*) "Determinant :", D
 if(abs(D)<1D-11) write(6,*) "LA MATRICE EST SINGULIERE ! (youpi)"
 

@@ -13,7 +13,7 @@ call afficherMatrice(A,N,N)
 call assembler(A,V,N,N,AA)
 write(6,*) "matrice A + second membre"
 call afficherMatrice(AA,N,N+1)
-call alsb(AA,3,3,1,K,erreur)
+call algebre_resoudre_systeme(AA,3,3,1,K,erreur)
 write(6,*) "inverse de A  + solutions"
 call afficherMatrice(AA,N,N+1)
 write(6,*) "indice d'erreur :", erreur

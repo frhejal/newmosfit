@@ -40,12 +40,12 @@ module ecriture
     real(dp),intent(in)::cn
     integer,intent(in)::nmax,ns,ns1,ns2
     integer::i
-    if(IZZ==1) print *, ' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
-    if(IOPT==1) print *, ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
-    print *, 'VITESSE PAR CANAL=', CN, ' NBRE DE COMPOSANTES =',ns
-    print *, 'NBRE MAX ITERATIO=', nmax
-    if(IO(4)/=0) print *, 'IL Y A UN SPECTRE DE BRUIT'
-    if(ns1/=0) print *, 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2
+    if(IZZ==1) write(NOUT,*)' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
+    if(IOPT==1) write(NOUT,'(1X,A,20(11X,I1))') ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
+    write(NOUT,'(1X,A,3X,F15.8,A,I4)') 'VITESSE PAR CANAL=', CN, ' NBRE DE COMPOSANTES =',ns
+    write(NOUT,*) 'NBRE MAX ITERATIO=', nmax
+    if(IO(4)/=0) write(NOUT,*) 'IL Y A UN SPECTRE DE BRUIT'
+    if(ns1/=0) write(NOUT,*) 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2
     if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
   end subroutine ecriture_options
   !=====================================================================
@@ -97,7 +97,7 @@ module ecriture
       write(NOUT,'(" ECART TYPE  ",10E12.3,//)') (etbt(i,nt),i=1,10)
       if(iogvt(nt)/=0)then
         write(NOUT,'(21X,"GVT(1)",8X,"GVT(2)",8X,"GVT(3)",8X,"GVT(4)",8X,"GVT(5) ",8X,"GVT(6)",8X,"GVT(7)",8X,"GVT(8)",/)'      ) 
-        write(NOUT,'(13X,8(8x,F6.4),/)') (gvt(i,nt),i=1,8)
+        write(NOUT,'(13X,8(8x,F7.4),/)') (gvt(i,nt),i=1,8)
         write(NOUT,'(" ECART TYPE  ",8(2X,E12.3),//)') (etgvt(i,nt),i=1,8)
       endif
     enddo
@@ -206,7 +206,7 @@ module ecriture
   !=====================================================================
   subroutine ecriture_ecart_stat(khi2)
     real(dp),intent(in)::khi2
-    write(NOUT,'("1",//,50X,"KHI2 = ",E13.8)') khi2
+    write(NOUT,'("1",//,50X,"KHI2 = ",E15.8)') khi2
   end subroutine ecriture_ecart_stat
   !=====================================================================
   subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cMin,cMax)

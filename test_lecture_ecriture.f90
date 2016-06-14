@@ -2,20 +2,17 @@ program test_lecture_ecriture
   use precision
   use lecture
   use ecriture
-!~   use options
+  use options
+!~   use spectres
   use variablesAjustables
   implicit none
-  
-  integer::NMAX,NS,NS1,NS2
-  real(dp)::GRASS(10)
   
 !~   character(len=*)::fichier_sortie='test.out'
 
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
-  call lecture_param( DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV)
   call ecriture_nommer_fichier_de_sortie('test.out')
-  call ecriture_titre
+  call ecriture_titre(0)
   call ecriture_options(CN,NMAX,NS,NS1,NS2)
   call ecriture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB)
   call lecture_param( DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV)
