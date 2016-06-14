@@ -244,7 +244,7 @@ module spectres
     do i=1,n
       sExp=sExp + b(k) - spectre_exp(i)
       sFit=sFit + b(k) - spectre_fit(i)
-      if(hbruit/=0) sBruit =sBruit-hbruit*spectre_bruit(i)
+      if(hbruit/=0.0_dp) sBruit =sBruit-hbruit*spectre_bruit(i) 
     enddo
     ! Surfaces exprimant la dispersion
     difFit=0.0_dp

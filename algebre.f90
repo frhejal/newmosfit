@@ -393,7 +393,7 @@ module algebre
                 yp=1.0_dp + abs(co)*abs(co)
                 sinus=1.0_dp/sqrt(yp)
                 cosinus=co*sinus
-                if(abs(cosinus)==0)then
+                if(abs(cosinus)==0.0_dp)then
                   ip=ip+1
                 else !goto 83
                   ip=0
@@ -453,7 +453,7 @@ module algebre
           endif
         enddo inner
         ! label 160
-        if(sinus==1.0_dp) exit outer
+        if(sinus==1.0_dp) exit outer ! Quelles chances que ça arrive ?
       enddo outer
     endif
     ! label 165
