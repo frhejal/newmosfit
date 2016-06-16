@@ -50,10 +50,10 @@ module variablesAjustables
   integer::MONOT(40)  !< Indication cristal/non cristal de chaque sous-spectre, cf. MONOC
   integer::IOGV       !<   IOGV   |      type d'ajustement des raies
                       !! --------:|-------------------------------------
-                      !!   0 | largeur unique pour toutes les raies (ajustable si NB(2)= 1 ou 2)
-                      !!   1 | spectre quadrupolaire à raies de largeurs differentes (2 largeurs independantes)
-                      !!   2 | spectre magnétique formé de 3 doublets symetriques d'entensité 3,2,1 (3 largeurs indépendantes)
-                      !!   3 | cas général
+                      !!        0 | largeur unique pour toutes les raies (ajustable si NB(2)= 1 ou 2)
+                      !!        1 | spectre quadrupolaire à raies de largeurs differentes (2 largeurs independantes)
+                      !!        2 | spectre magnétique formé de 3 doublets symetriques d'entensité 3,2,1 (3 largeurs indépendantes)
+                      !!        3 | cas général
   integer::IOGVT(40)  !< type d'ajustement des raies de chaque sous-spectre, cf IOGV
   ! PHF initiaux dans le cas d'une distribution arithmetique du spectre
   integer::NB0(10)!< Équivalent NB pour le premier sous-spectre de la distribution
@@ -65,16 +65,16 @@ module variablesAjustables
   real(dp)::PSQ   !< Increment de SQ
   real(dp)::TETA0 !< cf. DI0
   real(dp)::PTETA !< Increment de TETA
-  !PHF pour tout les spectre (une fois la lecture des données terminées)
+  ! PHF pour tout les spectre (une fois la lecture des données terminées)
   real(dp)::BT(10,40) !< Parametres hyper fins de tous les spectres (cf. DI à ALFA)
   real(dp)::ETBT(10,40)!< Ecart type de BT
   integer(dp)::NBT(10,40) !< Type d'ajustement des PHF de tous les spectres (cf. NB)
   integer ::IAD(10,40) !< IAD(i,n) = emplacement du PHF ajustable BT(i,n) dans B
-  !largeur des raies
-  integer::NG(8)      !<NG(i)| Ajustement des largeurs 
-                      !!----:|-------------------------
-                      !! 0   | pas d'ajustement de la ieme largeur , 
-                      !! 1   | ajustement de la ieme largeur , valeur initiale GV(i)
+  ! Largeur des raies
+  integer::NG(8)      !< NG(i)| Ajustement des largeurs 
+                      !! ----:|-------------------------
+                      !!  0   | pas d'ajustement de la ieme largeur , 
+                      !!  1   | ajustement de la ieme largeur , valeur initiale GV(i)
   real(dp)::GV(8)     !< GV(i)=valeur initiale de la ieme largeur, si NG(i)=1
   real(dp)::GVT(8,40) !< valeur des largeurs variables, pour tout les sous-spectres
   real(dp)::ETGVT(8,40)!< Ecart type de GVT
@@ -85,7 +85,6 @@ module variablesAjustables
   contains
   !=====================================================================
   !>@brief Mise à zero de toutes les variables du module variableAjustable
-  !>@callergraph @callgraph
   subroutine variablesAjustables_raz
       NB=0
       MONOC=0
@@ -184,7 +183,7 @@ module variablesAjustables
         IAD(i,nt) = IAD(i,nt-1)
       endif
     enddo
-    !rangement des largeurs variables dans GVT,NGT et B
+    ! Rangement des largeurs variables dans GVT,NGT et B
     do i=1,8
       if(k>40) stop erreur_kmax
       NGT(i,nt) = NG(i)
@@ -236,7 +235,7 @@ module variablesAjustables
   subroutine variablesAjustables_nivzer(spectre)
     real(dp),intent(in)::spectre(:)!< Une variable qui porte bien son nom.
     integer::i,ny
-    ny=size(Y)
+    ny=size(spectre)
     do i=2,11
       TY=TY+0.05_dp*spectre(i)
     enddo

@@ -205,7 +205,7 @@ module spectres
   !=====================================================================
   subroutine spectres_total_sous_spectres(grass,compteur)
     integer,intent(in)::grass(10) !groupes de sous-spectres à sommer
-    integer,intent(out)::compteur
+    integer,intent(out)::compteur !nombre de sous-spectres
     integer::i,nt
       TOTAL_SOUS_SPECTRES=0.0_dp
       compteur=0
@@ -297,7 +297,7 @@ module spectres
   end subroutine spectres_lissage_distribution
   !=====================================================================
   subroutine spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sTotal,nss,btmoy)
-  ! Calcul des moyennes des parametres hyperfins sur ns premiers spectres
+  ! Calcul des moyennes des parametres hyperfins sur ns (ou ns2) premiers spectres
     integer,intent(in)::ns
     integer,intent(in)::ns2
     real(dp),intent(in)::s(44)

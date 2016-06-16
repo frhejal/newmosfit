@@ -48,16 +48,18 @@ program mosfit
   real(dp)::AA(1600) 
   real(dp)::dump ! variable-poubelle
   real(dp)::cmin=0,cmax=0
-  integer::nt,nts,nss
+  integer::nt
+  integer::nts !Nombre de plages de sous-spectres à sommer
+  integer::nss
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
   real(dp)::s(44)
   real(dp)::sl(42)
   real(dp)::sInt(40) 
   real(dp)::btmoy(7,2)
-  character(len=*),parameter::fichierOut='test.out'
-  character(len=*),parameter::fichierGnuplot='test.dat'
-  character(len=*),parameter::fichierResultats='test.doc'
+  character(len=*),parameter::fichierOut='fit.out'
+  character(len=*),parameter::fichierGnuplot='Spect.dat'
+  character(len=*),parameter::fichierResultats='RESULTATS.doc'
   !initialisations------------------------------------------------------
   call raz
 !=======================================================================
@@ -179,7 +181,7 @@ program mosfit
   call ecriture_fin
   contains
 !***********************************************************************
-  !>@brief Appel des diverse fonctions de réinitialisation des variables
+  !>@brief Appel des diverses fonctions de réinitialisation des variables
   subroutine raz
     call options_raz
     call spectre_raz
