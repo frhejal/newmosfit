@@ -1,43 +1,48 @@
+!***********************************************************************
+!                              MODULE CONNEX
+!***********************************************************************
+!>@brief Ancienne routine CONNEX, laissée à la disposition de l'utilisateur.
+!> Permet a l'utilisateur d'imposer des relations entre les differentes composantes 
+!  du spectre  (intensités, parametres hyperfins...)
+!>
+!> Rappel des indices de BT(i,nt) :
+!>
+!>         nt = numero du sous-spectre
+!>         i  = identifiant du parametres hyperfin
+!>
+!>  parametre   | DI | GA | H1 | SQ | CH | ETA|TETA|GAMA|BETA|ALFA|
+!>--------------|----|----|----|----|----|----|----|----|----|----|
+!>  valeur de i |  1 |  2 | 3  | 4  | 5  |  6 | 7  | 8  | 9  | 10 |
 module connex
-!**********************************************************************
-!        Ancienne routine CONNEX, laissée à la disposition de l'utilisateur.
-! Permet a l utilisateur d'imposer des relations (intensités, parametres hyperfins,...)
-! entre les differentes composantes du spectre (Voir manuel).
-! Rappel des indices de BT(i,nt) :
-!         nt = numero du sous-spectre
-!         i  = identifiant du parametres hyperfin
-!   parametre  | DI GA H1 SQ CH ETA TETA GAMA BETA ALFA
-!  valeur de i |  1  2  3  4  5  6    7    8    9   10
-!......................................................................
-use precision
-IMPLICIT NONE  !!!  DECLAREZ VOS VARIABLES !
-contains
-  subroutine connex_connexions(BT,IO)
-    real(dp),intent(inout)::BT(10,40) 
-    integer,intent(in)::IO(20)
+  use precision
+  IMPLICIT NONE  !  DECLAREZ VOS VARIABLES !
+  contains
+  subroutine connex_connexions(bt,io)
+    real(dp),intent(inout)::bt(10,40) !<tableau des parametres ajustables pour chaque sous-spectre
+    integer,intent(in)::io(20)!< Liste d'options
     !=====================================================================
     !   DEBUT DE ZONE A MODIFIER  
     !=====================================================================
     integer::i
-    select case(IO(5))
+    select case(io(5))
       case(1)
     !  J.P  OXYDATION DU VERT                                           
-        BT(3,2)=0.63_dp*BT(2,1)*BT(3,1)/BT(2,2)
+        bt(3,2)=0.63_dp*bt(2,1)*bt(3,1)/bt(2,2)
       case(2)
     !  JACQUES
-        BT(3,2)=BT(2,1)*BT(3,1)/2./BT(2,2)
+        bt(3,2)=bt(2,1)*bt(3,1)/2./bt(2,2)
       case(3)
     !  FERRITES BEATRICE                                                
         do i=2,20
-          BT(1,i)=BT(1,1)+0.11_dp
+          bt(1,i)=bt(1,1)+0.11_dp
         enddo 
       case(4)
     !  JEAN-MARC
-        BT(3,3)=BT(2,1)*BT(3,1)/3.0_dp/BT(2,3)
+        bt(3,3)=bt(2,1)*bt(3,1)/3.0_dp/bt(2,3)
       case(5)
     ! GAETAN
-        BT(3,3)=BT(2,1)*BT(3,1)/3.0_dp/BT(2,3)
-        BT(3,4)=BT(2,6)*BT(3,6)/3.0_dp/BT(2,4)
+        bt(3,3)=bt(2,1)*bt(3,1)/3.0_dp/bt(2,3)
+        bt(3,4)=bt(2,6)*bt(3,6)/3.0_dp/bt(2,4)
       case (0) 
         print *, 'Un appel inutile à CONNEX a été fait'
       case default

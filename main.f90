@@ -1,4 +1,5 @@
-program mosfit
+!>@file 
+!!@brief Fichier contenant le programme principal
 !***********************************************************************
 !              __  __  ___  ____  _____ ___ _____ 
 !             |  \/  |/ _ \/ ___||  ___|_ _|_   _|
@@ -7,8 +8,8 @@ program mosfit
 !             |_|  |_|\___/|____/|_|   |___| |_|
 !
 !***********************************************************************
-!         FITTAGE THEORIQUE DE SPECTRES MOSSBAUER  FER 57/SN 119
-!                     VERSION  MAI  2016
+!>         Fittage theorique de spectres mossbauer  fer 57/sn 119,
+!>@version                  juin  2016
 ! MODIFICATIONS*********************************************************
 !
 ! INDIQUER DATE  NOM  MODIFICATION
@@ -27,27 +28,13 @@ program mosfit
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
 !    1995-2016 ??  ???
 !    MAI 2016 FL  REECRITURE EN FORTRAN 95
-!********************OPTIONS********************************************
-!    IO(1)=N  AJOUT N MILLIONS
-!    IO(2)=1  TRACE SUR LARGEUR 12OCX
-!    IO(3)=1  SN119
-!    IO(4)=1  HBRUIT NON AJUSTABLE
-!          2         AJUSTABLE
-!    IO(5)=N  CONNEXIONS PARAMETRES
-!    IO(6)=1  PERFORATION YEXP-YCALC
-!    IO(7)=1  PERFORATION YCALC
-!    IO(8)=1  X0,G,H,MATRICE DE VARIANCE COVARIANCE
-!    IO(9)=1  BETA=TETA ; ALFA=GAMA
-!    IO(10)=1  PAS DE SPECTRE EXPERIMENTAL
-!           2  MEME SPECTRE EXP QUE CAS PRECEDENT
-!    IO(11)=1  TRACE YEXP YCALC
-!    IO(12)=1  SORTIE BENSON
-!    IO(13)=1  DISTRIBUTION
-!    IO(14)=1  DISTRIBUTION avec tracé du diagramme en cartouches
-!    IO(16)=N  (N=NBRE DE SOUS CANAUX)  CONVOLUTION GAUSS*LORENZ
-!    IO(17)=1  TRACE DES SOUS-SPECTRES
-!    IO(20)=1  HORIZONTALISATION FOND CONTINU
 !***********************************************************************
+!>@param AA Matrice de Variance/covariance, stockée dans un vecteur
+!!@param s(44)  Contributions des distributions (+4 cases vides)
+!!@param sl(42)  Contributions lissées des distributions
+!!@param sInt(40) Contributions intermediaires (=sommes cumulées) 
+!!@param btmoy(7,2) moyenne des parametres hyperfins sur les spectres choisis
+program mosfit
   use precision
   use options         ! variables pour choix des options
   use variablesFixes
@@ -58,26 +45,24 @@ program mosfit
   use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
   use spectres         ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
   implicit none
-!***********************************************************************
-  !variables locales----------------------------------------------------
-  real(dp)::AA(1600)
+  real(dp)::AA(1600) 
   real(dp)::dump ! variable-poubelle
   real(dp)::cmin=0,cmax=0
   integer::nt,nts,nss
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
-  real(dp)::s(44)  ! Contributions des distributions (+4 cases vides)
-  real(dp)::sl(42)  ! Contributions lissées des distributions
-  real(dp)::sInt(40) ! Contributions intermediaires (=sommes cumulées) 
-  real(dp)::btmoy(7,2) ! moyenne des parametres hyperfins sur les spectres choisis
+  real(dp)::s(44)
+  real(dp)::sl(42)
+  real(dp)::sInt(40) 
+  real(dp)::btmoy(7,2)
   character(len=*),parameter::fichierOut='test.out'
   character(len=*),parameter::fichierGnuplot='test.dat'
   character(len=*),parameter::fichierResultats='test.doc'
   !initialisations------------------------------------------------------
   call raz
-!***********************************************************************
+!=======================================================================
 ! Entree des options et des données, copie dans le fichier de sortie
-!***********************************************************************
+!=======================================================================
   !Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
@@ -125,9 +110,9 @@ program mosfit
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
 !modification des poids pour canaux ignorés-----------------------------
   call spectres_poids(IZ)
-!***********************************************************************
+!=======================================================================
 ! Ajustement par moindres-carres
-!***********************************************************************
+!=======================================================================
   if(NMAX==0) then
     ! Pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
     call ecriture_info_iteration(NMAX,NMAX,B)
@@ -151,9 +136,9 @@ program mosfit
       call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
     enddo
   endif
-!***********************************************************************
+!=======================================================================
 ! Sorties
-!***********************************************************************
+!=======================================================================
   call ecriture_titre(1)
   call ecriture_titre(0)
   ! Ecarts type
@@ -193,9 +178,9 @@ program mosfit
   endif
   call ecriture_fin
   contains
-!=======================================================================
+!***********************************************************************
+  !>@brief Appel des diverse fonctions de réinitialisation des variables
   subroutine raz
-  ! Réinitialisation des variables
     call options_raz
     call spectre_raz
     call ajustement_raz
