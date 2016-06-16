@@ -23,7 +23,7 @@ module ecriture
     integer::option
     select case(option)
       case(0)
-        write(NOUT,'(A)') titre
+        write(NOUT,'(A)') TITRE
       case(1)
         write(NOUT,'(A)')'1'
       case(2)
@@ -42,7 +42,7 @@ module ecriture
     integer::i
     if(IZZ==1) write(NOUT,*)' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
     if(IOPT==1) write(NOUT,'(1X,A,20(11X,I1))') ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
-    write(NOUT,'(1X,A,3X,F15.8,A,I4)') 'VITESSE PAR CANAL=', CN, ' NBRE DE COMPOSANTES =',ns
+    write(NOUT,'(1X,A,3X,F15.8,A,I4)') 'VITESSE PAR CANAL=', cn, ' NBRE DE COMPOSANTES =',ns
     write(NOUT,*) 'NBRE MAX ITERATIO=', nmax
     if(IO(4)/=0) write(NOUT,*) 'IL Y A UN SPECTRE DE BRUIT'
     if(ns1/=0) write(NOUT,*) 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2

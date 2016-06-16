@@ -9,7 +9,7 @@ module options
   integer::IOPT   ! indique si des options sont spécifiées.
   integer::IZZ    ! indique si il y a des canaux à ignorer
   integer::IZ(10) ! plages de canaux a ignorer
-  character(len=256)::titre !en-tete du fichier .coo (date, echantillon, temperature, etc...)
+  character(len=256)::TITRE !en-tete du fichier .coo (date, echantillon, temperature, etc...)
 
   contains
   subroutine options_raz
@@ -18,6 +18,6 @@ module options
     IO=0
     IOPT=0
     IZZ=0
-    titre='Sans Titre'
+    TITRE='Sans Titre'
   end subroutine options_raz
 end module options

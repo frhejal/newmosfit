@@ -95,7 +95,7 @@ program mosfit
                                       &TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
-      if(IO(10)/=2) call variablesAjustables_raz0
+      if(IO(10)/=2) call variablesAjustables_raz_hyperfins
       call lecture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV )
       call ecriture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB)
     endif
@@ -200,6 +200,5 @@ program mosfit
     call spectre_raz
     call ajustement_raz
     call variablesAjustables_raz
-    call variablesAjustables_raz0
   end subroutine raz
 end program mosfit

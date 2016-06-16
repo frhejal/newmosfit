@@ -77,9 +77,20 @@ module variablesAjustables
   !gestion d'erreur
   character(len=*),parameter:: erreur_kmax='Nombre de parametres ajustables superieur à 40'
   contains
+
   !=====================================================================
   subroutine variablesAjustables_raz
-    !remise à zero des dernier PHF lus dans le fichier de donnee
+      NB=0
+      MONOC=0
+      B=0.0_dp
+      HBRUIT=0.0_dp
+      K=1
+      call variablesAjustables_raz_hyperfins
+      call variablesAjustables_raz0
+  end subroutine variablesAjustables_raz
+  !=====================================================================
+  subroutine variablesAjustables_raz_hyperfins
+      !remise à zero des dernier PHF lus dans le fichier de donnee
       DI=0.0_dp
       GA=0.1_dp
       H1=1.D5
@@ -92,12 +103,7 @@ module variablesAjustables
       ALFA=0.0_dp
       MONOC=0
       TY=0.0_dp
-      NB=0
-      MONOC=0
-      B=0.0_dp
-      HBRUIT=0.0_dp
-      K=1
-  end subroutine variablesAjustables_raz
+  end subroutine variablesAjustables_raz_hyperfins
   !=====================================================================
   subroutine variablesAjustables_raz0
       DI0=0.0_dp

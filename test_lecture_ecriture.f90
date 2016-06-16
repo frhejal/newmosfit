@@ -2,8 +2,8 @@ program test_lecture_ecriture
   use precision
   use lecture
   use ecriture
+  use variablesFixes
   use options
-!~   use spectres
   use variablesAjustables
   implicit none
   

@@ -21,8 +21,6 @@ module ajustement
   ! la fonction qui calcule le KHI**2
     real(dp),intent(in)::critere
     real(dp),save::oldB(40)
-!~     real(dp)::oldB(40)
-!~     real(dp)::petit=1.0D-12 ! pour eviter la division par zero
     real(dp)::petit=1.0D-5 ! pour eviter la division par zero
     logical::convergence
     if(  maxval(abs(B(1:K)-oldB(1:K))/(abs(B(1:K))+petit)) > CRITERE)  then
@@ -140,7 +138,7 @@ module ajustement
           enddo
         enddo
         do i=1,K
-          if (Q(i,i)==0.0_dp)then 
+          if (Q(i,i)==0.0_dp)then !Encore un cas tellement exceptionnel qu'il n'arrivera jamais
             ! la fonction est independante du parametre i
             call ecriture_fonction_independante(i)
             do m=1,K

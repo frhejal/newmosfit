@@ -1,22 +1,39 @@
-DEBUG=no
-CF = gfortran
+DEBUG = no
+COMPILER_UNIX = gfortran
+COMPILER_WIN = gfortran
+
 ifeq ($(DEBUG),yes)
-	CFLAGS= -Wall -W -g
-	LFLAGS=
+	CFLAGS = -Wall -W -g
+	LFLAGS =
 else
-	CFLAGS= 
-	LFLAGS=
+	CFLAGS = 
+	LFLAGS =
+endif
+# Pour faire fonctionner clean et mrproper dans windows :
+ifeq ($(OS),Windows_NT)
+	 CF = $(COMPILER_WIN)
+   RM = del /Q
+   #remplacement des slash par des antislash dans les chemins
+   FixPath = $(subst /,\,$1)
+   BIN = mosfit2016.exe
+else
+   ifeq ($(shell uname), Linux)
+			CF = $(COMPILER_UNIX)
+      RM = rm -f
+      FixPath = $1
+      BIN = mosfit2016
+   endif
 endif
 
 EXEC=main
 
-all: main test_minv.exec test_alsb.exec test_lecture_ecriture.exec
+all: mosfit test_minv.exec test_alsb.exec test_lecture_ecriture.exec
 ifeq ($(DEBUG),yes)
 	@echo "Génération en mode debug"
 endif
 
-main: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o variablesFixes.o
-	$(CF) $(LDLAGS) -o $@  $^
+mosfit: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o variablesFixes.o
+	$(CF) $(LDLAGS) -o $(BIN)  $^
 
 connex.o: precision.o
 
@@ -58,7 +75,7 @@ test_cegren.exec: test_cegren.f90 precision.o algebre.o old_cegren.o
 .PHONY: clean mrproper
 
 clean:
-	rm  *.o *.mod
+	 $(RM) $(call FixPath,*.o *.mod)
 
 mrproper: clean
-	rm  main
+	$(RM)  $(BIN)
