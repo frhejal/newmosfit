@@ -1,8 +1,12 @@
-module spectres
+!>@file
 !**********************************************************************
-!        module SPECTRE
-!        tableaux de données experimentales, theorique et de bruit.
-!    ..................................................................
+!                         MODULE SPECTRE
+!**********************************************************************
+!>@brief Gestion des donnees experimentales, theorique et de bruit, 
+!!  et calcul des spectres
+!!
+!!@version juin 2016
+module spectres
   use precision
   use options
   use algebre
@@ -13,29 +17,29 @@ module spectres
   use connex
   
   implicit none
-  integer,parameter::N=256 ! nombre de mesures par spectre
-  real(dp)::Q(N,42) ! tableau de travail pour les moindres carres.
-  real(dp)::Y(N)  ! Spectre experimental
-  real(dp)::BF(N) ! Spectre de bruit de fond
-  real(dp)::POIDS(N)  ! Poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
-  real(dp)::SOUS_SPECTRES(N,40) ! sous spectres calculés
-  real(dp)::TOTAL_SOUS_SPECTRES(N,5) ! sommes des groupes de sous-spectres demandés par IO(17)
-  real(dp)::ENERGIES(8,40)
-  real(dp)::INTENSITES(8,40)
+  integer,parameter::N=256 !< Nombre de mesures par spectre
+  real(dp)::Q(N,42) !< Tableau de travail pour les moindres carres.
+  real(dp)::Y(N)  !< Spectre experimental
+  real(dp)::BF(N) !< Spectre de bruit de fond
+  real(dp)::POIDS(N)  !< Poids statistique des canaux, si poids(i)=0 le canal i est ignoré.  
+  real(dp)::SOUS_SPECTRES(N,40) !< Sous-spectres calculés
+  real(dp)::TOTAL_SOUS_SPECTRES(N,5) !< Sommes des groupes de sous-spectres demandés par IO(17)
+  real(dp)::ENERGIES(8,40)  !< Energie des raies de tout les sous-spectres
+  real(dp)::INTENSITES(8,40)  ! intensité des raies de tout les sous-spectres 
 
   contains
   !=====================================================================
+  !>@brief  Retire le bruit moyen brumoy du spectre de bruit de fond BF
+  !>@details Le bruit moyen est la moyenne des 10 premieres mesures de BF
   subroutine spectres_preparer_bruit
-    ! retire le bruit moyen brumoy du spectre de bruit de fond BF
-    ! le bruit moyen est la moyenne des 10 premieres mesures de BF
-    real(dp)::brumoy
+    real(dp)::brumoy!< Bruit moyen 
     brumoy=0.1_dp*sum(BF(1:10))
     BF=BF-brumoy
   end subroutine spectres_preparer_bruit
   !=====================================================================
+  !@brief Met à zero le poids statistique des canaux à ignorer
   subroutine spectres_poids(iz)
-  ! met à zero le poids statistique des canaux à ignorer
-    integer,intent(in)::iz(10)
+    integer,intent(in)::iz(10)!< Liste des canaux à ignorer
     integer::i,kz
     canaux : do i=2,N
       do kz=1,9,2
@@ -47,14 +51,15 @@ module spectres
     enddo canaux
   end subroutine spectres_poids
   !=====================================================================
+  !>@brief Calcule le spectre theorique à partir des parametres hypers fins
   subroutine spectres_theorique(nt)
-  ! calcule le spectre theorique à partir des parametres hypers fins
-    !Choix du rapport gyromagnétique------------------------------------
-    integer,intent(in)::nt
-    real(dp)::ze,zf
+    integer,intent(in)::nt!< numéro du sous-spectre en cours de traitement
+    real(dp)::ze !rapport gyromagnétique de l'état fondamental
+    real(dp)::zf !rapport gyromagnétique de l'état excité
     real(dp)::sq,ch,eta,theta,gama,beta,alpha
-    real(dp)::wm
+    real(dp)::wm !paramètre cycloidal
     real(dp)::energ(8),intens(8)
+    !Choix du rapport gyromagnétique------------------------------------
     if(io(3)==0)then
       ! Fe57
       zf = 3.915_dp/330.0_dp 
@@ -64,7 +69,7 @@ module spectres
       zf = -0.08278_dp ! Unités : mm/s/kOe
       ze = 0.0180_dp
     endif
-    !recuperation des parametres hyperfins du module variableAjustalbles
+    !Recuperation des parametres hyperfins du module variableAjustalbles
     sq=BT(4,nt)
     ch=BT(5,nt)
     eta=BT(6,nt)
@@ -89,14 +94,14 @@ module spectres
     INTENSITES(1:8,nt) = intens(1:8)
   end subroutine spectres_theorique
   !=====================================================================
+  !>@brief Calcul du spectre total théorique et de ses derivees
+  !>@details Le spectre est calculé à partir des parametres hyperfins, via le calcul des
+  !> valeurs propres des hamiltonien de l'état excité et de l'état fondamental
   subroutine spectres_theorique_total
-    ! calcul du spectre total et de ses derivees par rapport aux parametres variables,
-    ! par appel répété de spectres_derivee (qui appelle spectres_theorique et l'habille avec des gaussiennes)
     real(dp)::spectre(N)
     integer::nt,ntheta
     integer::i,j
-!~     Q=0.0_dp
-    ! remplissage initial du tableau de travail Q-----------------------
+    ! Remplissage initial du tableau de travail Q-----------------------
     do i=1,N
       Q(i,K+2)=B(K) ! niveau moyen hors d'absorption
       Q(i,K)=1.0_dp
@@ -104,7 +109,7 @@ module spectres
         Q(i,j)=0.0_dp
       enddo
     enddo
-    ! calcul du spectre theorique---------------------------------------
+    ! Calcul du spectre théorique---------------------------------------
     do nt=1,NS
       call variablesAjustables_actualiser_rangement(nt)
       if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
@@ -113,20 +118,19 @@ module spectres
       H1=BT(3,nt)
       select case(IO(15))
         case(0)!Cas classique-------------------------------------------
-!~           write(6,*) "Utilisation du cas classique"
           call spectres_theorique(nt)
           call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
         case(1)!Cycloide------------------------------------------------
           call spectre_cycloide_theorique_et_habillage(nt,spectre)
-        case default! Erreur--------------------------------------------
+        case default! Gestion d'erreur----------------------------------
           stop "valeur de IO(15) inconnue"
       end select
-      ! calcul des derivees du spectre theorique------------------------
+      ! Calcul des derivées du spectre théorique------------------------
       call spectres_derivee(nt,spectre)
     enddo
     !-------------------------------------------------------------------
-    ! spectre theorique a present contenu dans Q(i,K+2) 
-    ! matrice des coefficients de correlation  a present contenue dans Q(1:N,1:K)
+    ! -Spectre theorique est à présent contenu dans Q(i,K+2) 
+    ! -Matrice des coefficients de correlation  a present contenue dans Q(1:N,1:K)
     !             Q(i,j) = d(spectre[i])/dB[j]  
     !-------------------------------------------------------------------
     !Spectre de bruit---------------------------------------------------
@@ -142,9 +146,12 @@ module spectres
     endif
   end subroutine spectres_theorique_total
   !=====================================================================
+  !>@brief Calcul du spectre théorique dans le cas des cycloides
+  !>@details Calcul un spectre moyen en effectuant un calcul de spectre théorique 
+  !! pour une cinquantaine de valeurs de theta autour du cercle.
   subroutine spectre_cycloide_theorique_et_habillage(nt,spectre)
-    integer,intent(in)::nt
-    real(dp),intent(out)::spectre(N)
+    integer,intent(in)::nt !<numéro du sous-spectre en cours de traitement
+    real(dp),intent(out)::spectre(N) !<sous-spectre théorique calculé
     real(dp)::spectre_theta(N)
     integer::i,ntheta
     ntheta=50
@@ -158,11 +165,12 @@ module spectres
     spectre = spectre/nTheta
   end subroutine spectre_cycloide_theorique_et_habillage
   !=====================================================================
-  
+  !>@brief Le tableau des dérivées du spectre par rapport aux paramètres variables
+  !>@details Le calcul des dérivées se fait en recalculant le spectre théorique avec de petites variations de 
+  !!la valeur des parametres
   subroutine spectres_derivee(nt,spectre)
-  ! calcule le spectre et le tableau des dérivées par rapport aux paramètres variables
-    integer,intent(in)::nt ! numéro du sous-spectre
-    real(dp),intent(out)::spectre(N)
+    integer,intent(in)::nt !< numéro du sous-spectre
+    real(dp),intent(out)::spectre(N)!< Spectre precedemment calculé
     integer::i,j,jj,l
     real(dp)::diff,di1,gb,pm
     real(dp)::spectre0(N)
@@ -171,19 +179,19 @@ module spectres
         Q(i,K+2)=Q(i,K+2)-spectre(i)
       enddo
       spectre0=spectre
-      !calcul des derivees par rapport aux largeurs variables-----------  
-      ! les derivees sont estimees par un petit deplacement diff de chaque parametre
+      !  Calcul des derivees par rapport aux largeurs variables---------
+      ! Les derivees sont estimees par un petit deplacement diff de chaque parametre
       do j=1,8
         if(NGT(j,nt) /=0) then
           l=IADG(j,nt)
-          diff=CN*1.0D-3 !element infiniment petit = 1/1000e d'un canal
+          diff=CN*1.0D-3 ! élément infiniment petit = 1/1000e d'un canal
           GVT(j,nt)=B(l)+diff !
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
           call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
           do i=1,N
             Q(i,l)=(spectre0(i)-spectre(i))/diff ! ecart sur le spectre engendre par l'ecart sur la largeur
           enddo
-          GVT(j,nt)=B(l) !retour à la valeur initiale de  la largeur
+          GVT(j,nt)=B(l) ! retour à la valeur initiale de  la largeur
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
         endif
       enddo

@@ -1,40 +1,30 @@
+!>@file
+!***********************************************************************
+!        				        MODULE ALGEBRE
+!***********************************************************************
+!>@brief   Routines de calcul algebrique
+!! 
+!!@version juin 2016
 !**********************************************************************
-!        MODULE ALGEBRE
-!        Contient les sousroutines MINV et ALSB
-!           MINV : Inverse une matrice N x N rangée dans un vecteur A
-!           ALSB : resoud un systeme lineaire
-!     ..................................................................
 module algebre
   use precision
   implicit none
   contains
-!---------------------------------------------------------------------
-!        SUBROUTINE MINV
-!        DESCRIPTION OF PARAMETERS
-!           A - INPUT MATRIX, DESTROYED IN COMPUTATION AND REPLACED BY
-!               RESULTANT INVERSE.
-!           N - ORDER OF MATRIX A
-!           D - RESULTANT DETERMINANT
-!           L - WORK VECTOR OF LENGTH N
-!           M - WORK VECTOR OF LENGTH N
-!
-!        REMARKS
-!           MATRIX A MUST BE A GENERAL MATRIX
-!        METHOD
-!           THE STANDARD GAUSS-JORDAN METHOD IS USED. THE DETERMINANT
-!           IS ALSO CALCULATED. A DETERMINANT OF ZERO INDICATES THAT
-!           THE MATRIX IS SINGULAR.
-!        Translated from MINV (F77) by F.L, may 2016
+!>@brief Inversion de matrice
+!>@details La matrice A doit etre une matrice générale, rangée dans un vecteur.
+!!@n Methode: La methode standard de Gauss-Jordan est utilisée. Le determinant est égalemement calculé.
+!! Un determinant nul indique que la matrice est singulière.
+!!
+!!Traduction en Fortran95 de la sous-routine F77 "MINV"
   subroutine algebre_inverser_matrice(A,N,D)
-    integer,intent(in)    :: N
-    real(dp),intent(inout):: A(N*N)
-    real(dp),intent(out)  :: D
+    real(dp),intent(inout):: A(N*N) !<Matrice a inverser,detruite et remplacée par son inverse
+    integer,intent(in)    :: N !< Ordre de la matrce A
+    real(dp),intent(out)  :: D !< Determinant resultant de l'inversion
     integer               :: I,IJ,IZ,IK,J,JI,JK,JP,JQ,JR,K,KI,KJ,KK,NK
     integer               :: L(N),M(N)
     real(dp)              :: BIGA, HOLD
-!        ...............................................................
-!        SEARCH FOR LARGEST ELEMENT
-!
+!=======================================================================
+! Recherche de l'élément le plus grand
     D=1.0_dp
     NK=-N
     do K=1,N                 ! Recherche du Kieme pivot
@@ -54,7 +44,7 @@ module algebre
           endif
         enddo
       enddo
-  !        INTERCHANGE ROWS
+  ! Echange des lignes
       J=L(K)
       if((J-K)>0) then
         KI=K-N
@@ -66,7 +56,7 @@ module algebre
           A(JI) =HOLD
         enddo
       endif
-  !        INTERCHANGE COLUMNS
+  ! Echange des colonnes
       I=M(K)
       if((I-K)>0)then
         JP=N*(I-1)
@@ -78,8 +68,7 @@ module algebre
           A(JI) =HOLD
         enddo
       endif
-  !        DIVIDE COLUMN BY MINUS PIVOT (VALUE OF PIVOT ELEMENT IS
-  !        CONTAINED IN BIGA)
+  ! Division de la colommn par l'opposé du pivot (Pivot contenu dans BIGA)
       if(ABS(BIGA).LE.1.E-5)then
         D=0.0
         return
@@ -90,7 +79,7 @@ module algebre
           A(IK)=A(IK)/(-BIGA)
         endif
       enddo
-  !        REDUCE MATRIX
+  ! Reduction de la matrice
       do I=1,N
         IK=NK+I
         HOLD=A(IK)
@@ -103,22 +92,18 @@ module algebre
           endif
         enddo
       enddo
-  !        DIVIDE ROW BY PIVOT
+  ! Division de la ligne par le pivot
       KJ=K-N
       do J=1,N
         KJ=KJ+N
         if( (J-K)  /=0 ) A(KJ)=A(KJ)/BIGA
       enddo
-  !     PRODUCT OF PIVOTS
-  !     D=D*BIGA        ! Aucune idee de l'utilite de ce truc
-  !
-  !        REPLACE PIVOT BY RECIPROCAL
-  !
+  ! Produit de pivot
+      D=D*BIGA 
+  ! Remplacement du pivot par l'inverse
       A(KK)=1.0/BIGA
     enddo
-  !
-  !        FINAL ROW AND COLUMN INTERCHANGE
-  !
+  ! Deplacement finale des lignes et des colonnes
     K=N-1
     do while(K>0)
       I=L(K)
@@ -148,23 +133,18 @@ module algebre
     enddo
     return
   end subroutine algebre_inverser_matrice
-!---------------------------------------------------------------------
-!        SUBROUTINE ALSB
-!   RESOLUTION DE SYSTEMES LINEAIRES A ELEMENTS REELS
-!   METHODE DU PIVOT DE GAUSS.
-!   A  MATRICE ET 2NDS MEMBRES (REMPLACES PAR LES SOLUTIONS)
-!   ID 1ERE DIMENSION DU BLOC A
-!   NA ORDRE DU SYSTEME
-!   M  NOMBRE DE 2NDS MEMBRES
-!   K  BLOC DE TRAVAIL
-!    IER 0 SI MATRICE NON SINGULIERE. 1 SI MATRICE SINGULIERE
-!      INTEGER NM NDEB
-!        Translated from F66/F77 by F.L, may 2016
+!=======================================================================
+!> @brief Résolution de systèmes linéaires à éléments réèls.
+!>@details Méthode du pivot de Gauss.
+!! Traduction en Fortran95 de la sous-routine F77 "ALSB"
+!!
   subroutine algebre_resoudre_systeme(A,ID,NA,M,K,IER)
-    integer,intent(in)    ::ID,NA,M
-    integer,intent(out)   ::IER
-    real(dp),intent(inout),dimension(ID,*)::A
-    integer,intent(inout),dimension(100)::K ! K permet de garder la trace des deplacements de ligne effectués
+    integer,intent(in)::ID !< 1ere dimension du bloc A
+    integer,intent(in)::NA  !<ordre du systeme
+    integer,intent(in)::M !< nombre de seconds membres
+    integer,intent(out)::IER !0 si matrice non singuliere, 1 si singulière
+    real(dp),intent(inout),dimension(ID,*)::A!< Matrice et second membres (remplacés par les solutions)
+    integer,intent(inout),dimension(100)::K !< K permet de garder la trace des deplacements de ligne effectués
     !variables locales :
     integer::I,I1,I2,I3,IN,it,J,J2,J3,JMAX,KC,MP,N,NAB,NDEB,NM
     real(dp)::AMAX,AUX,ERA,P,S,T
@@ -176,17 +156,17 @@ module algebre
     NDEB=N+1
     NM=N+M
     do i=1,N
-!     RECHERCHE DU PIVOT MAXIMUM
+! Recherche du pivot maximum
       AMAX=ABS(A(I,I))
       JMAX=I
       I1=I+1
       if(I <= N)then
-!   SELECTER DANS LA LIGNE I L'INDICE DE COLONNE JMAX DU TERME
-!   DE PLUS GRANDE VALEUR ABSOLUE AMAX PARMI LES TERMES
-!   SITUES A DROITE DE LA DIAGONALE
-!   SI , EN COURS DE TRIANGULARISATION , UN TERME DIAGONAL EST NUL
-!   AINSI QUE TOUS LES TERMES A SA DROITE ET DANS SA LIGNE ,
-!   LA MATRICE A EST SINGULIERE **********
+!   Selectionner dans la ligne I l'indice de colonne JMAX du terme
+!   de plus grande valeur absolue A parmi les termes
+!   situés a droite de la diagonale.
+!   Si , en cours de triangularisation , un terme diagonal est nul
+!   ainsi que tous les termes a sa droite et dans sa ligne ,
+!   la matrice A est singuliere.
         do J=I1,N
           if (AMAX <= ABS(A(I,J))  ) then
             AMAX=ABS(A(I,J))
@@ -194,13 +174,13 @@ module algebre
           endif
         enddo
       endif
-!     MATRICE SINGULIERE (PIVOT NUL)
+! Matrice singulière (pivot nul)
       if(AMAX==0) then
         IER=1
         write(6,*) ' MATRICE SINGULIERE'
         return
       endif
-!     TRANSPORT DE LA COLONNE
+! Transport de la colonne
       if(JMAX>I)then
         do I2=1,N
           AUX=A(I2,I)
@@ -208,7 +188,7 @@ module algebre
           A(I2,JMAX)=AUX
         enddo
       endif
-!     TEST SUR LA SINGULARITE DELA MATRICE
+!Test sur la singularité de la matrice
       if(I>1)then
         S=0.0
         T=0.0
@@ -225,15 +205,14 @@ module algebre
           return
         endif
       endif
-!     DIVISION PAR LE PIVOT
+!Division par le pivot
       do J2=I1,NM
         A(I,J2)=A(I,J2)/A(I,I)
       enddo
-!     SUBSTITUTION DES LIGNES
-!  SUBSTITUTION DES LIGNES
-!   DIVISER LES TERMES DE LA LIGNE I SITUES A DROITE DE LA
-!   DIAGONALE AINSI QUE LA I-EME COMPOSANTE DES SECONDS MEMBRES
-!   PAR LE TERME DE LA DIAGONALE
+!  Substitution des lignes
+!  Diviser les termes de la ligne i situés a droite de la
+!   diagonale ainsi que la i-eme composante des seconds membres
+!   par le terme de la diagonale
       if(I<N)then
         do I3=I1,N
           do J3=I1,NM
@@ -248,11 +227,11 @@ module algebre
         K(I)=NAB
       endif
     enddo
-    if(N == 1) return ! Pour eviter un plantage de l'agorithme pour I=J-1=0.
+    if(N == 1) return ! Pour éviter un plantage de l'agorithme pour I=J-1=0.
                       ! (Comme si on allait résoudre un systeme de rang 1 ...)
-!   CALCUL DES SOLUTIONS
-!   RESOLUTION DU SYSTEME TRIANGULAIRE
-!   VECTEUR SOLUTION REMPLACE VECTEUR SECOND MEMBRE
+! Calcul des solutions
+! Résolution du système triangulaire
+! Vecteur solution remplace vecteur second membre
       do KC=NDEB,NM
         do J=N, 2, -1
            do I=J-1, 1, -1
@@ -260,7 +239,7 @@ module algebre
            enddo
         enddo
       enddo
-!     CLASSEMENT DES SOLUTIONS
+! classement des solutions
       do I=1,N
         do while(K(I)>I)
           J=K(I)
@@ -275,22 +254,24 @@ module algebre
       enddo
     end subroutine algebre_resoudre_systeme
   !=====================================================================
+!>@brief Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
+!>@details En sortie, les valeurs propres sont sur la diagonale de a.
+!! Si mv = 0, les vecteurs prorpes sont calculés et placés dans les colonnes de r. 
+!! La matrice est de rang n, elle est stockée colonne par colonne dans un vecteur
+!! Traduction en Fortran95 de la sous-routine F77 "CEGREN"
+!Exemple: pour n=4, le vecteur  V = [ 1 2 3 4 5 6 7 8 9 10]  
+!   exemple: pour n=4, 
+!   le vecteur 
+!    V = [ 1 2 3 4 5 6 7 8 9 10]  
+!   code la matrice 4*4 :
+!    A = | 1  2  4  7 |
+!        | 0  3  5  8 |
+!        | 0  0  6  9 |
+!        | 0  0  0 10 |
+! 
+! les GOTO font reference à l'ancienne version F66 de mosfit, 
+! au cas où des courageux voudraient decrypter l'algorithme.
   subroutine algebre_eigenvalues(a,r,n,mv)
-  ! Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
-  ! En sortie, les valeurs propres sont sur la diagonale de a.
-  ! Si mv = 0, les vecteurs prorpes sont calculés et placés dans les colonnes de r. 
-  ! La matrice est de rang n, elle est stockée colonne par colonne dans un vecteur
-  !   exemple: pour n=4, 
-  !   le vecteur 
-  !    V = [ 1 2 3 4 5 6 7 8 9 10]  
-  !   code la matrice 4*4 :
-  !    A = | 1  2  4  7 |
-  !        | 0  3  5  8 |
-  !        | 0  0  6  9 |
-  !        | 0  0  0 10 |
-  ! 
-  ! les GOTO font reference à l'ancienne version F66 de mosfit, 
-  ! au cas où des courageux voudraient decrypter l'algorithme.
     integer,intent(in)::n,mv
     complex(dp),intent(inout)::a(10)
     complex(dp),intent(out)::r(16)
@@ -301,19 +282,19 @@ module algebre
     ip=0
     mvk=0
     if(mv/=1)then 
-      ! diagonale de R=1, le reste=0
+      ! Diagonale de R=1, le reste=0
       r=(0.0_dp,0.0_dp)
       do i=1,n
         ii= (i-1)*n + i
         r(ii)=(1.0_dp , 0.0_dp)
       enddo
     endif
-    !normalisation du plus grand terme de la diagonale
+    ! Normalisation du plus grand terme de la diagonale
     do i=1,n
       k=((i+1)*i)/2 !position sur la diagonale
       z=max(abs(a(k)),z)
     enddo
-    !normalisation du plus grand terme extradiagonal
+    ! Normalisation du plus grand terme extradiagonal
     zu=abs(a(2))
     do i=1,n-1
       do j=i+1,n
@@ -357,8 +338,8 @@ module algebre
           anorm=anorm+abs(a(k))*abs(a(k))
         enddo
       enddo
-!~       anorm=ROOT2*sqrt(anorm)
-      anorm=1.414*sqrt(anorm)
+      anorm=ROOT2*sqrt(anorm)
+!~       anorm=1.414*sqrt(anorm)
       anrmx=anorm*1.0D-7/real(n,dp)
       ind=0
       thr=anorm
@@ -489,12 +470,12 @@ module algebre
     endif
   end subroutine algebre_eigenvalues
   !=====================================================================
+  !>@brief Recopie les valeurs d'une matrice dans un vecteur, colonne par colonne.
   subroutine algebre_matrice_vers_vecteur(mat,vec,m,n)
-  ! Recopie les valeurs d'une matrice dans un vecteur, colonne par colonne.
     real(dp),intent(in)::mat(:,:)
     real(dp),intent(out)::vec(:)
-    integer,intent(in)::m ! nombre de lignes de la matrice
-    integer,intent(in)::n ! nombre de colonnes de la matrice
+    integer,intent(in)::m !< nombre de lignes de la matrice
+    integer,intent(in)::n !< nombre de colonnes de la matrice
     integer::i,j,ij
     if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
     if(m*n> size(vec,1)) stop "La matrice est trop grande pour etre contenue dans ce vecteur"
@@ -507,12 +488,12 @@ module algebre
     enddo
   end subroutine algebre_matrice_vers_vecteur
   !=====================================================================
+  !>@brief  Recopie les valeurs d'un vecteur dans une matrice, colonne par colonne.
   subroutine algebre_vecteur_vers_matrice(vec,mat,m,n)
-  ! Recopie les valeurs d'un vecteur dans une matrice, colonne par colonne.
     real(dp),intent(in)::vec(:)
     real(dp),intent(out)::mat(:,:)
-    integer,intent(in)::m ! nombre de lignes de la matrice
-    integer,intent(in)::n ! nombre de colonnes de la matrice
+    integer,intent(in)::m !< nombre de lignes de la matrice
+    integer,intent(in)::n !< nombre de colonnes de la matrice
     integer::i,j,ij
     if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
     if(m*n> size(vec,1)) stop "Le vecteur be correspond pas aux dimensions données pour la matrice"
@@ -525,5 +506,3 @@ module algebre
     enddo
   end subroutine algebre_vecteur_vers_matrice
 end module algebre
-!**********************************************************************
-!

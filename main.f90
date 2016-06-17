@@ -38,12 +38,12 @@ program mosfit
   use precision
   use options         ! variables pour choix des options
   use variablesFixes
-  use variablesAjustables ! variables des parametres hyperfins
-  use ajustement      ! moindres carres
-  use lecture         ! routines de lecture du fichier .coo
+  use variablesAjustables ! variables des parametres hyperfins  use lecture         ! routines de lecture du fichier .coo
+  use lecture
   use ecriture        ! routines d'ecriture du fichier résultat
   use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
   use spectres         ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
+  use ajustement      ! moindres carres
   implicit none
   real(dp)::AA(1600) 
   real(dp)::dump ! variable-poubelle
