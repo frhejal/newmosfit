@@ -119,7 +119,7 @@ module ajustement
         enddo
         do i=1,K
           do j=1,K
-            Q(j,K+2)=0.0_dp
+            q(j,K+2)=0.0_dp
             if(j>=i)then 
               do l=1,n
                 q(j,K+2)=q(j,K+2)+q(l,i)*q(l,j)*p(l)
@@ -138,8 +138,9 @@ module ajustement
           enddo
         enddo
         do i=1,K
-          if (Q(i,i)==0.0_dp)then !Encore un cas tellement exceptionnel qu'il n'arrivera jamais
+          if (q(i,i)==0.0_dp)then 
             ! la fonction est independante du parametre i
+            write(6,*) IAD
             call ecriture_fonction_independante(i)
             do m=1,K
               q(m,K+2)=y(m)

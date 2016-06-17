@@ -59,7 +59,7 @@ program mosfit
   real(dp)::btmoy(7,2)
   character(len=*),parameter::fichierOut='fit.out'
   character(len=*),parameter::fichierGnuplot='Spect.dat'
-  character(len=*),parameter::fichierResultats='RESULTATS.doc'
+  character(len=*),parameter::fichierResultats='RESULTAT.doc'
   !initialisations------------------------------------------------------
   call raz
 !=======================================================================
@@ -79,12 +79,12 @@ program mosfit
     if((NT>=NS1) .AND. (NT<=NS2))then
       ! Progression arithmetique demandee du sous-spectre NS1 au sous-spectre NS2
       if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,&
-                                      &TETA0,PTETA,GAMA,BETA,ALFA,MONOC,NB)
+                                      &THETA0,PTHETA,GAMA,BETA,ALPHA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
       if(IO(10)/=2) call variablesAjustables_raz_hyperfins
-      call lecture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB,IOGV )
-      call ecriture_param(DI,GA,H1,SQ,CH,ETA,TETA,GAMA,BETA,ALFA,MONOC,NB)
+      call lecture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV )
+      call ecriture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB)
     endif
     call variablesAjustables_definir_largeurs_raies
     ! Mise en tableau des parametres hyperfins et des largeurs variables

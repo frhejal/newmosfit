@@ -15,11 +15,12 @@ module hamiltonien
   
   contains
   
-  subroutine hamiltonien_definition_champ_hyperfin(ch,theta,gama)
+  subroutine hamiltonien_definition_champ_hyperfin(ch,theta,gama,wm)
   ! Definition du champ hyperfin
   ! Toute modification du champ interne doit etre codée ici (exemple : dans le cas d'un champ cycloidal)
     real(dp),intent(in)::ch ! champ interne 
     real(dp),intent(in)::theta,gama !teta,gama angles polaires du champ interne dans les axes du gradient
+    real(dp),intent(in)::wm !<Paramètre cycloidal Hperp/Hparallel
     real(dp)::sint,cost,sing,cosg,rmh
     sint=sin(theta)  
     cost=cos(theta)  
@@ -31,12 +32,13 @@ module hamiltonien
       HY=ch*sint*sing
       HZ=ch*cost
     case(1)
-      rmh=(cost**2)+gama*(sint**2)
+      rmh=(cost**2)+wm*(sint**2)
       HZ=ch*rmh*cost
       HX=ch*rmh*sint
       HY=0.
+!~       write(6,*)"theta=",theta," Wm=",wm, "rmh=", rmh, "HZ=", HZ, "HX=", HX
     case(2)
-      stop "valeur inconnue pour IO(15)"
+      stop "valeur de IO(15) inconnue"
     end select
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------

@@ -53,6 +53,7 @@ module spectres
     integer,intent(in)::nt
     real(dp)::ze,zf
     real(dp)::sq,ch,eta,theta,gama,beta,alpha
+    real(dp)::wm
     real(dp)::energ(8),intens(8)
     if(io(3)==0)then
       ! Fe57
@@ -68,11 +69,17 @@ module spectres
     ch=BT(5,nt)
     eta=BT(6,nt)
     theta=BT(7,nt)*RPD  ! les angles sont donnes en degres
-    gama=BT(8,nt)*RPD
+    if(IO(15)==0)then
+      gama=BT(8,nt)*RPD
+      wm=0.0_dp
+    else
+      gama=0.0_dp
+      wm=BT(8,nt)
+    endif
     beta=BT(9,nt)*RPD
     alpha=BT(10,nt)*RPD 
     !Calcul du champ hyperfin------------------------------------------- 
-    call hamiltonien_definition_champ_hyperfin(ch,teta,gama)
+    call hamiltonien_definition_champ_hyperfin(ch,theta,gama,wm)
     !Calcul d'energie et intensités-------------------------------------
     call hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
     !Calcul des energies par recherche des valeurs propres
@@ -86,7 +93,6 @@ module spectres
     ! calcul du spectre total et de ses derivees par rapport aux parametres variables,
     ! par appel répété de spectres_derivee (qui appelle spectres_theorique et l'habille avec des gaussiennes)
     real(dp)::spectre(N)
-    real(dp)::spectre_theta(N)
     integer::nt,ntheta
     integer::i,j
 !~     Q=0.0_dp
@@ -107,17 +113,11 @@ module spectres
       H1=BT(3,nt)
       select case(IO(15))
         case(0)!Cas classique-------------------------------------------
+!~           write(6,*) "Utilisation du cas classique"
           call spectres_theorique(nt)
           call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
         case(1)!Cycloide------------------------------------------------
-          ntheta=50
-          do i=0,nTheta-1 !moyenne sur theta
-            BT(7,nt) = real(i)*2.0_dp*PI/nTheta
-            call spectres_theorique(nt)
-            call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre_theta)
-            spectre = spectre + spectre_theta
-          enddo
-          spectre = spectre/nTheta
+          call spectre_cycloide_theorique_et_habillage(nt,spectre)
         case default! Erreur--------------------------------------------
           stop "valeur de IO(15) inconnue"
       end select
@@ -142,6 +142,23 @@ module spectres
     endif
   end subroutine spectres_theorique_total
   !=====================================================================
+  subroutine spectre_cycloide_theorique_et_habillage(nt,spectre)
+    integer,intent(in)::nt
+    real(dp),intent(out)::spectre(N)
+    real(dp)::spectre_theta(N)
+    integer::i,ntheta
+    ntheta=50
+    spectre=0.0_dp
+    do i=1,nTheta !moyenne sur theta
+      BT(7,nt) = real(i-1)*360.0/nTheta
+      call spectres_theorique(nt)
+      call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre_theta)
+      spectre = spectre + spectre_theta
+    enddo
+    spectre = spectre/nTheta
+  end subroutine spectre_cycloide_theorique_et_habillage
+  !=====================================================================
+  
   subroutine spectres_derivee(nt,spectre)
   ! calcule le spectre et le tableau des dérivées par rapport aux paramètres variables
     integer,intent(in)::nt ! numéro du sous-spectre
@@ -193,9 +210,13 @@ module spectres
             case(4:10) ! interaction quadrupolaire, champ interne, angles (tous sans unité)
               diff=pm*1.0D-2
               BT(j,nt)=BT(j,nt)+diff
-              call spectres_theorique(nt)
+              if(IO(15)==0)then
+                call spectres_theorique(nt)
+                call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
+              else
+                call spectre_cycloide_theorique_et_habillage(nt,spectre)
+              endif
               BT(j,nt)=BT(j,nt)-diff
-              call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
           end select
         enddo

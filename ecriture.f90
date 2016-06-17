@@ -62,8 +62,15 @@ module ecriture
     integer,intent(in)::nb(10)
     integer::i
     integer,save::cpt=0
-    if(cpt==0) write(NOUT,'(A)')  '   DI          GA          H1        SQ        &
+    if(cpt==0)then
+      if(IO(15)==0)then
+          write(NOUT,'(A)')  '   DI          GA          H1        SQ        &
                &CH       ETA      TETA      GAMA      BETA      ALFA    MONOC '
+      else
+          write(NOUT,'(A)')  '   DI          GA          H1        SQ        &
+               &CH       ETA      TETA       WM      BETA      ALFA    MONOC '
+      endif
+    endif
     write(NOUT, '(2(F8.3,2X),F11.2,7(2X,F8.3),3X,I4)' ) di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc
     write(NOUT,'(10(5X,I3,2X))')(nb(i), i=1,10)
     cpt=cpt+1
@@ -97,15 +104,32 @@ module ecriture
     integer,intent(in)::iogvt(40)
     integer::i,nt
     write(NOUT,'(//,50X,A,//)') 'CARACTERISTIQUES DES SPECTRES'
-    write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')
-    write(NOUT,'(1X,20X,"MMS",8X,"MMS",8X,"COUPS",6X,"MMS",9X,"KG",25X,"DEG",23X,"DEG",8X,///)')
+    if(IO(15)==0)then
+      write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')
+      write(NOUT,'(1X,20X,"MMS",8X,"MMS",8X,"COUPS",6X,"MMS",9X,"KG",25X,"DEG",23X,"DEG",8X,///)')
+    else
+      write(NOUT,'(1X,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",11X,"WM",9X,"BETA",9X,"ALFA",/)')
+      write(NOUT,'(1X,20X,"MMS",8X,"MMS",8X,"COUPS",6X,"MMS",9X,"KG",11X,"SANS DIMENSION",15X,"DEG",8X,///)')
+    endif
     do nt=1,ns
-      write(NOUT,'(//," SPECTRE ",I2,2X,10F12.3,/)') nt,(bt(i,nt),i=1,10)
-      write(NOUT,'(" ECART TYPE  ",10E12.3,//)') (etbt(i,nt),i=1,10)
+      if(IO(15)==0)then
+        write(NOUT,'(//," SPECTRE ",I2,2X,10F12.3,/)') nt,(bt(i,nt),i=1,10)
+        write(NOUT,'(" ECART TYPE  ",10E12.3,//)') (etbt(i,nt),i=1,10)
+      else
+        write(6,*)bt(i,8), bt(i,9)
+        write(NOUT,'(//," SPECTRE ",I2,2X,6F12.3,F12.3,2F12.3,/)') nt,(bt(i,nt),i=1,6),(bt(i,nt),i=8,10)
+        write(NOUT,'(" ECART TYPE  ",9E12.3,//)') (etbt(i,nt),i=1,6),(etbt(i,nt),i=8,10)
+      endif
       if(iogvt(nt)/=0)then
-        write(NOUT,'(21X,"GVT(1)",8X,"GVT(2)",8X,"GVT(3)",8X,"GVT(4)",8X,"GVT(5) ",8X,"GVT(6)",8X,"GVT(7)",8X,"GVT(8)",/)'      ) 
-        write(NOUT,'(13X,8(8x,F7.4),/)') (gvt(i,nt),i=1,8)
-        write(NOUT,'(" ECART TYPE  ",8(2X,E12.3),//)') (etgvt(i,nt),i=1,8)
+        if(IO(15)==0)then
+          write(NOUT,'(21X,"GVT(1)",8X,"GVT(2)",8X,"GVT(3)",8X,"GVT(4)",8X,"GVT(5) ",8X,"GVT(6)",8X,"GVT(7)",8X,"GVT(8)",/)'      ) 
+          write(NOUT,'(13X,8(8x,F7.4),/)') (gvt(i,nt),i=1,8)
+          write(NOUT,'(" ECART TYPE  ",8(2X,E12.3),//)') (etgvt(i,nt),i=1,8)
+        else
+          write(NOUT,'(21X,"GVT(1)",8X,"GVT(2)",8X,"GVT(3)",8X,"GVT(4)",8X,"GVT(5) ",8X,"GVT(7)",8X,"GVT(8)",/)'      ) 
+          write(NOUT,'(13X,8(8x,F7.4),/)') (gvt(i,nt),i=1,6),gvt(8,nt)
+          write(NOUT,'(" ECART TYPE  ",8(2X,E12.3),//)') (etgvt(i,nt),i=1,5),etgvt(8,nt)
+        endif
       endif
     enddo
   end subroutine ecriture_ecart_type
@@ -203,11 +227,19 @@ module ecriture
     real(dp),intent(in)::btmoy(7,2)
     character,intent(in)::dash(1)
     integer::i
-	write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
-	write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
-							&"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')dash
-	write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
-	write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+    if(IO(15)==0)then
+      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
+      write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
+                  &"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')dash
+      write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
+      write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+    else
+      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
+      write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
+                  &"TETA",9X,"WM",9X,"BETA",9X,"ALFA",/)')dash
+      write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
+      write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+    endif
   end subroutine ecriture_moyennes
   !=====================================================================
   !>@brief Ecriture de l'écart statistique "Khi"
@@ -294,7 +326,7 @@ module ecriture
     NOUT=NoutSave
   end subroutine ecriture_pour_gnuplot
   !=====================================================================
-  !>@brief Ecriture resumée des resultats
+  !>@brief Ecriture d'un resumée des resultats dans le fichier RESULTAT.doc
   subroutine ecriture_resultats_resume(ns,nss,s,sl,bt,btmoy,nom)
     integer,intent(in)::ns !<nombre de sous-spectres
     integer,intent(in)::nss !< nombre de sous-spectres sommés
@@ -309,12 +341,21 @@ module ecriture
     open(NOUT,file=trim(nom), status='unknown', form='formatted')
     call ecriture_titre(0)
     write(NOUT,'(//,"#",50X,"CARACTERISTIQUES DES SPECTRES",//)') 
-    write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"GAMA",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
-    write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",25X,"DEG",19X,"DEG",16X," % ",/)')
-    do nt=1,ns
-      write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
-                                                                            & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
-    enddo
+    if(IO(15)==0)then
+      write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"GAMA",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
+      write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",25X,"DEG",19X,"DEG",16X," % ",/)')
+      do nt=1,ns
+        write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
+                                                                              & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
+      enddo
+    else
+      write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"WM",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
+      write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",19X,"DEG",8X,"adim",10X,"DEG",16X," % ",/)')
+      do nt=1,ns
+        write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
+                                                                              & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
+      enddo
+    endif
     do i=1,ns+2
       write(NOUT,*)i,sl(i)
     enddo

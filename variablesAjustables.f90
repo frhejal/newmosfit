@@ -27,10 +27,10 @@ module variablesAjustables
   real(dp)::SQ    !< interaction quadrupolaire
   real(dp)::CH    !< champ interne (kOe)
   real(dp)::ETA   !< parametre d'asymétrie
-  real(dp)::TETA  !< TETA et GAMA :    angles polaires du chp interne
+  real(dp)::THETA  !< TETA et GAMA :    angles polaires du chp interne
   real(dp)::GAMA  !<   dans les axes principaux du gradient (degres)
   real(dp)::BETA  !<  ALFA et BETA : angles polaires de la direction du
-  real(dp)::ALFA  !<         rayonnement (meme axes que pour ETA, THETA)
+  real(dp)::ALPHA  !<         rayonnement (meme axes que pour ETA, THETA)
   real(dp)::TY    !< niveau moyen hors d'absorption
   integer::NB(10) !< Type d'ajustement des 10 paramètres hyperfins (pour le sous-spectre en cours de lecture)
                   !! exemple | signification 
@@ -63,8 +63,8 @@ module variablesAjustables
   real(dp)::PCH   !< Increment de CH
   real(dp)::SQ0   !< cf. DI0
   real(dp)::PSQ   !< Increment de SQ
-  real(dp)::TETA0 !< cf. DI0
-  real(dp)::PTETA !< Increment de TETA
+  real(dp)::THETA0 !< cf. DI0
+  real(dp)::PTHETA !< Increment de TETA
   ! PHF pour tout les spectre (une fois la lecture des données terminées)
   real(dp)::BT(10,40) !< Parametres hyper fins de tous les spectres (cf. DI à ALFA)
   real(dp)::ETBT(10,40)!< Ecart type de BT
@@ -103,10 +103,10 @@ module variablesAjustables
       SQ=0.0_dp
       CH=0.0_dp
       ETA=0.0_dp
-      TETA=0.0_dp
+      THETA=0.0_dp
       GAMA=0.0_dp
       BETA=0.0_dp
-      ALFA=0.0_dp
+      ALPHA=0.0_dp
       MONOC=0
       TY=0.0_dp
   end subroutine variablesAjustables_raz_hyperfins
@@ -119,8 +119,8 @@ module variablesAjustables
       PCH=0.0_dp
       SQ0=0.0_dp
       PSQ=0.0_dp
-      TETA0=0.0_dp
-      PTETA=0.0_dp
+      THETA0=0.0_dp
+      PTHETA=0.0_dp
       NB0=0
   end subroutine variablesAjustables_raz0
   !=====================================================================
@@ -133,7 +133,7 @@ module variablesAjustables
       DI=DI0+step*PDI
       SQ=SQ0+step*PSQ
       CH=CH0+step*PCH
-      TETA=TETA0+step*PTETA
+      THETA=THETA0+step*PTHETA
       IOGV=0
   end subroutine variablesAjustables_super
   !=====================================================================
@@ -165,10 +165,10 @@ module variablesAjustables
     BT(4,nt)=SQ
     BT(5,nt)=CH
     BT(6,nt)=ETA
-    BT(7,nt)=TETA
+    BT(7,nt)=THETA
     BT(8,nt)=GAMA
     BT(9,nt)=BETA
-    BT(10,nt)=ALFA
+    BT(10,nt)=ALPHA
     MONOT(nt)=MONOC
     IOGVT(nt)=IOGV
     ! Rangement dans B (parametres ajustables)
