@@ -16,14 +16,14 @@ module lecture
   !>@brief Ouverture du fichier donné en argument
   !>@details Les fichiers de sortie sont nommés en fonction du nom du fichier d'entrée
   subroutine lecture_ouvrir_fichier(fichierOut,fichierDat,fichierDoc)
-    character(len=*),intent(out)::fichierOut
-    character(len=*),intent(out)::fichierDat
-    character(len=*),intent(out)::fichierDoc
+    character(len=*),intent(out)::fichierOut!<fichier de sortie complet
+    character(len=*),intent(out)::fichierDat!<fichiers de donnes des spectrees (pour tracé eventuel)
+    character(len=*),intent(out)::fichierDoc!<fichier de resumé des résultats
     character(len=255)::fichier
     integer::taille
     call get_command_argument(1,fichier)
     taille=len_trim(fichier)
-    if(len_trim(fichier)/=0)then
+    if(taille/=0)then
       open(NIN,file=fichier,status="unknown",form="formatted", access="sequential")
       fichierOut=fichier
       fichierDoc=fichier

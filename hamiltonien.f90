@@ -1,26 +1,34 @@
+!>@file
+!***********************************************************************
+!                         MODULE HAMILTONIEN
+!***********************************************************************
+!>@rief définition du champ interne utilisé et résolution de l'hamiltonien
+!>@details Calcul des énergie et des fonctions d'onde des états fondamentaux et excités
+!>@version juin 2016
 module hamiltonien
-!**********************************************************************
-!       module hamiltonien
-!       Définition du champ interne utilisé,
-!
-!       et des parametres ajustables (largeur de raie, hbruit)
-!......................................................................
   use precision
   use options
   use algebre
   implicit none
-  real(dp)::HX,HY,HZ    ! Champ hyperfin
-  complex(dp)::hamilF(10),hamilE(10) !hamiltoniens / valeurs propres (sur la diagonale, apres appel de CEGREN)
-  complex(dp)::fctF(16),fctE(16)   ! fonctions d'onde etat fondamental/excité
+  real(dp)::HX    !< Champ hyperfin, composante selon x
+  real(dp)::HY    !< Champ hyperfin, composante selon y
+  real(dp)::HZ    !< Champ hyperfin, composante selon z
+  complex(dp)::hamilF(10) !<Etat fondamental :hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
+  complex(dp)::hamilE(10) !<Etat excité hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
+  complex(dp)::fctF(16)!< fonction d'onde etat fondamental
+  complex(dp)::fctE(16)!< fonction d'onde etat excité
   
   contains
-  
+  !---------------------------------------------------------------------
+  !> @brief Définition du champ hyperfin
+  !> @details Les valeurs de Hx, Hy, Hz sont calculées en fonction de l'amplitude CH du champ,
+  !! des angles polaires (theta, gamma) dans les axes du gradient, oud e l'angle theta et du parametre cycloidal Wm
+  !! dans le cas d'un cycloide
   subroutine hamiltonien_definition_champ_hyperfin(ch,theta,gama,wm)
-  ! Definition du champ hyperfin
-  ! Toute modification du champ interne doit etre codée ici (exemple : dans le cas d'un champ cycloidal)
-    real(dp),intent(in)::ch ! champ interne 
-    real(dp),intent(in)::theta,gama !teta,gama angles polaires du champ interne dans les axes du gradient
-    real(dp),intent(in)::wm !<Paramètre cycloidal Hperp/Hparallel
+    real(dp),intent(in)::ch !< intensité du champ interne 
+    real(dp),intent(in)::theta !< angle polaire du champ interne par rapport à l'axe Z
+    real(dp),intent(in)::gama !< angle polaire du champ interne par rapport à l'axe X
+    real(dp),intent(in)::wm !<Paramètre cycloidal Hperp/Hz (Hper = dans le plan OXY)
     real(dp)::sint,cost,sing,cosg,rmh
     sint=sin(theta)  
     cost=cos(theta)  
@@ -36,17 +44,18 @@ module hamiltonien
       HZ=ch*rmh*cost
       HX=ch*rmh*sint
       HY=0.
-!~       write(6,*)"theta=",theta," Wm=",wm, "rmh=", rmh, "HZ=", HZ, "HX=", HX
     case(2)
       stop "valeur de IO(15) inconnue"
     end select
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------
+  !>@brief Calcul des hamiltoniens des états fondametaux et excités, recherche de leurs valeurs propres
+  !>@details Les équations correspondantes proviennent de la thèse de F.Varret (1972),chap 4
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
-  ! calcul des hamiltoniens des etats fondametaux et excités, recherche de leurs valeurs propres
-    real(dp),intent(in)::ze,zf ! rapports gyromagnétiques de l'element étudié
-    real(dp),intent(in)::sq !interaction quadripolaire
-    real(dp),intent(in)::eta !
+    real(dp),intent(in)::ze !< Rapport gyromagnétiques de l'état excité
+    real(dp),intent(in)::zf !< Rapport gyromagnétiques de l'état fondamental
+    real(dp),intent(in)::sq !< Interaction quadripolaire
+    real(dp),intent(in)::eta !< Paramètre d'asymétrie
     real(dp)::Q
     !Etats fondamentaux-------------------------------------------------
     hamilF=(0.0_dp,0.0_dp)
@@ -71,9 +80,9 @@ module hamiltonien
     call algebre_eigenvalues(hamilE,fctE,4,0)
   endsubroutine hamiltonien_calculer_fonction_onde
   !---------------------------------------------------------------------
+  !>@brief Calcul des energies de transition
+  !>@details Simples differences entre les niveaux d'énérgie fondamentaux et excités
   subroutine hamiltonien_energies(energies)  
-  ! calcul des energies de transition
-  ! simple différence d'energies
     real(dp),intent(out)::energies(8)
     integer::i,ii,j,jj,k
     k=0
@@ -87,12 +96,15 @@ module hamiltonien
     enddo
   end subroutine hamiltonien_energies
   !---------------------------------------------------------------------
+  !> @brief Calcul des intensités des raies
+  !> @details On utilise les matrices tMm, tMp et tM0,  
+  !> contenant des coefficients de Glebsch Gordon.
+  !> @n  cf. thèse de F.Varret (1972),chap 4
   subroutine hamiltonien_intensites(alpha,beta,monoc,intensites)
-  ! calcul des intensités, utilisant les matrices de tMm tMp et tM0,  
-  ! contenant des coefficients de Glebsch Gordon
-    integer,intent(in)::monoc ! option poudre (0) ou monocristal (1)
-    real(dp),intent(in)::alpha,beta !angles polaires de la direction du rayonnement
-    real(dp),intent(out)::intensites(8)
+    integer,intent(in)::monoc !< option poudre (0) ou monocristal (1)
+    real(dp),intent(in)::alpha !< angle polaire dans la direction du rayonnement (par rapport à l'axe X)
+    real(dp),intent(in)::beta  !< angle polaire dans la direction du rayonnement (par rapport à l'axe Z)
+    real(dp),intent(out)::intensites(8) !intensité des raies calculées
     integer::i,ii,ik,il,j,jj,jk,jl,k
     real(dp)::cosa,cosb,sina,sinb
     complex(dp)::cu,ap,am,a0

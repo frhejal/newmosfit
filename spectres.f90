@@ -1,7 +1,7 @@
 !>@file
-!**********************************************************************
+!***********************************************************************
 !                         MODULE SPECTRE
-!**********************************************************************
+!***********************************************************************
 !>@brief Gestion des donnees experimentales, theorique et de bruit, 
 !!  et calcul des spectres
 !!
@@ -25,7 +25,7 @@ module spectres
   real(dp)::SOUS_SPECTRES(N,40) !< Sous-spectres calculés
   real(dp)::TOTAL_SOUS_SPECTRES(N,5) !< Sommes des groupes de sous-spectres demandés par IO(17)
   real(dp)::ENERGIES(8,40)  !< Energie des raies de tout les sous-spectres
-  real(dp)::INTENSITES(8,40)  ! intensité des raies de tout les sous-spectres 
+  real(dp)::INTENSITES(8,40)  !< Intensité des raies de tout les sous-spectres 
 
   contains
   !=====================================================================
@@ -307,11 +307,11 @@ module spectres
     daExp= n*sqrt(difExp/20.0_dp)/sExp
   end subroutine spectres_absorption_dispersion
   !=====================================================================
-  !>@brief Calcul des contributions de chaque distributions de sous-spectres par rapport au spectre total.
-  !> Les contributions sont calculées sous forme de surfaces hauteur*largeur
+  !>@brief Calcul des contributions de chaque groupe de sous-spectres par rapport au spectre total.
+  !> Les contributions sont calculées sous forme de surfaces (hauteur*largeur)
   subroutine spectres_contributions_distributions(ns,s,sInt)
     integer,intent(in)::ns
-    real(dp),intent(out)::s(44) !< contributions des distributions (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::s(44) !< contributions des groupes de sous-spectres (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
     real(dp),intent(out)::sInt(40)!< cumul des contributions, Sint(nt) est la somme des contributions des nt premiers spectres
     integer::nt
     real(dp)::st
@@ -330,25 +330,26 @@ module spectres
     enddo
   end subroutine spectres_contributions_distributions
   !=====================================================================
+  !<@brief Laissage des distributions
   subroutine spectres_lissage_distribution(ns,s,sl)
-  !Lissage des distributions
-    integer,intent(in)::ns
-    real(dp),intent(in)::s(44) ! distribution non lissée (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(out)::sl(42) !distribution lissée
+    integer,intent(in)::ns !< nombre de sous-spectres
+    real(dp),intent(in)::s(44) !< distributions non lissées (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sl(42) !<distributions lissées
     integer::i
       do i=1,ns+2
         sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
       enddo
   end subroutine spectres_lissage_distribution
   !=====================================================================
+  !<@brief Calcul des moyennes des parametres hyperfins sur ns (ou ns2) premiers spectres
+  !@details on calcule des moyennes arithmétiques et algébriques, pondérées par la contribution des sous-spectres
   subroutine spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sTotal,nss,btmoy)
-  ! Calcul des moyennes des parametres hyperfins sur ns (ou ns2) premiers spectres
-    integer,intent(in)::ns
-    integer,intent(in)::ns2
-    real(dp),intent(in)::s(44)
-    real(dp),intent(in)::sTotal
-    real(dp),intent(in)::bt(10,40)
-    integer,intent(out)::nss
+    integer,intent(in)::ns !< Nombre de sous-spectres
+    integer,intent(in)::ns2 !< Dernier sous-spectre de la distribution
+    real(dp),intent(in)::s(44)!<!< contributions des groupes de sous-spectres
+    real(dp),intent(in)::sTotal !<cumul des contributions jusqu'au dernier spectres (donc Stotal =100.0, en toute logique)
+    real(dp),intent(in)::bt(10,40)!parametres hyperfins
+    integer,intent(out)::nss !ns (ou ns2 si ns2/=0)
     real(dp),intent(out)::btmoy(7,2) ! bt(:,1) : moyenne arithmetique, bt(:,2) : moyenne quadratique
     integer::i,nt
       nss=ns
@@ -365,6 +366,7 @@ module spectres
       enddo
   end subroutine spectres_moyennes_param_hyperfins
   !=====================================================================
+  !>@brief Réinitialisation de POIDS.
   subroutine spectre_raz
     POIDS=1.0_dp
   end subroutine spectre_raz
