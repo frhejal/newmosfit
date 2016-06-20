@@ -3,11 +3,11 @@ COMPILER_UNIX = gfortran
 COMPILER_WIN = gfortran
 
 ifeq ($(DEBUG),yes)
-	CFLAGS = -Wall -W -g
-	LFLAGS =
+	CFLAGS = -Wall -W -g -static
+	LFLAGS = -static
 else
-	CFLAGS = 
-	LFLAGS =
+	CFLAGS = -static
+	LFLAGS = -static
 endif
 # Pour faire fonctionner clean et mrproper dans windows :
 ifeq ($(OS),Windows_NT)
@@ -27,13 +27,14 @@ endif
 
 EXEC=main
 
+
+mosfit: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o variablesFixes.o
+	$(CF) $(LFLAGS) -o $(BIN)  $^
+
 all: mosfit test_minv.exec test_alsb.exec test_lecture_ecriture.exec
 ifeq ($(DEBUG),yes)
 	@echo "Génération en mode debug"
 endif
-
-mosfit: main.f90 precision.o ecriture.o lecture.o options.o algebre.o variablesAjustables.o spectres.o habillage.o hamiltonien.o ajustement.o connex.o variablesFixes.o
-	$(CF) $(LDLAGS) -o $(BIN)  $^
 
 connex.o: precision.o
 

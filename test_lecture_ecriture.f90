@@ -6,9 +6,6 @@ program test_lecture_ecriture
   use options
   use variablesAjustables
   implicit none
-  
-!~   character(len=*)::fichier_sortie='test.out'
-
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
   call ecriture_nommer_fichier_de_sortie('test.out')

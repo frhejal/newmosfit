@@ -165,9 +165,9 @@ module spectres
     spectre = spectre/nTheta
   end subroutine spectre_cycloide_theorique_et_habillage
   !=====================================================================
-  !>@brief Le tableau des dérivées du spectre par rapport aux paramètres variables
-  !>@details Le calcul des dérivées se fait en recalculant le spectre théorique avec de petites variations de 
-  !!la valeur des parametres
+  !>@brief Calcule le tableau des dérivées du spectre par rapport aux paramètres variables
+  !>@details Le calcul des dérivées se fait en recalculant le spectre théorique avec de 
+  !! petites variations du parametre concerné
   subroutine spectres_derivee(nt,spectre)
     integer,intent(in)::nt !< numéro du sous-spectre
     real(dp),intent(out)::spectre(N)!< Spectre precedemment calculé
@@ -232,9 +232,19 @@ module spectres
       enddo parametres
   end subroutine spectres_derivee
   !=====================================================================
+  !>@brief Effectue la sommes de sous-spectres pour obtenir de nouveaux-sous-spectres. 
+  !>@details Les groupes de sous-spectres à sommer sont specifié dans GRASS. 
+  !! Jsuqu'à 5 groupes de sous-spectres peuvent être sommés.
+  !! Les nouveaux sous-spectres obtenus sont placés dans TOTAL_SOUS_SPECTRES
+  !!@n Utilisation de GRASS :  Grass(2*j-1) indique le premier spectre de la jieme somme, 
+  !! grass(2*) indique le dernier spectre de la jieme somme.
+  !! exemple :
+  !!@n Pour GRASS = [ 1 3 5 6 7 9 0 0 0 0], on obtient 3 nouveau sous-spectres.
+  !! Le premier est la somme des sous-spectres 1 à 3, le second est la somme des sous-spectres 5 et 6,
+  !! le troisième est la somme des sous-spectres 7 à 9. 
   subroutine spectres_total_sous_spectres(grass,compteur)
-    integer,intent(in)::grass(10) !groupes de sous-spectres à sommer
-    integer,intent(out)::compteur !nombre de sous-spectres
+    integer,intent(in)::grass(10) !<groupes de sous-spectres à sommer
+    integer,intent(out)::compteur !<nombres de sous-spectres rangés dans TOTAL_SOUS_SPECTRES
     integer::i,nt
       TOTAL_SOUS_SPECTRES=0.0_dp
       compteur=0
@@ -249,24 +259,29 @@ module spectres
       enddo
   end subroutine spectres_total_sous_spectres
   !=====================================================================
-  subroutine spectres_absoption_dispersion(k,n,b,spectre_exp,spectre_fit,spectre_bruit,nivzero,hbruit,sExp,sFit,sBruit,daExp,daFit)
-    integer,intent(in)::k
-    integer,intent(in)::n
-    real(dp),intent(in)::b(40)
-    real(dp),intent(in)::spectre_exp(n)
-    real(dp),intent(in)::spectre_fit(n)
-    real(dp),intent(in)::spectre_bruit(n)
-    real(dp),intent(in)::nivzero
-    real(dp),intent(out)::sExp
-    real(dp),intent(out)::sFit
-    real(dp),intent(out)::sBruit
-    real(dp),intent(out)::daExp
-    real(dp),intent(out)::daFit
-    real(dp),intent(in)::hbruit
+  !> @brief Calcul des absorptions et des dispersions
+  !> @details Les absortpions et des dispersions sont calculées par rapport au total des coups enregistrés,
+  !! en prenant en compte le niveau sans absorption et le niveau de bruit moyen
+  !> @todo : verifier si il existe une difference entre B(k) et nivzero, et entre B(k+1) et HBRUIT.
+  !! Inutile de multiplier les variables sinon. 
+  subroutine spectres_absorption_dispersion(k,n,b,spectre_exp,spectre_fit,spectre_bruit,nivzero,hbruit,sExp,sFit,sBruit,daExp,daFit)
+    integer,intent(in)::k !< position de TY dans le vecteur des grandeurs ajustables B
+    integer,intent(in)::n !< nombre de canaux du spectre
+    real(dp),intent(in)::b(40) !< grandeurs ajustables
+    real(dp),intent(in)::spectre_exp(n) !<spectre experimental
+    real(dp),intent(in)::spectre_fit(n) !<spectre calculé 
+    real(dp),intent(in)::spectre_bruit(n) !<spectre de btuit
+    real(dp),intent(in)::nivzero !< niveau zero du spectre (nombres de coups hors d'absorption) (equivaut à b(K) ?)
+    real(dp),intent(in)::hbruit !< hauteur de bruit (equivaut à hbruit ?)
+    real(dp),intent(out)::sExp !< absoprtion du spectre experimental
+    real(dp),intent(out)::sFit !< absorption du spectre calculé
+    real(dp),intent(out)::sBruit!< absorption du spectr ede bruit
+    real(dp),intent(out)::daExp !< dispersion du spectre experimental
+    real(dp),intent(out)::daFit !< dispersion du spectre calculé
     real(dp)::difExp
     real(dp)::difFit
     integer::i
-    ! Surfaces exprimant l'absorption
+    ! Sommes exprimant l'absorption
     sExp=1.0_dp
     sFit=0.0_dp
     sBruit=1.0_dp
@@ -275,7 +290,7 @@ module spectres
       sFit=sFit + b(k) - spectre_fit(i)
       if(hbruit/=0.0_dp) sBruit =sBruit-hbruit*spectre_bruit(i) 
     enddo
-    ! Surfaces exprimant la dispersion
+    ! Sommes exprimant la dispersion
     difFit=0.0_dp
     difExp=1.0_dp
     do i=1,n
@@ -290,13 +305,14 @@ module spectres
     ! Ratio dispersion/absorption
     daFit= n*sqrt(difFit/n)/sFit
     daExp= n*sqrt(difExp/20.0_dp)/sExp
-  end subroutine spectres_absoption_dispersion
+  end subroutine spectres_absorption_dispersion
   !=====================================================================
+  !>@brief Calcul des contributions de chaque distributions de sous-spectres par rapport au spectre total.
+  !> Les contributions sont calculées sous forme de surfaces hauteur*largeur
   subroutine spectres_contributions_distributions(ns,s,sInt)
-  !calcul des contributions de chqeu sous-spectre
     integer,intent(in)::ns
-    real(dp),intent(out)::s(44) ! distribution (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(out)::sInt(40)
+    real(dp),intent(out)::s(44) !< contributions des distributions (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sInt(40)!< cumul des contributions, Sint(nt) est la somme des contributions des nt premiers spectres
     integer::nt
     real(dp)::st
     s=0.0_dp

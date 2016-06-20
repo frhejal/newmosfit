@@ -116,7 +116,6 @@ module ecriture
         write(NOUT,'(//," SPECTRE ",I2,2X,10F12.3,/)') nt,(bt(i,nt),i=1,10)
         write(NOUT,'(" ECART TYPE  ",10E12.3,//)') (etbt(i,nt),i=1,10)
       else
-        write(6,*)bt(i,8), bt(i,9)
         write(NOUT,'(//," SPECTRE ",I2,2X,6F12.3,F12.3,2F12.3,/)') nt,(bt(i,nt),i=1,6),(bt(i,nt),i=8,10)
         write(NOUT,'(" ECART TYPE  ",9E12.3,//)') (etbt(i,nt),i=1,6),(etbt(i,nt),i=8,10)
       endif

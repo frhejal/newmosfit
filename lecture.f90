@@ -13,6 +13,27 @@ module lecture
   integer::NIN=5 !<Entree standard
   contains
 !=======================================================================
+  !>@brief Ouverture du fichier donné en argument
+  !>@details Les fichiers de sortie sont nommés en fonction du nom du fichier d'entrée
+  subroutine lecture_ouvrir_fichier(fichierOut,fichierDat,fichierDoc)
+    character(len=*),intent(out)::fichierOut
+    character(len=*),intent(out)::fichierDat
+    character(len=*),intent(out)::fichierDoc
+    character(len=255)::fichier
+    integer::taille
+    call get_command_argument(1,fichier)
+    taille=len_trim(fichier)
+    if(len_trim(fichier)/=0)then
+      open(NIN,file=fichier,status="unknown",form="formatted", access="sequential")
+      fichierOut=fichier
+      fichierDoc=fichier
+      fichierDat=fichier
+      fichierOut(taille-2:taille)="out"
+      fichierDat(taille-2:taille)="dat"
+      fichierDoc(taille-2:taille)="doc"
+    endif
+  end subroutine lecture_ouvrir_fichier
+!=======================================================================
   subroutine lecture_titre
     read(NIN,'(256A)') titre      
   end subroutine lecture_titre

@@ -57,14 +57,15 @@ program mosfit
   real(dp)::sl(42)
   real(dp)::sInt(40) 
   real(dp)::btmoy(7,2)
-  character(len=*),parameter::fichierOut='fit.out'
-  character(len=*),parameter::fichierGnuplot='Spect.dat'
-  character(len=*),parameter::fichierResultats='RESULTAT.doc'
+  character(len=255)::fichierOut
+  character(len=255)::fichierGnuplot
+  character(len=255)::fichierResultats
   !initialisations------------------------------------------------------
   call raz
 !=======================================================================
 ! Entree des options et des données, copie dans le fichier de sortie
 !=======================================================================
+  call lecture_ouvrir_fichier(fichierOut,fichierGnuplot,fichierResultats)
   !Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
@@ -148,7 +149,7 @@ program mosfit
   ! Largeurs, hauteur et energie des raies
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
   ! Absorptions,moyenne et lissage des sous-spectres
-  call spectres_absoption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
+  call spectres_absorption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
   call spectres_contributions_distributions(NS,s,sInt)
   call ecriture_absorption_dispersion_contributions(NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
   if(IO(13)/=0)then
