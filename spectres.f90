@@ -233,13 +233,13 @@ module spectres
   end subroutine spectres_derivee
   !=====================================================================
   !>@brief Effectue la sommes de sous-spectres pour obtenir de nouveaux-sous-spectres. 
-  !>@details Les groupes de sous-spectres à sommer sont specifié dans GRASS. 
+  !>@details Les groupes de sous-spectres à sommer sont specifiésdans GRASS. 
   !! Jsuqu'à 5 groupes de sous-spectres peuvent être sommés.
-  !! Les nouveaux sous-spectres obtenus sont placés dans TOTAL_SOUS_SPECTRES
+  !! Les nouveaux sous-spectres obtenus sont placés dans TOTAL_SOUS_SPECTRES.
   !!@n Utilisation de GRASS :  Grass(2*j-1) indique le premier spectre de la jieme somme, 
-  !! grass(2*) indique le dernier spectre de la jieme somme.
-  !! exemple :
-  !!@n Pour GRASS = [ 1 3 5 6 7 9 0 0 0 0], on obtient 3 nouveau sous-spectres.
+  !! grass(2*j) indique le dernier spectre de la jieme somme.
+  !!@n Exemple :
+  !!@n Pour GRASS = [ 1 3 5 6 7 9 0 0 0 0], on obtient 3 nouveaux sous-spectres.
   !! Le premier est la somme des sous-spectres 1 à 3, le second est la somme des sous-spectres 5 et 6,
   !! le troisième est la somme des sous-spectres 7 à 9. 
   subroutine spectres_total_sous_spectres(grass,compteur)

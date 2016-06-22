@@ -2,7 +2,7 @@
 !***********************************************************************
 !                         MODULE HAMILTONIEN
 !***********************************************************************
-!>@rief définition du champ interne utilisé et résolution de l'hamiltonien
+!>@brief Définition du champ interne utilisé et résolution de l'hamiltonien
 !>@details Calcul des énergie et des fonctions d'onde des états fondamentaux et excités
 !>@version juin 2016
 module hamiltonien
@@ -52,9 +52,9 @@ module hamiltonien
   !>@brief Calcul des hamiltoniens des états fondametaux et excités, recherche de leurs valeurs propres
   !>@details Les équations correspondantes proviennent de la thèse de F.Varret (1972),chap 4
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
-    real(dp),intent(in)::ze !< Rapport gyromagnétiques de l'état excité
-    real(dp),intent(in)::zf !< Rapport gyromagnétiques de l'état fondamental
-    real(dp),intent(in)::sq !< Interaction quadripolaire
+    real(dp),intent(in)::ze !< Rapport gyromagnétique de l'état excité
+    real(dp),intent(in)::zf !< Rapport gyromagnétique de l'état fondamental
+    real(dp),intent(in)::sq !< Interaction quadrupolaire
     real(dp),intent(in)::eta !< Paramètre d'asymétrie
     real(dp)::Q
     !Etats fondamentaux-------------------------------------------------

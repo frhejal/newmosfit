@@ -9,7 +9,7 @@
 !
 !***********************************************************************
 !>         Fittage theorique de spectres mossbauer  fer 57/sn 119,
-!>@version                  juin  2016
+!>@version     2.1   juin  2016
 ! MODIFICATIONS*********************************************************
 !
 ! INDIQUER DATE  NOM  MODIFICATION
@@ -27,7 +27,8 @@
 !    FEV 94  NR  TRACE DES SOUS-SPECTRES
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
 !    1995-2016 ??  ???
-!    MAI 2016 FL  REECRITURE EN FORTRAN 95
+!    MAI 2016 FL  v2.0 REECRITURE EN FORTRAN 95
+!    JUN 2016 FL  v2.1 Ajout de cycloides
 !***********************************************************************
 !>@param AA Matrice de Variance/covariance, stockée dans un vecteur
 !!@param s(44)  Contributions des distributions (+4 cases vides)

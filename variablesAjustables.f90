@@ -21,15 +21,15 @@ module variablesAjustables
   ! hauteur de bruit
   real(dp)::HBRUIT !< si HBRUIT /= 0, introduction d'un spectre de bruit de fond
   ! PHF pour un sous-spectre:
-  real(dp)::DI    !< moment isomérique
+  real(dp)::DI    !< déplacement isomérique
   real(dp)::GA    !< demi-largeur (commune aux raies du spectre)
   real(dp)::H1    !< intensité totale (nombre de coups)
   real(dp)::SQ    !< interaction quadrupolaire
   real(dp)::CH    !< champ interne (kOe)
   real(dp)::ETA   !< parametre d'asymétrie
-  real(dp)::THETA  !< TETA et GAMA :    angles polaires du chp interne
+  real(dp)::THETA  !< THETA et GAMA :    angles polaires du chp interne
   real(dp)::GAMA  !<   dans les axes principaux du gradient (degres)
-  real(dp)::BETA  !<  ALFA et BETA : angles polaires de la direction du
+  real(dp)::BETA  !<  ALPHA et BETA : angles polaires de la direction du
   real(dp)::ALPHA  !<         rayonnement (meme axes que pour ETA, THETA)
   real(dp)::TY    !< niveau moyen hors d'absorption
   integer::NB(10) !< Type d'ajustement des 10 paramètres hyperfins (pour le sous-spectre en cours de lecture)

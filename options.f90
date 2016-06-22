@@ -26,6 +26,7 @@
 !!      IO(12)|1 | Ecrire du résume dans un fichier RESULTAT.doc, écriture de Yexp et Ycalc dans un fichier exploitable par gnuplot,
 !!      IO(13)|1 | Ecriture du lissage des sous-spectres, et des moyennes des sous-spectres tels que definis par GRASS,
 !!      IO(14)|1 | Tracer le diagramme en cartouches du lissage des sous-spectres,
+!!      IO(15)|1 | Utilisation de la formulation du champ hyperfin pour des cycloïdes (Gamma est remplacé par Wm)
 !!      IO(16)|N | Convolution Gauss*Lorentz pour les enveloppes des raies (N=nbre de sous canaux),
 !!      IO(17)|1 | Tracer les sous-spectres tels que definis par GRASS,
 !!      IO(20)|1 | Horizontalisation du fond continu.

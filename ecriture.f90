@@ -20,7 +20,7 @@ module ecriture
     if( len( trim( nom ) )>255) stop "ERREUR dans ecriture_nommer_fichier_de_sortie  : nom de fichier trop long"
     fichier_sortie = nom
     open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted')
-    write(NOUT,'(A)') ' VERSION MAI 2016 '
+    write(NOUT,'(A)') ' VERSION 2.1, Juin 2016 '
   end subroutine ecriture_nommer_fichier_de_sortie
   !=====================================================================
   !>@brief Ecriture des titres et sous-titres

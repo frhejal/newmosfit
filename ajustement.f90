@@ -69,7 +69,7 @@ module ajustement
                                       !! le spectre theorique + le tableau des derivees 
                                       !!   (matrice de coefficients de correlation)
       real(dp),intent(inout)::b(k) !< Vecteur des parametres ajustables
-      real(dp),intent(in)::y(n) !< Vpectre experimental
+      real(dp),intent(in)::y(n) !< Spectre experimental
       real(dp),intent(in)::p(n) !< Poids statistique des canaux
       logical::fin,coupureNmax 
       integer::i,j,l,m,ierr
