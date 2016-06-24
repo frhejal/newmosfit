@@ -181,15 +181,15 @@ module spectres
       spectre0=spectre
       !  Calcul des derivees par rapport aux largeurs variables---------
       ! Les derivees sont estimees par un petit deplacement diff de chaque parametre
-      do j=1,8
+      do j=1,8 !Dérivées sur les largeurs indépendantes
         if(NGT(j,nt) /=0) then
           l=IADG(j,nt)
-          diff=CN*1.0D-3 ! élément infiniment petit = 1/1000e d'un canal
+          diff=CN*1.0D-3 ! élément "infiniment" petit = 1/1000e d'un canal
           GVT(j,nt)=B(l)+diff !
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
           call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES,INTENSITES,spectre)
           do i=1,N
-            Q(i,l)=(spectre0(i)-spectre(i))/diff ! ecart sur le spectre engendre par l'ecart sur la largeur
+            Q(i,l)=(spectre0(i)-spectre(i))/diff ! écart sur le spectre engendre par l'ecart sur la largeur
           enddo
           GVT(j,nt)=B(l) ! retour à la valeur initiale de  la largeur
           IF(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
@@ -208,7 +208,7 @@ module spectres
               di1=DI+diff
               call habillage_raies(CN,di1,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
               derivee(jj,:)=(spectre0-spectre)/diff
-            case(2) ! largeur de raie
+            case(2) ! largeur de raie GA, commune à plusieurs raies si IOGV=1 ( possiblement aussi si IOGV=3, selon choix de l'utilisateur)
               diff=pm*CN*1.0D-3
               gb=GA+diff
               call habillage_raies(CN,DI,gb,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),spectre)
@@ -309,56 +309,61 @@ module spectres
   !=====================================================================
   !>@brief Calcul des contributions de chaque groupe de sous-spectres par rapport au spectre total.
   !> Les contributions sont calculées sous forme de surfaces (hauteur*largeur)
-  subroutine spectres_contributions_distributions(ns,s,sInt)
-    integer,intent(in)::ns
-    real(dp),intent(out)::s(44) !< contributions des groupes de sous-spectres (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(out)::sInt(40)!< cumul des contributions, Sint(nt) est la somme des contributions des nt premiers spectres
+  subroutine spectres_contributions_distributions(nsmin,nsmax,s,sInt,champ)
+    integer,intent(in)::nsmin!< Premier sous-spectre
+    integer,intent(in)::nsmax!< Dernier sous-spectre
+    real(dp),intent(out)::s(44) !< Contributions des groupes de sous-spectres (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(out)::sInt(40)!< Cumul des contributions, Sint(nt) est la somme des contributions des nt premiers spectres
+    real(dp),intent(out)::champ(44)!< Champ hyperfin des sous-spectres
     integer::nt
     real(dp)::st
     s=0.0_dp
     st=0.0_dp
-    do nt=1,ns
+    champ=0.0_dp
+    do nt=nsmin,nsmax
       s(nt+2)=abs(BT(2,nt))*BT(3,nt)
+      champ(nt+2)=BT(5,nt)
       st=st+s(nt+2)
     enddo
     ! Contribution de chaque sous-spectre (en pourcent)
     sInt=0.0_dp
     s=100.0_dp*s/st
-    sInt(1)=s(3)
-    do nt=2,ns
+    sInt(nsmin)=s(nsmin+2)
+    do nt=nsmin+1,nsmax
       sInt(nt)=sInt(nt-1)+s(nt+2)
     enddo
   end subroutine spectres_contributions_distributions
   !=====================================================================
-  !<@brief Laissage des distributions
-  subroutine spectres_lissage_distribution(ns,s,sl)
-    integer,intent(in)::ns !< nombre de sous-spectres
-    real(dp),intent(in)::s(44) !< distributions non lissées (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(out)::sl(42) !<distributions lissées
+  !<@brief Lissage des distributions
+  subroutine spectres_lissage_distribution(nsmin,nsmax,s,sl,champ,champLisse)
+    integer,intent(in)::nsmin!< Premier spectre du lissage
+    integer,intent(in)::nsmax!< Dernier spectre du lissage
+    real(dp),intent(in)::s(44) !< Distributions non lissées (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
+    real(dp),intent(in)::champ(44) !< champ des sous-spectres
+    real(dp),intent(out)::sl(42) !< Distributions lissées
+    real(dp),intent(out)::champLisse(42) !< Champs des souss-spectres lissés
     integer::i
-      do i=1,ns+2
-        sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
-      enddo
+    do i=nsmin,nsmax+2
+      sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
+      champLisse(i)=0.25_dp*(champ(i)+2.0_dp*champ(i+1)+champ(i+2))
+    enddo
   end subroutine spectres_lissage_distribution
   !=====================================================================
   !<@brief Calcul des moyennes des parametres hyperfins sur ns (ou ns2) premiers spectres
   !@details on calcule des moyennes arithmétiques et algébriques, pondérées par la contribution des sous-spectres
-  subroutine spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sTotal,nss,btmoy)
-    integer,intent(in)::ns !< Nombre de sous-spectres
-    integer,intent(in)::ns2 !< Dernier sous-spectre de la distribution
-    real(dp),intent(in)::s(44)!<!< contributions des groupes de sous-spectres
-    real(dp),intent(in)::sTotal !<cumul des contributions jusqu'au dernier spectres (donc Stotal =100.0, en toute logique)
-    real(dp),intent(in)::bt(10,40)!parametres hyperfins
-    integer,intent(out)::nss !ns (ou ns2 si ns2/=0)
+  subroutine spectres_moyennes_param_hyperfins(nsmin,nsmax,bt,s,sTotal,btmoy)
+    integer,intent(in)::nsmin !< Dernier sous-spectre de la distribution
+    integer,intent(in)::nsmax !< Dernier sous-spectre de la distribution
+    real(dp),intent(in)::s(44)!<!< Contributions des groupes de sous-spectres
+    real(dp),intent(in)::sTotal !< Cumul des contributions jusqu'au dernier spectres (donc Stotal =100.0, en toute logique)
+    real(dp),intent(in)::bt(10,40)!< Parametres hyperfins
     real(dp),intent(out)::btmoy(7,2) ! bt(:,1) : moyenne arithmetique, bt(:,2) : moyenne quadratique
     integer::i,nt
-      nss=ns
       btmoy=0.0_dp
-      if(ns2/=0)nss=ns2
       do i=1,7
         select case(i)
           case(1,4,5,7)
-            do nt=1,nss
+            do nt=nsmin,nsmax
               btmoy(i,1)=btmoy(i,1)+bt(i,nt)*s(nt+2)/sTotal
               btmoy(i,2)=btmoy(i,2)+(bt(i,nt)**2)*s(nt+2)/sTotal
             enddo

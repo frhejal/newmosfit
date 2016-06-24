@@ -1,0 +1,462 @@
+%=======================================================================
+\subsection{Sous-spectres}
+%-----------------------------------------------------------------------
+\subsubsection{Description d'un sous-spectre}
+Pour rendre compte d'un spectre théorique, on peut utiliser jusqu'à 40 sous-spectres.
+Chaque sous-spectre est défini par une liste de paramètres hyperfins (Table \ref{tab:param}), dont les valeurs initiales sont données dans le fichier d'entrée.
+Ces paramètres hyperfijns sont donnés dans un ordre précis (Table \ref{tab:position_param}).
+Leurs options d'ajustements sont contenue par le tableau \lstinline{NB}. 
+La valeur de \lstinline{NB(I)} indique comment le \lstinline{I}ème paramètre doit être ajusté au cours de l'affinement en moindre carrés (Table \ref{tab:NB}).
+
+La variable \lstinline{MONOC} indique s'il s'agit d'un monocristal, et la variable \lstinline{IOGV} indique si des relations lient la largeur des raies du sous-spectre entre elles (voir \S \ref{part:largeurs}).% (Table \ref{tab:IOGV}).
+
+\begin{table}[!h]
+\caption{\label{tab:param}Paramètres hyperfins}
+\begin{tabular}{c|l}
+Paramètre & Description\\
+\hline
+\hline
+  DI    & Déplacement isomérique\\
+\hline
+  GA    & Demi-largeur (\milli\meter.\reciprocal\second),\\
+        & commune aux raies du spectre\\
+\hline
+  H1    & Intensité totale (nombre de coups)\\
+\hline
+  SQ    & Interaction quadrupolaire\\
+\hline
+  CH    & Champ interne (kOe)\\
+\hline
+  ETA   & Paramètre d'asymétrie\\
+\hline
+  THETA  & Angles polaires du champ interne\\
+  GAMA  &   dans les axes principaux du gradient (degrés)\\
+\hline
+  BETA  &   Angles polaires de la direction du\\
+  ALPHA  &         rayonnement (meme axes que pour THETA,GAMA)\\
+\end{tabular}
+\end{table}
+
+\begin{table}[!h]
+\caption{\label{tab:position_param}Ordre de rangement des paramètres hyperfins}
+\begin{tabular}{c|cccccccccc}
+\lstinline{I} & 1  &2  & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+Paramètre & \lstinline{DI} &\lstinline{GA} &\lstinline{H1}&  \lstinline{SQ}&  \lstinline{CH} & \lstinline{ETA}& \lstinline{THETA}&\lstinline{GAMA}& \lstinline{BETA}&\lstinline{ALPHA}
+\end{tabular}
+\end{table}
+
+ \begin{table}[!h]
+ \caption{\label{tab:NB}Type d'ajustement des paramètres hyperfins}
+ \begin{tabular}{c|l}
+  \lstinline{NB(I)}=0 & Le \lstinline{I}ème paramètre est fixée \\
+  \hline
+  \lstinline{NB(I)}=1 & Le \lstinline{I}ème paramètre est ajustable \\
+  \hline
+  \lstinline{NB(I)}=2 & Le \lstinline{I}ème paramètre est ajusté de manière identique \\
+    & au \lstinline{I}ème paramètre du spectre précédent. \\
+  \hline
+  \lstinline{NB(I)}=3 & Le \lstinline{I}ème paramètre est relié à d'autres paramètres ajustables.\\
+    & Il n'est pas ajusté directement,  mais par l'intermédiaire\\
+    &  d'une relation définie dans le module \lstinline{CONNEX}. 
+ \end{tabular}
+\end{table}
+\FloatBarrier
+%-----------------------------------------------------------------------
+\subsubsection{Largeur des raies d'un sous-spectre}
+Pour un sous-spectre :
+\begin{itemize}
+\item Si \lstinline{IOGV} = 0, toutes les raies ont la largeur  \lstinline{GA}, et leur ajustement dépend donc de la valeur donnée à  \lstinline{NB(2)}
+\item  si \lstinline{IOGV} = 1 ou 2, \lstinline{GA} est automatiquement non ajustable (\lstinline{NB(2)}=0), voir Table \ref{tab:IOGV}.
+\item  si \lstinline{IOGV} = 3, on peut ajuster :
+  \begin{itemize}
+    \item La largeur d'un certian nombre de raies de manière commune (\lstinline{NB(2)}=1, \lstinline{NG(I)}=0).
+    \item La largeur des autres raies raies de manière indépendante (\lstinline{NG(I)}=1).
+  \end{itemize}
+\end{itemize}
+\label{part:largeurs}
+\begin{table}[!h]
+  \caption{\label{tab:IOGV}Type d'ajustement des raies d'un sous-spectre selon la valeur de l'option \lstinline{IOGV}}
+  \begin{tabular}{c|l}
+    \lstinline{IOGV}=0& Largeur unique pour toutes les raies, ajustable si \lstinline{NB(2})=1 ou 2 \\
+    \hline
+    \lstinline{IOGV}=1& Spectre quadrupolaire à raies de largeurs différentes\\
+                      & (2 largeurs indépendantes)\\
+    \hline
+    \lstinline{IOGV}=2& Spectre magnétique formé de trois doublets symétriques d'intensité 3,2,1\\
+                      & (3 largeurs différentes)\\
+    \hline
+    \lstinline{IOGV}=3& Cas général. Les tableaux \lstinline{NG} et \lstinline{GV} sont alors utilisés.\\
+    &\begin{tabular}{cl}
+      \lstinline{NG(I)}=0 : & La \lstinline{I}ème largeur correspond à la valeur ajustée/fixée \\
+                            & pour GA \\
+      \lstinline{NG(I)}=1 : & Ajustement indépendant de la \lstinline{I}ème largeur à partir \\
+                            & de la valeur initiale \lstinline{GV(i)}
+    \end{tabular}\\
+    & \lstinline{GV(i)} : Valeur initiale de la \lstinline{I}eme largeur
+  \end{tabular}
+\end{table}
+%-----------------------------------------------------------------------
+\subsubsection{\'Etapes de la lecture d'un sous-spectre}
+Lors de la lecture du sous spectre numéro \lstinline{NT}, le programme effectue les étapes suivantes :
+\begin{itemize}
+  \item Les paramètres hyperfins sont placés dans le tableau \lstinline{BT(I,NT)}, et la valeur de \lstinline{MONOC} est placée dans \lstinline{MONOT(NT)}.
+  \item Les paramètres d'ajustements \lstinline{NB(I)} sont rangés dans le tableau \lstinline{NBT(I,NT)}.
+  \item Les paramètres hyperfins définis comme ajustables (\lstinline{NB(I)$\neq$0}) sont placés dans le tableau \lstinline{B}.
+   C'est ce tableau \lstinline{B} qui consituera le vecteur à ajuster lors de l'affinement.
+  \item Dans l'alternative où les largeurs de raies ne sont pas identiques (\lstinline{IOGV}$\neq$0), les valeurs initiales des largeurs variables sont introduites dans le tableau \lstinline{GVT(J,NT)} (\lstinline{J}=1 à 8). 
+\end{itemize}
+
+Les tableaux \lstinline{IAD} et \lstinline{IADG} permettent d'assurer la correspondance entre \lstinline{B} 
+(qui ne contient que les paramètres ajustables) et les tableaux \lstinline{BT} et \lstinline{GVT} (qui contiennent l'ensemble des paramètres qui permettent de calculer les sous-spectres).
+
+\begin{tabular}{rcl}
+  \lstinline{IAD(I,NT)}&=&adresse dans le tableau B  du paramètre  hyperfin \lstinline{BT(I,NT)}\\
+  \lstinline{IADG(J,NT)}&=&adresse dans le tableau B de la largeur de raie \lstinline{GVT(J,NT)}\\
+\end{tabular}
+%-----------------------------------------------------------------------
+\subsubsection{Distribution arithmétique et affichage de groupes de sous-spectres}
+Il est possible de contruire une distribution de sous-spectres selon une progression arithmétique.
+Une fois l'affinement réalisé, il est également possible de regrouper et sommer certains des sous-spectres lors de l'affichage des résultats. 
+Ainsi, dans la plupart des cas, on cherchera principalement à regrouper les sous-spectres de la distribution, mais ce n'est pas obligatoire.
+C'est l'utilisateur qui choisi quels sous-spectres il souhaite regrouper, selon ses besoins.
+
+\paragraph{Définition d'un sous-spectre}
+Le premier spectre de la distribution porte le numéro \lstinline{NS1}, le dernier sous-spectre porte le numéro \lstinline{NS2}.
+Le premier sous-spectre de la distribution  est défini par les paramètres hyperfins : \\
+
+\lstinline{DI0} \lstinline{SQ0} \lstinline{CH0} \lstinline{TETA0} \lstinline{ETA0} \lstinline{GAMA0}, \lstinline{BETA0}, \lstinline{ALPHA0} \lstinline{MONOC0}. \\
+
+On défini également \lstinline{PDI}, \lstinline{PSQ}, \lstinline{PCH} et \lstinline{PTETA}, qui sont les pas de la distribution.
+Les paramètres hyperfins des sous-spectres de la distribution  sont incrémentée de ces valeurs, de \lstinline{NS1} à \lstinline{NS2} inclus.
+
+Toutes les raies de tout les sous-spectre de la distribution ont la même largeur. L'intensité des raies de chacun des sous-spectre est prise egale à H1 pour tous au départ.
+
+Les paramètres de tout les sous-spectres de la distribution obéissent aux mêmes options d'ajustement définies par \lstinline{NB0}, équivalent de \lstinline{NB}.
+
+\paragraph{Affichage de groupes de sous-spectres}
+L'affichage de groupes de sous-spectres se fait si  \lstinline{IO(17)}=1 (voir \ref{part:options}). 
+Les groupes de sous-spectres sont alors spécifié dans le tableau \lstinline{GRASS}. 
+
+\FloatBarrier
+%-----------------------------------------------------------------------
+\subsection{Options}
+\label{part:options}
+Avant de fournir les sous-spectres, il convient de fournir un certain nombre de variables et d'options (voir Table \ref{tab:var_gen}).
+Ces options précisent entre autre le nombre de sous-spectres, l'existence éventuelle d'une distribution de sous-spectres, les éventuels canaux à ignorer, une limite superieure au nombre d'itérations lors de l'affinement.
+Voir la table \ref{tab:var_gen} pour la liste ce ces variables.
+De plus, \lstinline{IOPT}=1 donne accès au options commandées par le tableau \lstinline{IO}, qui sont listée en table \ref{tab:IO}. 
+
+En plus des paramètres hyperfins de chaque sous-spectre, la hauteur de bruit \lstinline{HBRUIT} et le niveau moyen hors d'absorption \lstinline{TY} peuvent être ajustés.
+\lstinline{TY} est toujours ajustable. 
+\lstinline{HBRUIT} sera ou non  ajustable, selon la valeur de l'option \lstinline{IO(4)}.
+La valeur de \lstinline{IO(4)} détermine également si un spectre de bruit doit être lu dans le fichier d'entrée.
+
+\begin{table}[!h]
+\caption{\label{tab:var_gen}Variables générales}
+\begin{tabular}{c|l}
+variable & description \\ \hline
+\lstinline{CN} & Largeur des canaux (en ~\milli\meter.\reciprocal\second)\\
+\hline
+\lstinline{NMAX} & Nombre maximum d'itérations dans l'ajustement par moindres carrés. \\
+                & Lorsque \lstinline{NMAX} est atteint, la convergence souhaitée n'a \\
+                & pas été obtenue, et l'on sort la mention "COUPURE PAR NMAX"\\
+                &  ainsi que les résultats provisoires dans le fichier .out \\
+\hline
+\lstinline{NS} & Nombre de sous-spectres théoriques utilisés pour \\
+    & représenter le spectre expérimental (\lstinline{NS}<40)\\
+\hline
+\lstinline{NS1} & Premier sous-spectre de la distribution (0 si pas de distribution)\\
+\hline
+\lstinline{NS2} & Dernier  sous-spectre de la distribution (0 si pas de distribution)\\
+\hline
+\lstinline{IZZ} & Si \lstinline{IZZ}$\neq 0$, Existence de canaux à ignorer, précisés dans le tableau \lstinline{IZ}\\
+\hline
+\lstinline{IOPT} & Si \lstinline{IOPT}$= 1$, un tableau d'options \lstinline{IO} est spécifié\\
+\hline
+\lstinline{HBRUIT}& Si \lstinline{IO(4)}$\neq$0, \lstinline{HBRUIT} est la hauteur du spectre de bruit.
+\end{tabular}
+\end{table}
+\begin{table}
+\caption{\label{tab:IO} Options définies par le tableau \lstinline{IO}. Lorsque ce n'est pas précisé, une option nulle correspond à une absence d'effet.}
+\begin{tabular}{|rcl|l|}
+%~ \hline
+%~ \lstinline{IO}& Valeur & Option\\
+%~ \hline
+\hline
+\lstinline{IO(1)} &=& N & Le programme ajoute N millions de coups par canal au \\
+                  & &    & spectre expérimental fourni.\\
+\hline
+\lstinline{IO(2)} &=& 1 & Option obsolete : changement d'echelle du tracé du spectre \\
+                  & &   & dans le fichier .out .  \\
+\hline
+\lstinline{IO(3)} &=& 0 & Choix de l'élement Fe57,\\
+                  &=& 1 & Choix de l'élement Sn119. \\
+\hline
+\lstinline{IO(4)} &=& 0 & Pas de spectre de bruit dans le fichier d'entrée, \lstinline{HBRUIT}=0, \\
+                  &=& 1 & Spectre de bruit de hauteur \lstinline{HBRUIT} non ajustable. \\
+                  &=& 2 & \lstinline{HBRUIT} ajustable, spectre de bruit fourni.\\
+\hline  
+\lstinline{IO(5)} &=& N & Choix de connexion entre paramètres (module \lstinline{CONNEX}). Ces relations\\
+                  & &  & doivent être décrites dans le module \lstinline{CONNEX}. On peut \\
+                  & &  & utiliser la valeur de \lstinline{IO(5)}  pour choisir entre plusieures \\
+                  & &  & connexion réalisables.\\
+\hline  
+\lstinline{IO(6)} &=& 1 & \'Ecriture de la différence entre le spectre exprérimental et le spectre calculé\\
+                  & &  & dans le fichier .out.\\
+\hline  
+\lstinline{IO(7)} &=& 1 & \'Ecriture du spectre calculé dans le fichier .out.\\
+\hline
+\lstinline{IO(8)} &=& 1 & \'Ecriture des positions, largeur et hauteur des différentes\\
+                  & &   & raies ajustées. \\
+\hline  
+\lstinline{IO(9)} &=& 1 & $\beta=\theta$, $\alpha=\gamma$. Seuls $\theta$ et  $\gamma$ sont à indiquer. Option utilisée pour les \\
+                  & &   &spectres sous champ magnétique intense longitudinale.\\
+\hline  
+\lstinline{IO(10)}&=& 0 & Lecture d'un spectre expérimental et affinnement des paramètres hyperfins. \\
+                  &=& 1 & Calcul et tracé du spectre théorique seul à partir des paramètres hyperfins\\
+                  & &   & fournis. \\
+\hline  
+\lstinline{IO(11)}&=& 1 & Calcul de la différence du contenu des canaux du spectre expérimental\\
+                  & &  & et du spectre calculé.\\
+\hline  
+\lstinline{IO(12)}&=& 1 & \'Ecriture du résumé dans le fichier .doc, écriture du spectre expérimental\\
+                  & &   & et du spectre calculé dans dans un fichier exploitable par un logiciel\\
+                  & &   &  tiers (ex: gnuplot). Les eventuels groupes de sous-spectres définis dans \lstinline{GRASS}\\
+                  & &   &  sont également écrits si \lstinline{IO(17)}=1.\\
+\hline  
+\lstinline{IO(13)}&=& 1 & Ecriture du lissage de tout les sous-spectres. \\
+                  &=& 2 & Ecriture des lissage des sous-spectres de la distribution uniquement \\
+\hline  
+\lstinline{IO(14)}&=& 1 & Si IO(13)$\neq$0, tracé les sous-spectres avant et après lissage dans le fichier.out \\
+\hline  
+\lstinline{IO(15)}&=& 1 & Utilisation de la formulation du champ hyperfin \\
+                  & &   & pour des cycloïdes (\lstinline{GAMMA} est remplacé par \lstinline{WM})\\
+\hline
+\lstinline{IO(16)}&=& N & Convolution Gauss*Lorentz pour les enveloppes des raies\\
+                  & &  & (N=nombre de sous canaux)\\
+\hline  
+\lstinline{IO(17)}&=& 1 & Si \lstinline{IO(12)}$\neq$0, trace les sous-spectres tels que definis par \lstinline{GRASS}\\
+                  & &   & dans le fichier .dat. \\
+\hline  
+\lstinline{IO(18)}&=& 0 & Les fichiers de sortie se nomment fit.out, Spect.dat, RESULTAT.doc, et sont\\
+                  & &   & placés dans le même répertoire que l'executable.\\
+                  &=& 1 & Les fichiers de sortie se nomment d'après le fichier d'entree. Ils sont \\
+                  & &   & placés dans le même répertoire que le fichier d'entree.\\
+\hline  
+\lstinline{IO(19)}& &   & Option vacante.\\
+\hline  
+\lstinline{IO(20)}&=&1 & Horizontalise le fond continu expérimental (dans les cas de déviation \\
+                  & &  & de fond continu observé dans les expériences sous champ magnétique).\\
+\hline  
+\end{tabular}
+\end{table}
+
+
+\FloatBarrier
+\subsection{Fichier d'entrées}
+%-----------------------------------------------------------------------
+\subsubsection{Composition d'un fichier d'entrée}
+Les opérations de lectures se font dans un fichier d'entree au format ASCII possédant une extension .coo (ou toute autre extension de trois lettres).
+Le contenu typique d'un fichier .coo comprend :
+
+\begin{itemize}
+\item le titre du spectre expérimental. Il est arbitraire et doit tenir sur une ligne.
+    Le titre peut contenir des informations telles que la date de la mesure, la température de l'échantillon, le type de source, l'âge du capitaine, ou tout autre information propre à identifier le spectre,
+\item la liste des variables générales du problème : CN, NMAX, NS, NS1, NS2, IZZ, IOPT, HBRUIT,
+\item si IZZ=0, la liste des canaux à ignorer,
+\item si IOPT=1, la liste des 20 options du tableau d'options IO,
+\item si IO(17)$\neq 0$, une liste des groupes de sous-spectres à moyenner en sortie,
+\item jusqu'à 40 sous-spectres théoriques (selon la valeur de NS). Un spectre théorique est défini par une liste de 10 paramètres hyperfins.
+    et par une liste des paramètres d'ajustements demandés pour ces paramètres.
+    Une distribution arithmétique de sous-spectres peut être insérée parmis les sous-spectres théoriques,
+\item si IO(4)$\neq 0 $, un spectre de bruit de fond (précédé d'un titre),
+\item si IO(10)$=0$, un spectre expérimental,
+\end{itemize}
+Les spectre présents dans le fichier (spectre de bruit de fond et spectre expérimental) sont constitué de 256 canaux.
+Les valeurs des canaux sont réparties sur 32 lignes.
+ Au début de chaque ligne, un entier indique le nombre total de canaux présents dans les lignes précédentes. 
+
+Ci suit un exemple de fichier donnant l'allure général d'un fichier source.
+Les nom des variables doivent être remplacée par les valeurs numérique.
+Les lignes commençant par des points de suspension sont des commentaire qui ne doivent pas apparaitre dans un vrai fichier d'entrée.
+\begin{lstlisting}[frame=single,escapeinside=<>]
+Ligne de titre, donnant des indications diverses.
+CN NMAX NS NS1 NS2 IZZ IOPT HBRUIT
+<{\it ... si }>IZZ<{\it =1 :}>
+IZ(1) IZ(2) IZ(3) IZ(4) ... IZ(9) IZ(10)
+<{\it ... si }>IOPT<{\it=1 :}>
+IO(1) IO(2) IO(3) IO(4) ... IO(19) IO(20) IO(20)
+<{\it ... si }>IO(17)<{\it=1 :}>
+GRASS(1) GRASS(2) ...   GRASS(10) 
+<{\it ... 1er sous-spectre}>
+DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) IOGV
+ <{\it ... 2nd sous-spectre}>
+DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC   
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) IOGV
+<{\it ...etc...}>
+<{\it ... cas d'un sous-spectre avec }>IOGV<{\it=3 :}>
+ DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) 3
+ GV(1) GV(2) ... GV(8)
+ NG(1) NG(2) ... NG(8)
+<{\it ... cas d'une distribution arithmetique de sous-spectre :}>
+DI0 PDI GA H1 SQ0 PSQ CH0 PCH ETA0 THETA0 PTHETA GAMA BETA ALPHA MONOC
+NB0(1) NB0(2) NB0(3)... NB0(9) NB0(10)
+<{\it ... spectre experimental :}>
+  0 29368 29374 29374 29378 29361 29336 29358 29389
+  8 29383 29359 29345 29351 29372 29384 29393 29388
+ 16 29365 29369 29370 29377 29389 29393 29382 29384
+<{\it ... reste du spectre}>
+240 29380 29348 29379 29376 29349 29367 29380 29363
+248 29369 29367 29369 29384 29383 29370 29385 29389
+<{\it si IO(4)=1, presence d'un spectre  de bruit :}>
+ TITRE du spectre de bruit
+  0 29262 29297 29297 29320 29335 29322 29327 29345
+  8 29352 29345 29342 29326 29305 29290 29285 29301
+<{\it ... reste du spectre }>
+ 248 29330 29336 29339 29358 29387 29354 29373 29363
+ \end{lstlisting}
+
+%Parametres hyperfins
+\begin{table}
+\caption{Paramètres hyperfins}
+\begin{tabular}{c|c}
+...&...\\
+\end{tabular}
+\end{table}
+préciser ici l'ordre des paramètres dans BT, comment est defini le type d'ajustement, 
+evoquer MONOC
+\FloatBarrier
+%Distributions de sous-spectres
+\subsubsection{Distributions arithmétique de sous-spectres}
+...
+\newpage
+\subsubsection{exemple de fichier d'entrée}
+Prenons l'exemple du fichier suivant :
+\begin{lstlisting}
+0/09/97 NR Fe51Pt27Nb2B20 900C Mot:H1 8mm/s App:1 Temp:300K
+0.0600356 80 8 5 8 0 1 0
+0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 0 0 0
+1 1 2 2 3 3 4 8 0 0
+0.13    .18  81000  0.27   277  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+0.13    .18  81000   0     280  0 0 0 0 0 0 
+ 1       0    1       1      1  0 0 0 0 0 0
+-0.072  .18  81000  0.19   241  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+0.11    .18  125000 0.07   115  0 0 0 0 0 0 
+ 1       0    1       1      0  0 0 0 0 0 0
+.065  0  .18   4738  0  0 100 -15 0 0 0 0 0 0 0
+  2       0      1   2     0      0 0   0  0
+   0 2936866 2937414 2937448 2937813 2936118 2933607 2935895 2938930
+   8 2938309 2935942 2934521 2935197 2937298 2938432 2939326 2938806
+  16 2936536 2936904 2937098 2937780 2938907 2939332 2938254 2938458
+  24 2936899 2937734 2937058 2934998 2936177 2936895 2938978 2937656
+  32 2936772 2938535 2937290 2938995 2936098 2937345 2937792 2937642
+  40 2938637 2936002 2935063 2936945 2939254 2935946 2935282 2937072
+  48 2936534 2935796 2933706 2934070 2934227 2933531 2931402 2929126
+  56 2925986 2924042 2921245 2920892 2920914 2920639 2922117 2926364
+  64 2929294 2929821 2930991 2932563 2933154 2934197 2935048 2934909
+  72 2934118 2934726 2935826 2936170 2935984 2933513 2934665 2934117
+  80 2934614 2934278 2934327 2928869 2921944 2922008 2923439 2926673
+  88 2926246 2929796 2929768 2932030 2933561 2932213 2932780 2934548
+  96 2935227 2934530 2934215 2932671 2930546 2929025 2928541 2930139
+ 104 2929380 2929394 2925852 2927064 2926582 2924999 2925148 2925250
+ 112 2920879 2921155 2921680 2919556 2922850 2924848 2926294 2928443
+ 120 2930851 2931892 2930184 2927042 2924785 2924610 2927450 2929919
+ 128 2929214 2927812 2926000 2923581 2923963 2926178 2927523 2927325
+ 136 2926201 2925254 2920272 2921388 2924001 2924121 2923356 2925664
+ 144 2927858 2928319 2925991 2927803 2928501 2932273 2931864 2930785
+ 152 2930279 2930946 2930999 2928093 2927205 2926481 2926625 2927818
+ 160 2927922 2926973 2927965 2927396 2929250 2928999 2928383 2928056
+ 168 2923559 2921584 2922414 2924801 2929318 2929648 2931047 2935912
+ 176 2933075 2933607 2933907 2935826 2938741 2935490 2937386 2936315
+ 184 2934837 2935005 2934626 2935319 2934540 2931694 2932804 2933068
+ 192 2932614 2935923 2936230 2934393 2934317 2934267 2934088 2932837
+ 200 2931086 2930906 2928521 2925563 2922992 2918894 2917045 2918983
+ 208 2922561 2926459 2929470 2931752 2934993 2936115 2933460 2933954
+ 216 2936705 2935712 2935155 2935436 2935433 2936745 2935363 2935105
+ 224 2935398 2935381 2936615 2937822 2936971 2936850 2936837 2937205
+ 232 2937418 2936668 2937714 2936877 2935516 2937878 2937874 2938865
+ 240 2938061 2934803 2937958 2937679 2934971 2936772 2938088 2936396
+ 248 2936950 2936746 2936919 2938460 2938389 2937098 2938500 2938994
+\end{lstlisting}
+\paragraph{Explication :}
+La première ligne est le titre, elle n'est pas exploitée par Mosfit. 
+La seconde ligne est :
+\begin{lstlisting}[frame=single]
+0.0600356 80 8 5 8 0 1 0
+\end{lstlisting}
+On a une vitesse par canal $\text{CN}=0.0600356$~\milli\meter.\reciprocal\second.
+$\text{NMAX}=80$, donc, l'algorithme des moindres carrés s'arrêtera après la 80ème itération si la convergence n'est pas atteinte avant.
+On souhaite utiliser $\text{NS}=8$ sous-spectres théoriques pour décrire le spectre expérimental.
+Parmis ces sous-spectres, les spectres NS1=5 à NS2=8 sont décrit par une distribution arithmétique.
+$\text{IZZ}=0$, aucun canal n'est ignoré.$\text{IOPT}=1$, on doit donc specifier les options $\text{IO}$ sur la ligne suivante. La ligne suivante est :
+\begin{lstlisting}[frame=single]
+0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 0 0 0
+\end{lstlisting}
+Toutes les options sont mises à zéro et ont donc leur valeur par defaut, sauf les options $\text{IO(12)}$, $\text{IO(13)}$, $\text{IO(14)}$ et $\text{IO(17)}$.
+Comme $\text{IO(17)}=1$, la ligne suivante correspond aux groupes de sous-spectres à moyenner:
+\begin{lstlisting}[frame=single]
+1 1 2 2 3 3 4 8 0 0
+\end{lstlisting}
+Le premier groupe comprends uniquement le premier sous-spectre. De même, le second groupe et le troisième groupe contiennent le sous-spectre 2 et le sous-spectre 3 respectivement.
+Les dernier groupe contient les sous-spectres 4 à 8. Il n'y a pas de cinquième groupe
+Au final, on souhaite donc des information en sortie sur 4 sous-spectre: Les sous-spectres $\text{NT}=1$ , $\text{NT}=2$  et $\text{NT}=3$ ,  ainsi qu'un nouveau sous-spectre qui est la moyenne du sous-spectre $\text{NT}=4$  et des sous-spectres de la distribution ($\text{NT}=5$ à $\text{NT}=8$ ).
+
+Les Deux lignes suivantes correspondent à la description des paramètres du premier sous-spectre.
+La première ligne donne leur valeur initiale, la second donne leur type d'ajustement.
+\begin{lstlisting}[frame=single]
+0.13    .18  81000  0.27   277  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+\end{lstlisting}
+On a donc, dans l'ordre: DI=0.13 (ajustable),  GA=0.18 (fixée), H1=81000 (ajustable), SQ =0.27 (ajustable), CH=277 (ajustable). Tout les autres paramètres (ETA et les angles) sont fixés et nuls.
+ Enfin, MONOC=0, l'échantillon est donc une poudre.
+Les sous-spectre 2,3 et 4 sont définis de manière similaire par les huit lignes suivantes.
+
+On a ensuite la définition de la distribution qui permet de décrire les sous-spectres 5 à 8 :
+\begin{lstlisting}[frame=single]
+.065  0  .18   4738  0  0 100 -15 0 0 0 0 0 0 0
+  2    0     1     2  0  0    0 0 0 0 0
+\end{lstlisting}
+
+\FloatBarrier
+
+
+\subsubsection{utilisation du fichier d'entree}
+Windows: glisser/deposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe, 
+ou se déplacer dans le dossier contenant l'éxecutable et entrer la commande: 
+
+\begin{lstlisting}[frame=single]
+mosfit2016 nomDuFichier.coo
+\end{lstlisting}
+
+MacOS/Linux : se placer dans le dossier de Mosfit et entrer la commande: 
+
+\begin{lstlisting}[frame=single]
+mosfit2016 nomDuFichier.coo
+\end{lstlisting}
+
+\subsection{Sorties}
+Trois fichiers de sortie sont crées, donc le nom correspond au fichier d'entree, avec l'extension remplacée par .out, .dat et .doc. :
+\begin{itemize}
+\item Le fichier .out contient les paramètres hyerpfins ajustés, l'ensemble des grandeurs demandées en option, ainsi que les valeurs intermédiares des paramètres ajustables obtenus au cours de la recherche en moindres carrés.
+\item Le fichier .dat contient les valeurs pour chaque canal du spectre expérimental, du spectre calculé et des eventuels groupes de sous-spectres demandés.
+\item Le fichier .doc contient les paramètres hyerpfins ajustés, et, si demandé, leur moyennes pour chaque groupe de sous-spectres. 
+\end{itemize}
+Un graphique en caractère ASCII (précision 1/100) est également affiché en fin de fichier, qui donne un apperçu du spectre expérimental et du spectre calculé.
+
+
+\subsubsection{Déroulement du programme}
+\begin{enumerate}
+\item Lecture des options.
+\item Lecture des paramètres initiaux pour les NS sous-spectres théoriques. 
+\item Si un spectre de bruit est précisé, lecture du spectre de bruit.
+  Durant cette lecture, les paramètres hyperfins ajustables sont comptés.
+\item Lecture du spectre expérimental.
+\item Operation d'affinement. L'algorithme de moindres carrés de Marquardt est appliqué. 
+  Le déroulement de chaque itération de l'affinnement est donné dans la partie suivante.
+\item Calcul des divers grandeurs demandées en option (moyennes, absorptions, groupe de sous-spectres...)
+  et ecriture des resultats dans des fichiers. 
+\end{enumerate}

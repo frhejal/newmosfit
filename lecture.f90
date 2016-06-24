@@ -11,28 +11,19 @@ module lecture
   use options
   implicit none
   integer::NIN=5 !<Entree standard
+  character(len=255)::fichierCoo
   contains
 !=======================================================================
   !>@brief Ouverture du fichier donné en argument
   !>@details Les fichiers de sortie sont nommés en fonction du nom du fichier d'entrée
-  subroutine lecture_ouvrir_fichier(fichierOut,fichierDat,fichierDoc)
-    character(len=*),intent(out)::fichierOut!<fichier de sortie complet
-    character(len=*),intent(out)::fichierDat!<fichiers de donnes des spectrees (pour tracé eventuel)
-    character(len=*),intent(out)::fichierDoc!<fichier de resumé des résultats
-    character(len=255)::fichier
+  subroutine lecture_ouvrir_fichier_entree
     integer::taille
-    call get_command_argument(1,fichier)
-    taille=len_trim(fichier)
+    call get_command_argument(1,fichierCoo)
+    taille=len_trim(fichiercoo)
     if(taille/=0)then
-      open(NIN,file=fichier,status="unknown",form="formatted", access="sequential")
-      fichierOut=fichier
-      fichierDoc=fichier
-      fichierDat=fichier
-      fichierOut(taille-2:taille)="out"
-      fichierDat(taille-2:taille)="dat"
-      fichierDoc(taille-2:taille)="doc"
+      open(NIN,file=fichierCoo,status="unknown",form="formatted", access="sequential")
     endif
-  end subroutine lecture_ouvrir_fichier
+  end subroutine lecture_ouvrir_fichier_entree
 !=======================================================================
   subroutine lecture_titre
     read(NIN,'(256A)') titre      
@@ -54,15 +45,22 @@ module lecture
     if(IO(17)/=0) read(5,*) (grass(i), i=1,10)
   end subroutine lecture_options
 !=======================================================================
-    !> @brief Lecture des paramètres hyperfins et de leurs options d'ajustement (ajustable vs fixe)
-    subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc,nb,iogv)
-      integer,intent(out)::monoc
-      integer,intent(out)::iogv
-      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha
-      integer,intent(out)::nb(10)
+    !> @brief Lecture des paramètres hyperfins et de leurs options d'ajustement (ajustable vs fixe),
+    !! et eventuellement des largeurs de raies (si IOGV lue vaux 3)
+    subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc,nb,iogv,gv,ng)
+      integer,intent(out)::monoc!< monocristal ou pas monocristal
+      integer,intent(out)::iogv ! type d'ajustement des raies
+      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha !< params hyperfins
+      integer,intent(out)::nb(10) !< type d'ajustement des params hyperfins
+      real(dp),intent(out)::gv(8)
+      integer,intent(out)::ng(8)
       integer::i
-      read(5,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc
-      read(5,*) (nb(i), i=1,10), iogv
+      read(NIN,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc
+      read(NIN,*) (nb(i), i=1,10), iogv
+      if(iogv==3)then
+        read(NIN,*) (gv(i),i=1,8)
+        read(NIN,*) (ng(i),i=1,8)
+      endif
     end subroutine lecture_param
 !=======================================================================
     !> @brief Lecture des parametres hyperfins à partir desquels construire une progression arithmetique 

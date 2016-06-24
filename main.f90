@@ -52,25 +52,25 @@ program mosfit
   integer::nt
   integer::nts !Nombre de plages de sous-spectres à sommer
   integer::nss
+  integer::nsmin,nsmax
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
+  real(dp)::champ(44)
+  real(dp)::champLisse(42)
   real(dp)::s(44)
   real(dp)::sl(42)
   real(dp)::sInt(40) 
   real(dp)::btmoy(7,2)
-  character(len=255)::fichierOut
-  character(len=255)::fichierGnuplot
-  character(len=255)::fichierResultats
   !initialisations------------------------------------------------------
   call raz
 !=======================================================================
 ! Entree des options et des données, copie dans le fichier de sortie
 !=======================================================================
-  call lecture_ouvrir_fichier(fichierOut,fichierGnuplot,fichierResultats)
+  call lecture_ouvrir_fichier_entree
   !Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
-  call ecriture_nommer_fichier_de_sortie(fichierOut)
+  call ecriture_nommer_fichier_de_sortie(fichierCoo)
   call ecriture_titre(0)
   call ecriture_options(CN,NMAX,NS,NS1,NS2)
   !Lecture des parametres ajustables des sous-spectres------------------
@@ -84,9 +84,9 @@ program mosfit
                                       &THETA0,PTHETA,GAMA,BETA,ALPHA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
-      if(IO(10)/=2) call variablesAjustables_raz_hyperfins
-      call lecture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV )
-      call ecriture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB)
+!~       if(IO(10)/=2) call variablesAjustables_raz_hyperfins  ! ancienne option pour reunitiliser les meêm données d'un appel à l'autre (quand Mosfit était une sous-routine ?)
+      call lecture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV,GV,NG)
+      call ecriture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV,GV,NG)
     endif
     call variablesAjustables_definir_largeurs_raies
     ! Mise en tableau des parametres hyperfins et des largeurs variables
@@ -151,13 +151,20 @@ program mosfit
   if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
   ! Absorptions,moyenne et lissage des sous-spectres
   call spectres_absorption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
-  call spectres_contributions_distributions(NS,s,sInt)
-  call ecriture_absorption_dispersion_contributions(NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
+  call spectres_contributions_distributions(1,NS,s,sInt,champ)
+  call ecriture_absorption_dispersion_contributions(1,NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
+  nsmin=1
+  nsmax=NS
   if(IO(13)/=0)then
-    call spectres_lissage_distribution(NS,s,sl)
-    call spectres_moyennes_param_hyperfins(ns,ns2,bt,s,sInt(NS),nss,btmoy)
-    call ecriture_lissage(NS,s,sl)
-    call ecriture_moyennes(nss,btmoy,' ')
+    if(IO(13)==2)then
+      nsmin=NS1
+      nsmax=NS2
+      call spectres_contributions_distributions(nsmin,nsmax,s,sInt,champ)
+    endif
+    call spectres_lissage_distribution(nsmin,nsmax,s,sl,champ,champLisse)
+    call spectres_moyennes_param_hyperfins(nsmin,nsmax,bt,s,sInt(NS2),btmoy)
+    call ecriture_lissage(nsmin,nsmax,s,sl,champ,champLisse)
+    call ecriture_moyennes(nsmin,nsmax,btmoy,' ')
   endif
   ! Calcul du khi**2
   KHI2=ajustement_ecart_stat(K,N,Y,Q(:,K+2),POIDS)
@@ -177,8 +184,8 @@ program mosfit
     ! Tracé des sous-spectres-------------------------------------------
       call spectres_total_sous_spectres(GRASS,nts)
     endif
-    call ecriture_pour_gnuplot(N,nts,CN,Y,Q(:,K+2),TOTAL_SOUS_SPECTRES,fichierGnuplot)
-    call ecriture_resultats_resume(NS,nss,s,sl,BT,btmoy,fichierResultats)
+    call ecriture_pour_gnuplot(N,nts,CN,Y,Q(:,K+2),TOTAL_SOUS_SPECTRES)
+    call ecriture_resultats_resume(nsmin,nsmax,s,sl,BT,btmoy)
   endif
   call ecriture_fin
   contains

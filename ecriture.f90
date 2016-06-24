@@ -10,16 +10,30 @@ module ecriture
   use options
   implicit none
   integer::NOUT=6  ! label du fichier de sortie (sortie par defaut)
-  character(len=255),private::fichier_sortie !nom du fichier de sortie
-
+  character(len=255),private::fichierOut !<fichier de sortie complet
+  character(len=255),private::fichierDat !<fichiers de donnees des spectres (pour tracé eventuel)
+  character(len=255),private::fichierDoc !<fichier de resumé des résultats
   contains
   !=====================================================================
   !>@brief Creation du fichier fit.out 
   subroutine ecriture_nommer_fichier_de_sortie(nom)
     character(len=*)::nom
-    if( len( trim( nom ) )>255) stop "ERREUR dans ecriture_nommer_fichier_de_sortie  : nom de fichier trop long"
-    fichier_sortie = nom
-    open(NOUT,file=trim(fichier_sortie), status='unknown', form='formatted')
+    integer::taille
+    taille=len_trim(nom)
+    if( taille>255) stop "ERREUR dans ecriture_nommer_fichier_de_sortie  : nom de fichier trop long"
+    if(IO(18)==1)then
+      fichierOut=nom
+      fichierDoc=nom
+      fichierDat=nom
+      fichierOut(taille-3:taille)=".out"
+      fichierDat(taille-3:taille)=".dat"
+      fichierDoc(taille-3:taille)=".doc"
+    else
+      fichierOut="fit.out"
+      fichierDoc="RESULTAT.doc"
+      fichierDat="Spect.dat"
+    endif
+    open(NOUT,file=trim(fichierOut), status='unknown', form='formatted')
     write(NOUT,'(A)') ' VERSION 2.1, Juin 2016 '
   end subroutine ecriture_nommer_fichier_de_sortie
   !=====================================================================
@@ -56,10 +70,13 @@ module ecriture
   !=====================================================================
   !>@brief Ecriture des valeurs des parametres hyperfins dans le fichier de sortie
   !!@details Le fichier n'est pas effacé, les données sont ajoutées à la fin.
-  subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb)
+  subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb,iogv,gv,ng)
     integer,intent(in)::monoc
     real(dp),intent(in)::di,ga,h1,sq,ch,eta,teta,gama,beta,alfa
     integer,intent(in)::nb(10)
+    integer,intent(in)::iogv
+    real(dp),intent(in)::gv(8)
+    integer,intent(in)::ng(8)
     integer::i
     integer,save::cpt=0
     if(cpt==0)then
@@ -73,6 +90,11 @@ module ecriture
     endif
     write(NOUT, '(2(F8.3,2X),F11.2,7(2X,F8.3),3X,I4)' ) di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc
     write(NOUT,'(10(5X,I3,2X))')(nb(i), i=1,10)
+    if(iogv==3)then
+      write(NOUT,'(3X,"LARGEUR DE RAIES CHOIX UTILISATEUR")')
+      write(NOUT,'(8F8.3)')(gv(i),i=1,8)
+      write(NOUT,'(8(4X,I4))')(ng(i),i=1,8)
+    endif
     cpt=cpt+1
   end subroutine ecriture_param
   !=====================================================================
@@ -154,24 +176,33 @@ module ecriture
   end subroutine ecriture_raies_covariance
   !=====================================================================
   !>@brief Calcul des rapports d'absoption/dispersion (surfaces) entre le spectre expérimental et le spectre fitté
-  subroutine ecriture_lissage(ns,s,sl)
-    integer,intent(in)::ns
+  subroutine ecriture_lissage(nsmin,nsmax,s,sl,champ,champLisse)
+    integer,intent(in)::nsmin
+    integer,intent(in)::nsmax
     real(dp),intent(in)::s(44)
     real(dp),intent(in)::sl(42)
+    real(dp),intent(in)::champ(44)
+    real(dp),intent(in)::champLisse(42)
     real(dp)::ordS,ordT
     integer::i,ic,colMax,colonneS,colonneT
     character::chaine(256)
+!~     sl(nsmin)=5
+!~     sl(nsmin+1)=10
+!~     sl(nsmin+2)=15
+!~     sl(nsmin+3)=20
+!~     sl(nsmin+4)=25
+!~     sl(nsmin+5)=30
     ! Lissage de la distribution
     if(IO(14)==0)then
-      write(NOUT,'(30X,"LISSAGE",19X,"%",22X,"%LISSE",/)')
-      do i=1,ns+2
-        write(NOUT,'(30X,2(20X,F6.2),/)') s(i+1),sl(i)
+      write(NOUT,'(10X,"LISSAGE",16X,"%",22X,"%LISSE",22X,"CH",22X,"CH LISSE",/)')
+      do i=nsmin,nsmax+2
+        write(NOUT,'(10X,4(20X,F6.2),/)') s(i+1),sl(i), champ(i+1), champLisse(i)
       enddo
     else
-      write(NOUT,'(9X,"LISSAGE",5X,"%",8X,"%LISSE",20X,"DIAGRAMME  EN  CARTOUCHES",//)')  
-      write(NOUT,'(56X,"0",19X,"5",18X,"10%",18X,"15%",18X,"20%",18X,"25%",18X,"30%")')
+      write(NOUT,'(X,"LISSAGE",2X,"%",4X,"%LISSE",4X,"CH",4X,"CH LISSE",17X,"DIAGRAMME  EN  CARTOUCHES",//)')  
+      write(NOUT,'(56X,"0",19X,"5",18X,"10%",17X,"15%",17X,"20%",17X,"25%",17X,"30%")')
       ! Tracé de la distribution en ASCII-art...
-      do i=1,ns+2
+      do i=nsmin,nsmax+2
         ordS=20.0_dp+4.0_dp*sl(i)
         ordT=20.0_dp+4.0_dp*s(i+1)
         colonneS=1+int(ordS)
@@ -187,15 +218,16 @@ module ecriture
         chaine(colonneT)='X'
         chaine(colonneS)='*'
         chaine(21)='!'
-        write(NOUT,'(8X,2(6X,F6.2),4X,A1,256A1)') s(i+1), sl(i), (chaine(ic),ic=1,colMax)
+        write(NOUT,'(4X,4(2X,F6.2),A1,256A1)') s(i+1), sl(i), champ(i+1), champLisse(i), (chaine(ic),ic=1,colMax)
         write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,colMax)
       enddo
     endif
   end subroutine ecriture_lissage
   !=====================================================================
   !>@brief Ecriture des absorptions/dispersions( surfaces relatives des spectres)
-  subroutine ecriture_absorption_dispersion_contributions(ns,k,hbruit,daExp,daFit,sExp,sFit,sBruit,b,s,sInt)
-    integer,intent(in)::ns
+  subroutine ecriture_absorption_dispersion_contributions(nsmin,nsmax,k,hbruit,daExp,daFit,sExp,sFit,sBruit,b,s,sInt)
+    integer,intent(in)::nsmin!< Premier spectre du lissage
+    integer,intent(in)::nsmax!< Dernier spectre du lissage
     integer,intent(in)::k
     real(dp),intent(in)::hbruit
     real(dp),intent(in)::daExp
@@ -215,30 +247,27 @@ module ecriture
     ! Surfaces exprimant la dispersion
     write(NOUT,'(/,"   SURFACE DISPERSEE/SURFACE ABSORPTION    EXP=",F11.5,1X,"FIT=",F11.5,/)') daExp, daFit
     ! Contribution de chaque sous-spectre (en pourcent)
-    do nt=1,ns
+    do nt=nsmin,nsmax
       write(NOUT,'(30X," SPECTRE ",I2,10X,F6.2," %","  TOTAL ",10X,F6.2,/)')nt, s(nt+2),sInt(nt)
     enddo
   end subroutine ecriture_absorption_dispersion_contributions
   !=====================================================================
   !>@brief Moyennes arithmétiques et quadratiques
-  subroutine ecriture_moyennes(nss,btmoy,dash)
-    integer,intent(in)::nss !< Nombre de spectres sur lesquels on effectue les moyenne
+  subroutine ecriture_moyennes(nsmin,nsmax,btmoy,dash)
+    integer,intent(in)::nsmin!< premier des sous-spectres lissés
+    integer,intent(in)::nsmax!< dernier des sous-spectres lissés
     real(dp),intent(in)::btmoy(7,2)
     character,intent(in)::dash(1)
     integer::i
-    if(IO(15)==0)then
-      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
-      write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
-                  &"TETA",9X,"GAMA",9X,"BETA",9X,"ALFA",/)')dash
-      write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
-      write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
-    else
-      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," PREMIERS SPECTRES",//)')dash,nss
-      write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
-                  &"TETA",9X,"WM",9X,"BETA",9X,"ALFA",/)')dash
-      write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
-      write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+    if(IO(13)==1)then
+      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," SPECTRES",//)')dash,nsmax-nsmin+1
+    else if(IO(13)==2)then 
+      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," SPECTRES DE LA DISTRIBUTION",//)')dash,nsmax-nsmin+1
     endif
+    write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
+                &"TETA",/)')dash
+    write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
+    write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
   end subroutine ecriture_moyennes
   !=====================================================================
   !>@brief Ecriture de l'écart statistique "Khi"
@@ -289,7 +318,7 @@ module ecriture
   !=====================================================================
   !>@brief Ecriture des spectres experimental et calculé, ainsi que des sous-spectres
   !>@details L'ecriture se fait dans un fichier à part, facilement exploitable par un logiciel tiers (ex: Gnuplot)
-  subroutine ecriture_pour_gnuplot(n,nts,cn,spectreExp,spectreFit,totalSousSpectres,nom)
+  subroutine ecriture_pour_gnuplot(n,nts,cn,spectreExp,spectreFit,totalSousSpectres)
     integer,intent(in)::n
     integer,intent(in)::nts !< nombre de plages de sous-spectres
     real(dp),intent(in)::cn !<vitesse par canaux
@@ -297,7 +326,6 @@ module ecriture
     real(dp),intent(in)::spectreFit(n) !<spectre theorique (calculé)
     real(dp),intent(in)::totalSousSpectres(n,5)!< sous-spectres
     real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau
-    character(len=*)::nom
     integer::i,j,NoutSave
     NoutSave=NOUT
     NOUT=42
@@ -317,7 +345,7 @@ module ecriture
       enddo
     endif
     ! ecriture dans le fichier 
-    open(NOUT,file=trim(nom), status='unknown', form='formatted')
+    open(NOUT,file=trim(fichierDat), status='unknown', form='formatted')
     do i=1,n
       write(NOUT,'(2X,F6.2,7(1X,F12.2))') (tout(i,j),j=1,nts+3)
     enddo
@@ -325,40 +353,39 @@ module ecriture
     NOUT=NoutSave
   end subroutine ecriture_pour_gnuplot
   !=====================================================================
-  !>@brief Ecriture d'un resumée des resultats dans le fichier RESULTAT.doc
-  subroutine ecriture_resultats_resume(ns,nss,s,sl,bt,btmoy,nom)
-    integer,intent(in)::ns !<nombre de sous-spectres
-    integer,intent(in)::nss !< nombre de sous-spectres sommés
+  !>@brief Ecriture d'un resumée des resultats dans le fichier .doc
+  subroutine ecriture_resultats_resume(nsmin,nsmax,s,sl,bt,btmoy)
+    integer,intent(in)::nsmin !<nombre de sous-spectres
+    integer,intent(in)::nsmax !< nombre de sous-spectres sommés
     real(dp),intent(in)::s(44)
     real(dp),intent(in)::sl(42)
     real(dp),intent(in)::bt(10,40)
     real(dp),intent(in)::btmoy(7,2)
-    character(len=*)::nom
     integer::i,nt,NoutSave
     NoutSave=NOUT
     NOUT=42
-    open(NOUT,file=trim(nom), status='unknown', form='formatted')
+    open(NOUT,file=trim(fichierDoc), status='unknown', form='formatted')
     call ecriture_titre(0)
     write(NOUT,'(//,"#",50X,"CARACTERISTIQUES DES SPECTRES",//)') 
     if(IO(15)==0)then
       write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"GAMA",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
       write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",25X,"DEG",19X,"DEG",16X," % ",/)')
-      do nt=1,ns
+      do nt=nsmin,nsmax
         write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
                                                                               & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
       enddo
     else
       write(NOUT,'("#",1X,13X,"DI",7X,"GA",5X," SQ",8X,"CH",7X," ETA",8X,"TETA",7X,"WM",7X,"BETA",7X,"ALFA",9x,"TAUX",/)')
       write(NOUT,'("#",1X,13X,"MMS",5X,"MMS",5X,"MMS",8X,"KG",19X,"DEG",8X,"adim",10X,"DEG",16X," % ",/)')
-      do nt=1,ns
+      do nt=nsmin,nsmax
         write(NOUT,'(/,"#"," SPECTRE ",I2,2X,F6.3,2X,F5.2,2X,F6.3,2X,F8.2,5(2X,F9.2),8X,F6.2)') &
                                                                               & nt,bt(1,nt),bt(2,nt),(bt(i,nt),i=4,10),s(nt+2)
       enddo
     endif
-    do i=1,ns+2
+    do i=nsmin,nsmax+2
       write(NOUT,*)i,sl(i)
     enddo
-    if (IO(13)/=0)call ecriture_moyennes(nss,btmoy,'#')
+    if (IO(13)/=0) call ecriture_moyennes(nsmin,nsmax,btmoy,'#')
     close(NOUT)
     NOUT=NoutSave
   end subroutine ecriture_resultats_resume

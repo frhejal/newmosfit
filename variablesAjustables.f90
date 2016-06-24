@@ -138,23 +138,64 @@ module variablesAjustables
   end subroutine variablesAjustables_super
   !=====================================================================
   !>@brief Définition des largeurs variables des raies du spectre d'apres IOGV. 
-  !!@n@b Remarque: dans le cas d'une distribution arithmétique, IOGV=0
+  !!@details Cette routine travaille de concert avec  variablesAjustables_actualiser_largeur_raies
+  !! Une fois les differentes largeurs de raies calculées et affinées
+  !!Remarque: dans le cas d'une distribution arithmétique, IOGV=0
   subroutine variablesAjustables_definir_largeurs_raies
-    NG=0
-    GV=0
-    if(IOGV/=0) GV(1:8) = GA  
-    if((IOGV==1).OR.(IOGV==2)) NB(2)=0 !GA devient non ajustable  
-    if(IOGV==1)then 
-        NG(1)=1
+    integer::i
+    select case(IOGV)
+      case(0)
+        NG=0 ! toutes les raies sont égale à GA
+        GV=0.0_dp
+      case(1)
+        GV = GA
+        NB(2)=0 !GA devient non ajustable  
+        !Deux largeurs de raies independantes.
+        NG(1)=1 
         NG(3)=1
-    elseif(IOGV==2)then
+      case(2)
+        GV = GA
+        NB(2)=0 !GA devient non ajustable  
+        !trois largeurs de raies independantes.
         NG(2)=1
         NG(3)=1
         NG(4)=1
-    endif
+      case(3)!largeur de raies définies par utilisateur
+        do i=1,8
+          !Les raies sont ajustables si NB(i)=1, défini par l'utilisateur
+          if(NG(i)==0) GV(i)=0.0_dp 
+        enddo
+      case default
+        write(6,*) "STOP IOGV=", IOGV
+        stop "OPTION INVALIDE POUR IOGV"
+    end select
+        
   end subroutine variablesAjustables_definir_largeurs_raies
+  !===================================================================== 
+  !>@brief en fonction de IOGVT(NT),applique les relations demandées entre les 
+  !! largeurs de raies (spectre quadrupolaire, spectre magnétique...)
+  !!@details Les largeurs à ajuster ont été definie dans la routine 
+  !! variablesAjustables_definir_largeurs_raies. 
+  !!@n Il s'agit ici d'appliquer les largeurs de raies calculées à toute les raies
+  !! pour la construction du spectre.
+  subroutine variablesAjustables_actualiser_largeur_raies(nt)
+    integer,intent(in)::nt !< numéro du spectre en cours de traitement. 
+    if(IOGVT(nt)==1)then 
+      GVT(2,nt)=GVT(1,nt)
+      GVT(5,nt)=GVT(1,nt)
+      GVT(6,nt)=GVT(1,nt)
+      GVT(4,nt)=GVT(3,nt)
+      GVT(7,nt)=GVT(3,nt)
+      GVT(8,nt)=GVT(3,nt)
+    elseif(IOGVT(nt)==2) then
+      GVT(7,nt)=GVT(2,nt)
+      GVT(6,nt)=GVT(3,nt)
+      GVT(5,nt)=GVT(4,nt)
+    endif
+  endsubroutine variablesAjustables_actualiser_largeur_raies
   !=====================================================================
-  !>@brief Rangement des parametres hyperfins du NTième spectre dans les tableaux BT,NBT et B
+  !>@brief Rangement des parametres hyperfins du NTième spectre dans les tableaux BT,NBT et B,
+  !!Rangement des largeur de raie dans les tableaux NGT, GVT et B
   subroutine variablesAjustables_ranger(nt)
     integer,intent(in)::nt
     integer::i
@@ -194,7 +235,6 @@ module variablesAjustables
         K=K+1
       endif
     enddo
-
   end subroutine variablesAjustables_ranger
   !=====================================================================
   !>@brief Actualisation du rangement des parametre ajustables du  NTième spectre
@@ -210,8 +250,8 @@ module variablesAjustables
       if(IO(5)/=0 .AND. NBT(i,nt)==3) call connex_connexions(BT,IO)
     enddo
     do i=1,8
-      GVT(i,nt)=BT(2,nt)
-      if(NGT(i,nt)/=0)then 
+      GVT(i,nt)=BT(2,nt)  ! par defaut, largeur de raie actualisée à la valeur trouvée pour GA
+      if(NGT(i,nt)/=0)then ! Selon la valeur de NGT, une autre largeur de raies peut être utilisée
         l=IADG(i,nt)
         GVT(i,nt)=B(l)
       endif
@@ -246,24 +286,6 @@ module variablesAjustables
     if(k>40)  stop erreur_kmax
     B(K)=TY
   end subroutine variablesAjustables_nivzer
-  !===================================================================== 
-  !>@brief en fonction de IOGVT(NT),applique les relations demandées entre les 
-  !! largeurs de raies (spectre quadrupolaire, spectre magnétique...)
-  subroutine variablesAjustables_actualiser_largeur_raies(nt)
-    integer,intent(in)::nt !< numéro du spectre en cours de traitement. 
-    if(IOGVT(nt)==1)then 
-      GVT(2,nt)=GVT(1,nt)
-      GVT(5,nt)=GVT(1,nt)
-      GVT(6,nt)=GVT(1,nt)
-      GVT(4,nt)=GVT(3,nt)
-      GVT(7,nt)=GVT(3,nt)
-      GVT(8,nt)=GVT(3,nt)
-    elseif(IOGVT(nt)==2) then
-      GVT(7,nt)=GVT(2,nt)
-      GVT(6,nt)=GVT(3,nt)
-      GVT(5,nt)=GVT(4,nt)
-    endif
-  endsubroutine variablesAjustables_actualiser_largeur_raies
   !=====================================================================
   !<@brief ! Calcul des ecarts type des paramètres ajustables
   subroutine variablesAjustables_calculer_ecart_type(phi,nt,n)

@@ -53,12 +53,13 @@ module habillage
     spectre=0.0_dp
     d0= 0.5_dp*(real(N,dp) + 1.0_dp)   !milieu du spectre
     do l=1,8
-      G(l,nt)=largeur/cn
+      G(l,nt)=largeur/cn ! Largeur par defaut ..
       H(l,nt)=hauteur*intensites(l)/8.0_dp
-      if(  ((IOGVT(nt)==3 ) .AND. (NGT(l,nt) /=0) )&
-          &   .OR.      (IOGVT(nt)==1)             &
-          &   .OR.      (IOGVT(nt)==2)             &
-      & )then
+      ! Correction  de la largeur selon l'option IOGV
+      if(  ((IOGVT(nt)==3 ) .AND. (NGT(l,nt) /=0) )& ! Si l'ajustement des raies est customisé, on se refere à NGT (I.E, NG donné par l'utilisateur)
+          &   .OR.      (IOGVT(nt)==1)             & ! Si on a 2 groupes (spectre quadrupolaire), toutes les raies ont déjà leur largeur decrite dans GVT (appel precedent à variablesAjustables_actualiser_largeur_raies)
+          &   .OR.      (IOGVT(nt)==2)             & ! idem si 3 groupes (spectre magnétique)
+        & )then
         G(l,nt)=GVT(l,nt)/CN
         H(l,nt)=H(l,nt)*largeur/GVT(l,nt)
       endif
