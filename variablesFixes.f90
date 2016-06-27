@@ -14,4 +14,5 @@ module variablesFixes
   integer::NS1=0 !< Premier spectre de la distribution
   integer::NS2=0 !< Dernier spectre de la distribution
   integer::GRASS(10) !< Plages de sous-spectres à sommer (si IO(17)=1)
+  integer::PLAGEL(2) !<Plage de sous-spectres à lisser
 end module variablesFixes

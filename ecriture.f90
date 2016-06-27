@@ -55,9 +55,10 @@ module ecriture
   !>@brief Ecriture des options précédemment lues
   !!@details L'ecriture se fait dans le fichier de sortie (unité NOUT précedemment ouverte)
   !! Le fichier est effacé avant le debut de l'ecriture.
-  subroutine ecriture_options(cn,nmax,ns,ns1,ns2)
+  subroutine ecriture_options(cn,nmax,ns,ns1,ns2,plage)
     real(dp),intent(in)::cn
     integer,intent(in)::nmax,ns,ns1,ns2
+    integer,intent(in)::plage(2)
     integer::i
     if(IZZ==1) write(NOUT,*)' CANAUX SUPPRIMES = ',(IZ(i),i=1,10)
     if(IOPT==1) write(NOUT,'(1X,A,20(11X,I1))') ' OPTIONS UTILISEES = ',(IO(i),i=1,20)
@@ -65,6 +66,9 @@ module ecriture
     write(NOUT,*) 'NBRE MAX ITERATIO=', nmax
     if(IO(4)/=0) write(NOUT,*) 'IL Y A UN SPECTRE DE BRUIT'
     if(ns1/=0) write(NOUT,*) 'DISTRIBUTION ENTRE NS1=',ns1,' ET NS2 =',ns2
+    if(IO(13)==1)write(NOUT,*) 'LISSAGE DE TOUS LES SPECTRES'
+    if(IO(13)==2)write(NOUT,*) 'LISSAGE DE LA DISTRIBUTION'
+    if(IO(13)==3)write(NOUT,*) 'LISSAGE DU SPECTRE ', plage(1) ,'AU SPECTRE ', plage(2)
     if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
   end subroutine ecriture_options
   !=====================================================================
@@ -176,13 +180,13 @@ module ecriture
   end subroutine ecriture_raies_covariance
   !=====================================================================
   !>@brief Calcul des rapports d'absoption/dispersion (surfaces) entre le spectre expérimental et le spectre fitté
-  subroutine ecriture_lissage(nsmin,nsmax,s,sl,champ,champLisse)
+  subroutine ecriture_lissage(nsmin,nsmax,s,sl,champ)
     integer,intent(in)::nsmin
     integer,intent(in)::nsmax
     real(dp),intent(in)::s(44)
     real(dp),intent(in)::sl(42)
+!~     real(dp),intent(out)::sl(42)
     real(dp),intent(in)::champ(44)
-    real(dp),intent(in)::champLisse(42)
     real(dp)::ordS,ordT
     integer::i,ic,colMax,colonneS,colonneT
     character::chaine(256)
@@ -194,13 +198,13 @@ module ecriture
 !~     sl(nsmin+5)=30
     ! Lissage de la distribution
     if(IO(14)==0)then
-      write(NOUT,'(10X,"LISSAGE",16X,"%",22X,"%LISSE",22X,"CH",22X,"CH LISSE",/)')
+      write(NOUT,'(10X,"LISSAGE",16X,"%",22X,"%LISSE",22X,"CH",22X,/)')
       do i=nsmin,nsmax+2
-        write(NOUT,'(10X,4(20X,F6.2),/)') s(i+1),sl(i), champ(i+1), champLisse(i)
+        write(NOUT,'(10X,3(20X,F6.2),/)') s(i+1),sl(i), champ(i+1)
       enddo
     else
-      write(NOUT,'(X,"LISSAGE",2X,"%",4X,"%LISSE",4X,"CH",4X,"CH LISSE",17X,"DIAGRAMME  EN  CARTOUCHES",//)')  
-      write(NOUT,'(56X,"0",19X,"5",18X,"10%",17X,"15%",17X,"20%",17X,"25%",17X,"30%")')
+      write(NOUT,'(X,"SPECTRE",5X,"%",4X,"%LISSE",4X,"CH",21X,"DIAGRAMME  EN  CARTOUCHES",//)')  
+      write(NOUT,'(52X,"0",19X,"5",18X,"10%",17X,"15%",17X,"20%",17X,"25%",17X,"30%")')
       ! Tracé de la distribution en ASCII-art...
       do i=nsmin,nsmax+2
         ordS=20.0_dp+4.0_dp*sl(i)
@@ -218,8 +222,12 @@ module ecriture
         chaine(colonneT)='X'
         chaine(colonneS)='*'
         chaine(21)='!'
-        write(NOUT,'(4X,4(2X,F6.2),A1,256A1)') s(i+1), sl(i), champ(i+1), champLisse(i), (chaine(ic),ic=1,colMax)
-        write(NOUT,'(36X,A1,256A1)') (chaine(ic),ic=1,colMax)
+        if((i>nsmin) .AND. (i<nsmax+2))then
+          write(NOUT,'(X,I4,3X,3(2X,F6.2),A1,256A1)')i-1,s(i+1), sl(i), champ(i+1), (chaine(ic),ic=1,colMax)
+        else
+          write(NOUT,'(8X,3(2X,F6.2),A1,256A1)')s(i+1), sl(i), champ(i+1), (chaine(ic),ic=1,colMax)
+        endif
+        write(NOUT,'(32X,A1,256A1)') (chaine(ic),ic=1,colMax)
       enddo
     endif
   end subroutine ecriture_lissage
@@ -260,14 +268,19 @@ module ecriture
     character,intent(in)::dash(1)
     integer::i
     if(IO(13)==1)then
-      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," SPECTRES",//)')dash,nsmax-nsmin+1
+      write(NOUT,'(//,A,"CALCUL DE MOYENNES SUR LES ",I3," SPECTRES",//)')dash,nsmax-nsmin+1
     else if(IO(13)==2)then 
-      write(NOUT,'(//,A,"CALCUL SUR LES ",I3," SPECTRES DE LA DISTRIBUTION",//)')dash,nsmax-nsmin+1
+      write(NOUT,'(//,A,"CALCUL DE MOYENNES SUR LES ",I3," SPECTRES DE LA DISTRIBUTION",//)')dash,nsmax-nsmin+1
+    else if(IO(13)==3)then 
+      write(NOUT,'(//,A,"CALCUL DE MOYENNES DU SPECTRE ",I3," AU SPECTRE ",I3,//)')dash,nsmin, nsmax
     endif
-    write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
-                &"TETA",/)')dash
-    write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
-    write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+!~     write(NOUT,'(A,20X,"DI",9X,"GA",9X,"H1",9X," SQ",9X,"CH",9X," ETA",9X,&
+!~                 &"TETA",/)')dash
+!~     write(NOUT,'(//,A,"MOYENNE",6X,7F12.3,//)')dash,(btmoy(i,1),i=1,7)
+!~     write(NOUT,'(//,A,"QUADRATIQUE",2X,7F12.3,//)')dash,(btmoy(i,2),i=1,7)
+    write(NOUT,'(A,20X,"DI",9X," SQ",9X,"CH",9X,"TETA",/)')dash
+    write(NOUT,'(//,A,"MOYENNE",6X,4F12.3,//)')dash,btmoy(1,1),btmoy(4,1),btmoy(5,1),btmoy(7,1)
+    write(NOUT,'(//,A,"QUADRATIQUE",2X,4F12.3,//)')dash,btmoy(1,2),btmoy(4,2),btmoy(5,2),btmoy(7,2)
   end subroutine ecriture_moyennes
   !=====================================================================
   !>@brief Ecriture de l'écart statistique "Khi"

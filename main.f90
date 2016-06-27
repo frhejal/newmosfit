@@ -43,7 +43,7 @@ program mosfit
   use lecture
   use ecriture        ! routines d'ecriture du fichier résultat
   use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
-  use spectres         ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
+  use spectres        ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
   use ajustement      ! moindres carres
   implicit none
   real(dp)::AA(1600) 
@@ -51,12 +51,10 @@ program mosfit
   real(dp)::cmin=0,cmax=0
   integer::nt
   integer::nts !Nombre de plages de sous-spectres à sommer
-  integer::nss
   integer::nsmin,nsmax
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
   real(dp)::champ(44)
-  real(dp)::champLisse(42)
   real(dp)::s(44)
   real(dp)::sl(42)
   real(dp)::sInt(40) 
@@ -69,10 +67,10 @@ program mosfit
   call lecture_ouvrir_fichier_entree
   !Lecture des options--------------------------------------------------
   call lecture_titre
-  call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS)
+  call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS,PLAGEL)
   call ecriture_nommer_fichier_de_sortie(fichierCoo)
   call ecriture_titre(0)
-  call ecriture_options(CN,NMAX,NS,NS1,NS2)
+  call ecriture_options(CN,NMAX,NS,NS1,NS2,PLAGEL)
   !Lecture des parametres ajustables des sous-spectres------------------
   !(ou construction d'une distribution en progression arithmetique)
   do NT=1,NS
@@ -148,22 +146,27 @@ program mosfit
   ! Ecarts type
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
   ! Largeurs, hauteur et energie des raies
-  if(io(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
+  if(IO(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
   ! Absorptions,moyenne et lissage des sous-spectres
   call spectres_absorption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
   call spectres_contributions_distributions(1,NS,s,sInt,champ)
   call ecriture_absorption_dispersion_contributions(1,NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
-  nsmin=1
-  nsmax=NS
+  select case(IO(13)) !Selection de la plage de sous-spectres à sommer
+    case(2)
+    nsmin=NS1
+    nsmax=NS2
+    case(3)
+    nsmin=PLAGEL(1)
+    nsmax=PLAGEL(2)
+    case default
+    nsmin=1
+    nsmax=NS
+  end select 
   if(IO(13)/=0)then
-    if(IO(13)==2)then
-      nsmin=NS1
-      nsmax=NS2
-      call spectres_contributions_distributions(nsmin,nsmax,s,sInt,champ)
-    endif
-    call spectres_lissage_distribution(nsmin,nsmax,s,sl,champ,champLisse)
-    call spectres_moyennes_param_hyperfins(nsmin,nsmax,bt,s,sInt(NS2),btmoy)
-    call ecriture_lissage(nsmin,nsmax,s,sl,champ,champLisse)
+    call spectres_contributions_distributions(nsmin,nsmax,s,sInt,champ)
+    call spectres_lissage_distribution(nsmin,nsmax,s,sl)
+    call spectres_moyennes_param_hyperfins(nsmin,nsmax,bt,s,sInt(nsmax),btmoy)
+    call ecriture_lissage(nsmin,nsmax,s,sl,champ)
     call ecriture_moyennes(nsmin,nsmax,btmoy,' ')
   endif
   ! Calcul du khi**2

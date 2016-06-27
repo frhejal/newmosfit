@@ -239,9 +239,9 @@ module spectres
   !!@n Utilisation de GRASS :  Grass(2*j-1) indique le premier spectre de la jieme somme, 
   !! grass(2*j) indique le dernier spectre de la jieme somme.
   !!@n Exemple :
-  !!@n Pour GRASS = [ 1 3 5 6 7 9 0 0 0 0], on obtient 3 nouveaux sous-spectres.
+  !!@n Pour GRASS = [ 1 3 5 6 7 7 0 0 0 0], on obtient 3 nouveaux sous-spectres.
   !! Le premier est la somme des sous-spectres 1 à 3, le second est la somme des sous-spectres 5 et 6,
-  !! le troisième est la somme des sous-spectres 7 à 9. 
+  !! le troisième est le spectre 7 seul (de 7 à 7).
   subroutine spectres_total_sous_spectres(grass,compteur)
     integer,intent(in)::grass(10) !<groupes de sous-spectres à sommer
     integer,intent(out)::compteur !<nombres de sous-spectres rangés dans TOTAL_SOUS_SPECTRES
@@ -325,6 +325,8 @@ module spectres
       champ(nt+2)=BT(5,nt)
       st=st+s(nt+2)
     enddo
+    champ(nsmin+1)=2.0_dp*champ(2+nsmin)-champ(nsmin+3)
+    champ(nsmax+3)=2.0_dp*champ(2+nsmax)-champ(nsmax+1)
     ! Contribution de chaque sous-spectre (en pourcent)
     sInt=0.0_dp
     s=100.0_dp*s/st
@@ -335,26 +337,23 @@ module spectres
   end subroutine spectres_contributions_distributions
   !=====================================================================
   !<@brief Lissage des distributions
-  subroutine spectres_lissage_distribution(nsmin,nsmax,s,sl,champ,champLisse)
+  subroutine spectres_lissage_distribution(nsmin,nsmax,s,sl)
     integer,intent(in)::nsmin!< Premier spectre du lissage
     integer,intent(in)::nsmax!< Dernier spectre du lissage
     real(dp),intent(in)::s(44) !< Distributions non lissées (Surface des sous-spectres), avec 2 case vides au debut et à la fin (pour le lissage)
-    real(dp),intent(in)::champ(44) !< champ des sous-spectres
     real(dp),intent(out)::sl(42) !< Distributions lissées
-    real(dp),intent(out)::champLisse(42) !< Champs des souss-spectres lissés
     integer::i
     do i=nsmin,nsmax+2
       sl(i)=0.25_dp*(s(i)+2.0_dp*s(i+1)+s(i+2))
-      champLisse(i)=0.25_dp*(champ(i)+2.0_dp*champ(i+1)+champ(i+2))
     enddo
   end subroutine spectres_lissage_distribution
   !=====================================================================
-  !<@brief Calcul des moyennes des parametres hyperfins sur ns (ou ns2) premiers spectres
+  !<@brief Calcul des moyennes des parametres hyperfins sur la plage de sous-spectres spécifiée
   !@details on calcule des moyennes arithmétiques et algébriques, pondérées par la contribution des sous-spectres
   subroutine spectres_moyennes_param_hyperfins(nsmin,nsmax,bt,s,sTotal,btmoy)
-    integer,intent(in)::nsmin !< Dernier sous-spectre de la distribution
-    integer,intent(in)::nsmax !< Dernier sous-spectre de la distribution
-    real(dp),intent(in)::s(44)!<!< Contributions des groupes de sous-spectres
+    integer,intent(in)::nsmin !< premier sous-spectre de la plage
+    integer,intent(in)::nsmax !< Dernier sous-spectre de la plage
+    real(dp),intent(in)::s(44)!< Contributions des sous-spectres
     real(dp),intent(in)::sTotal !< Cumul des contributions jusqu'au dernier spectres (donc Stotal =100.0, en toute logique)
     real(dp),intent(in)::bt(10,40)!< Parametres hyperfins
     real(dp),intent(out)::btmoy(7,2) ! bt(:,1) : moyenne arithmetique, bt(:,2) : moyenne quadratique
@@ -371,7 +370,7 @@ module spectres
       enddo
   end subroutine spectres_moyennes_param_hyperfins
   !=====================================================================
-  !>@brief Réinitialisation de POIDS.
+  !>@brief Réinitialisation
   subroutine spectre_raz
     POIDS=1.0_dp
   end subroutine spectre_raz

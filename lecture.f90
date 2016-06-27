@@ -30,7 +30,7 @@ module lecture
   end subroutine lecture_titre
 !=======================================================================
   !> @brief Lecture des options et des valeurs initiales des parametres hyperfins ajustables
-  subroutine lecture_options(cn,nmax,ns,ns1,ns2,hbruit,grass)
+  subroutine lecture_options(cn,nmax,ns,ns1,ns2,hbruit,grass,plage)
     integer,intent(out)::nmax !<Nombre maximal d'itérations dans l'algorithme des moindres carrés 
     integer,intent(out)::ns !<nombre de sous-spectres 
     integer,intent(out)::ns1 !< numéro du premier sous spectre de la distribution
@@ -38,10 +38,12 @@ module lecture
     real(dp),intent(out)::cn !< largeur d'un canal (mm/s)
     real(dp),intent(out)::hbruit !< hauteur du spectre de bruit
     integer,intent(out)::grass(10) !< Plages de sous-spectres à sommer
+    integer,intent(out)::plage(2) !< Plages de sous-spectres à lisser
     integer::i
     read(NIN,*) cn,nmax,ns,ns1,ns2,IZZ,IOPT,hbruit
     if(IZZ==1) read(5,*) (IZ(i),i=1,10)
     if(IOPT==1) read(5,*) (IO(i),i=1,20)
+    IF(IO(13)==3) read(5,*) plage
     if(IO(17)/=0) read(5,*) (grass(i), i=1,10)
   end subroutine lecture_options
 !=======================================================================

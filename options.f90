@@ -23,14 +23,14 @@
 !!      .     |1 | Pas de spectre expérimental,
 !!      .     |2 | Même spectre expérimental que cas précédent ( +IO(1) millions),
 !!      IO(11)|1 | Tracer Yexp-Ycalc,
-!!      IO(12)|1 | Ecrire du résume dans un fichier RESULTAT.doc, écriture de Yexp et Ycalc dans un fichier exploitable par gnuplot,
-!!      IO(13)|1 | Ecriture du lissage des sous-spectres, et des moyennes des sous-spectres (si IO(14)=1) 
-!!            |  |            ou des moyennes de la distribution, (si IO(14)==2).
-!!      IO(14)|1 | Tracer le diagramme du lissage pour tout les sous-spectres,
-!!      .     |2 | Tracer le diagramme du lissage de la distribution uniquement
+!!      IO(12)|1 | Ecrire du résume dans un fichier RESULTAT.doc, écriture de Yexp et Ycalc dans un fichier .dat exploitable par gnuplot,
+!!      IO(13)|1 | Lissage de tout les sous-spectres, et des moyennes des sous-spectres
+!!            |2 | Lissage de la distribution uniquement
+!!            |3 | Lissage d'une plage de sous-spectres spécifiée par PLAGEL
+!!      IO(14)|1 | Tracer le diagramme du lissage
 !!      IO(15)|1 | Utilisation de la formulation du champ hyperfin pour des cycloïdes (Gamma est remplacé par Wm)
 !!      IO(16)|N | Convolution Gauss*Lorentz pour les enveloppes des raies (N=nbre de sous canaux),
-!!      IO(17)|1 | Tracer les sous-spectres tels que definis par GRASS,
+!!      IO(17)|1 | Tracer les sous-spectres tels que definis par GRASS (si IO(12)==1),
 !!      IO(18)|1 | Adapter les noms des fichiers de sortie au nom du fichier d'entrée
 !!      IO(19)|  |     OPTION VACANTE
 !!      IO(20)|1 | Horizontalisation du fond continu.

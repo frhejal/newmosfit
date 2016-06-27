@@ -4,7 +4,7 @@ COMPILER_WIN = gfortran
 
 ifeq ($(DEBUG),yes)
 	CFLAGS = -Wall -W -g -static
-	LFLAGS = -static
+	LFLAGS = -Wall -W -g -static
 else
 	CFLAGS = -static
 	LFLAGS = -static
