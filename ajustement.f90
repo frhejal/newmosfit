@@ -17,7 +17,7 @@ module ajustement
   use ecriture
   use algebre
   implicit none
-  real(dp)::PH  !< Phi dans [1]
+  real(dp)::PH  !< Phi dans ref.[1]
   real(dp)::CRITERE !< Critere de convergence
   real(dp)::KHI2   !< Ecart statistique de l'ajustement en moindres carrés
   contains
@@ -86,6 +86,7 @@ module ajustement
       nu=5.0_dp
       lambda=0.01_dp
       iter=0
+      !Début algorithme moindres carrés
       marquardt: do while(.NOT. fin)
         ! verification du critere de sortie de la boucle---------------- 
         call ecriture_info_iteration(npas,nmax,B)
@@ -94,34 +95,34 @@ module ajustement
         npas=npas+1
         ! premier calcul du spectre theorique---------------------------
         call spectres_theorique_total
-        if(fin) exit marquardt  ! sortie sans calculer le reste (nmax ou critere atteint)
+        if(fin) exit marquardt  ! sortie sans calculer le reste (Nmax ou critere atteint)
         !calcul de phi--------------------------------------------------
         PH=0.0_dp
         do i=1,n
           PH= PH + p(i)*(y(i)-q(i,K+2))**2  ! equation (3) de ref.[1]
         enddo
         iter=iter+1
-        if(iter >1) then ! si on a passe les deux premieres iterations 
+        if(iter >1) then ! si on a passé les deux premieres iterations 
           if( PH < phi )then
             phi = PH
             lambda=lambda/nu 
           else 
-              lambda=lambda*nu  ! on revient à lambda precedent ou on fait lambda*nu
-              iter=iter-1 ! annule l'incrementation de int
-              B(1:K)=saveB(1:K) !on recharge les parametres precedents (i.e. on reste dans l'iteration actuelle)
-              call ecriture_info_iteration(npas,nmax,B)
-              fin = convergence(critere) .OR. (npas>=nmax)
-              npas=npas+1
-              call spectres_theorique_total
-              !Sortie en cas de convergence (ou de Nmax itérations atteint)
-              if(fin)exit marquardt
+            lambda=lambda*nu  ! on revient à lambda precedent ou on fait lambda*nu
+            iter=iter-1 ! annule l'incrementation de int
+            B(1:K)=saveB(1:K) !on recharge les parametres precedents (i.e. on reste dans l'iteration actuelle)
+            call ecriture_info_iteration(npas,nmax,B)
+            fin = convergence(critere) .OR. (npas>=nmax)
+            npas=npas+1
+            call spectres_theorique_total
+            !Sortie en cas de convergence (ou de Nmax itérations atteint)
+            if(fin)exit marquardt
           endif
         else
           phi = PH
         endif
         !vecteur g (equations (9) et (21) de ref.[1])
         do i=1,K
-          Q(i,K+1)=0.0_dp
+          q(i,K+1)=0.0_dp
           do m=1,N
             q(i,K+1)=q(i,K+1)+(y(m)-q(m,K+2))*q(m,i)*p(m) 
           enddo
@@ -159,7 +160,7 @@ module ajustement
           q(i,K+2)=SQRT(q(i,i))
           q(i,K+1)=q(i,K+1)/q(i,K+2)
         enddo
-        !creation de la matrice (A* + lambda I)  (equation (32) de ref.[1])
+        !creation de la matrice (A* + lambda I)  (equation (31) de ref.[1])
         do i=1,K
           do j=1,K
             if(i==j)then
@@ -171,7 +172,7 @@ module ajustement
             endif
           enddo
         enddo
-        !resolution de l'equation (32) de ref.[1]
+        !resolution de l'equation (31) de ref.[1]
         call algebre_resoudre_systeme(q,n,K,1,dump,ierr)
         if(ierr/=0) stop 'erreur de resolution de systeme lineraire dans ASLB'
         do i=1,K

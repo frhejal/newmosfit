@@ -39,11 +39,11 @@
 module options
   use precision
   implicit none
-  integer::IOPT   !< indique si des options IO sont spécifiées.
-  integer::IO(20) !< liste des options
-  integer::IZZ    !< indique si il y a des canaux à ignorer
-  integer::IZ(10) !< plages de canaux a ignorer
-  character(len=256)::TITRE !< en-tete du fichier .coo (date, echantillon, temperature, etc...)
+  integer,save::IOPT   !< indique si des options IO sont spécifiées.
+  integer,save::IO(20) !< liste des options
+  integer,save::IZZ    !< indique si il y a des canaux à ignorer
+  integer,save::IZ(10) !< plages de canaux a ignorer
+  character(len=256),save::TITRE !< en-tete du fichier .coo (date, echantillon, temperature, etc...)
 
   contains
   !>@brief initialisation des variables d'options

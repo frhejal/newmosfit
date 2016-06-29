@@ -12,7 +12,7 @@
   escapeinside=<>,
   mathescape
 }
-
+\usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[squaren,Gray]{SIunits}
 \usepackage{placeins}
@@ -40,7 +40,7 @@ On peut ajuster jusqu'à la somme de 40 spectres théoriques à un spectres exp�
  Une procédure particulièrement aisée est utilisée pour ajuster les distributions de paramètres hyperfins.
  Un paramètre hyperfin ajustable peut être commun à plusieurs de ces spectres.
  Un paramètre peut être astreint à satisfaire une relation le liant à plusieurs parametres ajustable.
- Une modification du module CONNEX et une re-compilation du programme est nécessaire pour ajouter de nouvelles relations.
+ Une modification du module \lstinline{connex} et une re-compilation du programme est nécessaire pour ajouter de nouvelles relations.
  
 \paragraph{}
 On peut également tenir compte d'un bruit de fond de hauteur ajustable ou fixée dont le profil est donnée dans le fichier d'entrée.
@@ -52,19 +52,16 @@ On peut également tenir compte d'un bruit de fond de hauteur ajustable ou fixé
 \FloatBarrier
 \input{hamilton}
 \FloatBarrier
-
+\section{Ajustement en moindres-carrés}
+\input{marquardt}
 \newpage
-\subsection{Organisation des sous-programmes}
-Description des relations d'appel entre sous-routines 
-Utilisation de Doxygen ?
-description du role des modules
-\input{modules}
-\subsection{Une itération de l'affinement}
-décrire ici l'algorithme de Marquardt ?
+\section{Organisation du programme}
+\input{organisation}
+\newpage
 \section{Entrée des données}
 \input{options}
 \input{entree}
-
+\section{Module Connex}
 \section{Remarques}
 \subsection{Remarques Importante}
 
@@ -72,5 +69,7 @@ décrire ici l'algorithme de Marquardt ?
 plusieur affinements par job ?
 
 tracé spectre theorique seul
-
+\newpage
+\bibliographystyle{ieeetr}
+\bibliography{biblio}
 \end{document}
