@@ -2,8 +2,7 @@
 !***********************************************************************
 !        				        MODULE ALGEBRE
 !***********************************************************************
-!>@brief   Routines de calcul algebrique
-!! 
+!>@brief   Routines de calcul algébrique!! 
 !!@version juin 2016
 !**********************************************************************
 module algebre
@@ -12,14 +11,14 @@ module algebre
   contains
 !>@brief Inversion de matrice
 !>@details La matrice A doit etre une matrice générale, rangée dans un vecteur.
-!!@n Methode: La methode standard de Gauss-Jordan est utilisée. Le determinant est égalemement calculé.
-!! Un determinant nul indique que la matrice est singulière.
+!!@n Méthode: La méthode standard de Gauss-Jordan est utilisée. Le déterminant est égalemement calculé.
+!! Un déterminant nul indique que la matrice est singulière.
 !!
 !!Traduction en Fortran95 de la sous-routine F77 "MINV"
   subroutine algebre_inverser_matrice(A,N,D)
-    real(dp),intent(inout):: A(N*N) !<Matrice a inverser,detruite et remplacée par son inverse
+    real(dp),intent(inout):: A(N*N) !<Matrice a inverser,détruite et remplacée par son inverse
     integer,intent(in)    :: N !< Ordre de la matrce A
-    real(dp),intent(out)  :: D !< Determinant resultant de l'inversion
+    real(dp),intent(out)  :: D !< Déterminant résultant de l'inversion
     integer               :: I,IJ,IZ,IK,J,JI,JK,JP,JQ,JR,K,KI,KJ,KK,NK
     integer               :: L(N),M(N)
     real(dp)              :: BIGA, HOLD
@@ -27,19 +26,19 @@ module algebre
 ! Recherche de l'élément le plus grand
     D=1.0_dp
     NK=-N
-    do K=1,N                 ! Recherche du Kieme pivot
+    do K=1,N       ! Recherche du Kième pivot
       NK=NK+N
       L(K)=K
       M(K)=K
       KK=NK+K    !KK : position finale du pivot (colonne K, ligne K)
       BIGA=A(KK)
       do J=K,N
-        IZ=N*(J-1)  ! IZ debut de la colonne J dans A
-        do I=K,N    ! parcours la Jieme colonne de K a N
+        IZ=N*(J-1)  ! IZ début de la colonne J dans A
+        do I=K,N    ! parcourt la Jième colonne de K à N
           IJ=IZ+I   ! IJ emplacement de la case (i,j) dans A
           if(  ABS(A(IJ))  >  ABS(BIGA) ) then
             BIGA=A(IJ)
-            L(K)=I              !Le Kieme Pivot a été trouvé à la ligne L(K), colonne M(K)
+            L(K)=I              !Le Kième Pivot a été trouvé à la ligne L(K), colonne M(K)
             M(K)=J
           endif
         enddo
@@ -68,7 +67,7 @@ module algebre
           A(JI) =HOLD
         enddo
       endif
-  ! Division de la colommn par l'opposé du pivot (Pivot contenu dans BIGA)
+  ! Division de la colonne par l'opposé du pivot (Pivot contenu dans BIGA)
       if(ABS(BIGA).LE.1.E-5)then
         D=0.0
         return
@@ -79,7 +78,7 @@ module algebre
           A(IK)=A(IK)/(-BIGA)
         endif
       enddo
-  ! Reduction de la matrice
+  ! Réduction de la matrice
       do I=1,N
         IK=NK+I
         HOLD=A(IK)
@@ -103,7 +102,7 @@ module algebre
   ! Remplacement du pivot par l'inverse
       A(KK)=1.0/BIGA
     enddo
-  ! Deplacement finale des lignes et des colonnes
+  ! Déplacement final des lignes et des colonnes
     K=N-1
     do while(K>0)
       I=L(K)
@@ -139,12 +138,12 @@ module algebre
 !! Traduction en Fortran95 de la sous-routine F77 "ALSB"
 !!
   subroutine algebre_resoudre_systeme(A,ID,NA,M,K,IER)
-    integer,intent(in)::ID !< 1ere dimension du bloc A
-    integer,intent(in)::NA  !<ordre du systeme
-    integer,intent(in)::M !< nombre de seconds membres
-    integer,intent(out)::IER !0 si matrice non singuliere, 1 si singulière
+    integer,intent(in)::ID !< 1ère dimension du bloc A
+    integer,intent(in)::NA  !< Ordre du système
+    integer,intent(in)::M !< Nombre de seconds membres
+    integer,intent(out)::IER !0 si matrice non singulière, 1 si singulière
     real(dp),intent(inout),dimension(ID,*)::A!< Matrice et second membres (remplacés par les solutions)
-    integer,intent(inout),dimension(100)::K !< K permet de garder la trace des deplacements de ligne effectués
+    integer,intent(inout),dimension(100)::K !< K permet de garder la trace des déplacements de ligne effectués
     !variables locales :
     integer::I,I1,I2,I3,IN,it,J,J2,J3,JMAX,KC,MP,N,NAB,NDEB,NM
     real(dp)::AMAX,AUX,ERA,P,S,T
@@ -161,12 +160,12 @@ module algebre
       JMAX=I
       I1=I+1
       if(I <= N)then
-!   Selectionner dans la ligne I l'indice de colonne JMAX du terme
+!   Sélectionner dans la ligne I l'indice de colonne JMAX du terme
 !   de plus grande valeur absolue A parmi les termes
 !   situés a droite de la diagonale.
-!   Si , en cours de triangularisation , un terme diagonal est nul
-!   ainsi que tous les termes a sa droite et dans sa ligne ,
-!   la matrice A est singuliere.
+!   Si, en cours de triangularisation, un terme diagonal est nul
+!   ainsi que tous les termes a sa droite et dans sa ligne,
+!   la matrice A est singulière.
         do J=I1,N
           if (AMAX <= ABS(A(I,J))  ) then
             AMAX=ABS(A(I,J))
@@ -211,7 +210,7 @@ module algebre
       enddo
 !  Substitution des lignes
 !  Diviser les termes de la ligne i situés a droite de la
-!   diagonale ainsi que la i-eme composante des seconds membres
+!   diagonale ainsi que la i-ème composante des seconds membres
 !   par le terme de la diagonale
       if(I<N)then
         do I3=I1,N
@@ -239,7 +238,7 @@ module algebre
            enddo
         enddo
       enddo
-! classement des solutions
+! Classement des solutions
       do I=1,N
         do while(K(I)>I)
           J=K(I)
@@ -254,23 +253,23 @@ module algebre
       enddo
     end subroutine algebre_resoudre_systeme
   !=====================================================================
-!>@brief Calcul des valeurs propres et vecteurs propres d'une matrice complexe triangulaire a(n,n).
+!>@brief Calcul des valeurs propres et vecteurs propres d'une matrice complexe hermitienne a(n,n).
 !>@details En sortie, les valeurs propres sont sur la diagonale de a.
-!! Si mv = 0, les vecteurs prorpes sont calculés et placés dans les colonnes de r. 
-!! La matrice est de rang n, elle est stockée colonne par colonne dans un vecteur
+!! Si mv = 0, les vecteurs propres sont calculés et placés dans les colonnes de r. 
+!! La matrice est de rang n, elle est stockée colonne par colonne dans un vecteur.
+!! On ne sotcke que les valeurs de la diagonale et les valeurs situées au dessus de la diagonale.
 !! Traduction en Fortran95 de la sous-routine F77 "CEGREN"
-!Exemple: pour n=4, le vecteur  V = [ 1 2 3 4 5 6 7 8 9 10]  
-!   exemple: pour n=4, 
+!Exemple: pour n=4, 
 !   le vecteur 
 !    V = [ 1 2 3 4 5 6 7 8 9 10]  
 !   code la matrice 4*4 :
-!    A = | 1  2  4  7 |
-!        | 0  3  5  8 |
-!        | 0  0  6  9 |
-!        | 0  0  0 10 |
+!    A = | 1  2  4  7 | = | 1  2  4  7 |
+!        | .  3  5  8 |   | 2  3  5  8 |
+!        | .  .  6  9 |   | 4  5  6  9 |
+!        | .  .  . 10 |   | 7  8  9 10 |
 ! 
-! les GOTO font reference à l'ancienne version F66 de mosfit, 
-! au cas où des courageux voudraient decrypter l'algorithme.
+! les GOTO font référence à l'ancienne version F66 de mosfit, 
+! au cas où des courageux voudraient décrypter l'algorithme.
   subroutine algebre_eigenvalues(a,r,n,mv)
     integer,intent(in)::n,mv
     complex(dp),intent(inout)::a(10)
@@ -304,8 +303,8 @@ module algebre
     enddo
     if(zu/=0.0_dp)then
       y=1.D30
-      nn=((n-1)*n)/2 ! nbre element non diagonaux
-      nnl=nn+n       ! nbre elements dans a
+      nn=((n-1)*n)/2 ! Nbre élement non diagonaux
+      nnl=nn+n       ! Nbre élements dans a
       yz=real(nn,dp)
       yu=1D37/sqrt(yz)
       uw=1.0D-37/sqrt(yz)
@@ -425,8 +424,8 @@ module algebre
             l=l+1
           enddo
           !label 150
-          ! inversion de la condition d'arret de la boucle 
-          ! (voilà ce qui se passe quand on traduit les gotos de f66)
+          ! Inversion de la condition d'arret de la boucle 
+          ! (voilà ce qui se passe quand on traduit les gotos de F66)
           if(ind==1)then 
             ind = 0
           else
@@ -434,13 +433,13 @@ module algebre
           endif
         enddo inner
         ! label 160
-        if(sinus==1.0_dp) exit outer ! Quelles chances que ça arrive ?
+        if(sinus==1.0_dp) exit outer ! Ça peut vraiment arriver.
       enddo outer
     endif
     ! label 165
     iq=-n
-    ! rangement des valeurs propres dans l'ordre croissant
-    !les vp sont sur la diagonale de a.
+    ! Rangement des valeurs propres dans l'ordre croissant
+    ! Les vp sont sur la diagonale de a.
     do i=1,n
       iq=iq+n
       ll=(i*i+i)/2
@@ -478,7 +477,7 @@ module algebre
     integer,intent(in)::n !< nombre de colonnes de la matrice
     integer::i,j,ij
     if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
-    if(m*n> size(vec,1)) stop "La matrice est trop grande pour etre contenue dans ce vecteur"
+    if(m*n> size(vec,1)) stop "La matrice est trop grande pour être contenue dans ce vecteur"
     ij=0
     do j=1,n
       do i=1,m
@@ -492,11 +491,11 @@ module algebre
   subroutine algebre_vecteur_vers_matrice(vec,mat,m,n)
     real(dp),intent(in)::vec(:)
     real(dp),intent(out)::mat(:,:)
-    integer,intent(in)::m !< nombre de lignes de la matrice
-    integer,intent(in)::n !< nombre de colonnes de la matrice
+    integer,intent(in)::m !< Nombre de lignes de la matrice
+    integer,intent(in)::n !< Nombre de colonnes de la matrice
     integer::i,j,ij
-    if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que specifié"
-    if(m*n> size(vec,1)) stop "Le vecteur be correspond pas aux dimensions données pour la matrice"
+    if(m>size(mat,1).OR.n>size(mat,2)) stop "Au moins une dimension de la matrice est plus petite que spécifié"
+    if(m*n> size(vec,1)) stop "Le vecteur ne correspond pas aux dimensions données pour la matrice"
     ij=0
     do j=1,n
       do i=1,m

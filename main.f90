@@ -31,26 +31,27 @@
 !    JUN 2016 FL  v2.1 Ajout de cycloides
 !***********************************************************************
 !>@param AA Matrice de Variance/covariance, stockée dans un vecteur
-!!@param s(44)  Contributions des distributions (+4 cases vides)
-!!@param sl(42)  Contributions lissées des distributions
-!!@param sInt(40) Contributions intermediaires (=sommes cumulées) 
-!!@param btmoy(7,2) moyenne des parametres hyperfins sur les spectres choisis
+!!@param s(44)  Contributions des sous-spectres (+4 cases vides)
+!!@param sl(42)  Contributions des sous-spectres lissés
+!!@param sInt(40) Contributions intermédiaires (=sommes cumulées) 
+!!@param champ(44) Champs hyperfin des sous-spectres lissés
+!!@param btmoy(7,2) Moyenne des paramètres hyperfins sur les spectres choisis
 program mosfit
   use precision
-  use options         ! variables pour choix des options
-  use variablesFixes
-  use variablesAjustables ! variables des parametres hyperfins  use lecture         ! routines de lecture du fichier .coo
-  use lecture
-  use ecriture        ! routines d'ecriture du fichier résultat
-  use algebre         ! routines d'algebre lineaire (inverses de matrice, resolution de systemes)
-  use spectres        ! variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
-  use ajustement      ! moindres carres
+  use options         ! Variables pour choix des options
+  use variablesFixes  ! Variables générales
+  use variablesAjustables ! Variables des parametres hyperfins  use lecture  
+  use lecture         ! Routines de lecture du fichier .coo
+  use ecriture        ! Routines d'ecriture du fichier résultat
+  use algebre         ! Routines d'algebre lineaire (inverses de matrice, resolution de systemes)
+  use spectres        ! Variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
+  use ajustement      ! Moindres carrés
   implicit none
   real(dp)::AA(1600) 
-  real(dp)::dump ! variable-poubelle
+  real(dp)::dump ! Variable-poubelle
   real(dp)::cmin=0,cmax=0
   integer::nt
-  integer::nts !Nombre de plages de sous-spectres à sommer
+  integer::nts ! Nombre de plages de sous-spectres à sommer
   integer::nsmin,nsmax
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
@@ -59,35 +60,35 @@ program mosfit
   real(dp)::sl(42)
   real(dp)::sInt(40) 
   real(dp)::btmoy(7,2)
-  !initialisations------------------------------------------------------
+  ! Isnitialisations------------------------------------------------------
   call raz
 !=======================================================================
-! Entree des options et des données, copie dans le fichier de sortie
+! Entrée des options et des données, copie dans le fichier de sortie
 !=======================================================================
   call lecture_ouvrir_fichier_entree
-  !Lecture des options--------------------------------------------------
+  ! Lecture des options--------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS,PLAGEL)
   call ecriture_nommer_fichier_de_sortie(fichierCoo)
   call ecriture_titre(0)
   call ecriture_options(CN,NMAX,NS,NS1,NS2,PLAGEL)
-  !Lecture des parametres ajustables des sous-spectres------------------
-  !(ou construction d'une distribution en progression arithmetique)
+  ! Lecture des paramètres ajustables des sous-spectres------------------
+  ! (ou construction d'une distribution en progression arithmétique)
   do NT=1,NS
     MONOC=0
     IOGV=0
     if((NT>=NS1) .AND. (NT<=NS2))then
-      ! Progression arithmetique demandee du sous-spectre NS1 au sous-spectre NS2
+      ! Progression arithmétique demandee du sous-spectre NS1 au sous-spectre NS2
       if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,&
                                       &THETA0,PTHETA,GAMA,BETA,ALPHA,MONOC,NB)
       call variablesAjustables_super(NT,NS1)
     else
-!~       if(IO(10)/=2) call variablesAjustables_raz_hyperfins  ! ancienne option pour reunitiliser les meêm données d'un appel à l'autre (quand Mosfit était une sous-routine ?)
+!~       if(IO(10)/=2) call variablesAjustables_raz_hyperfins  ! ancienne option pour réutiliser les même données d'un appel à l'autre (quand Mosfit était une sous-routine ?)
       call lecture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV,GV,NG)
       call ecriture_param(DI,GA,H1,SQ,CH,ETA,THETA,GAMA,BETA,ALPHA,MONOC,NB,IOGV,GV,NG)
     endif
     call variablesAjustables_definir_largeurs_raies
-    ! Mise en tableau des parametres hyperfins et des largeurs variables
+    ! Mise en tableau des paramètres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
   ! Lecture de bruit-----------------------------------------------------
@@ -102,31 +103,31 @@ program mosfit
   !Chargement du spectre experimental-----------------------------------
   if(IO(10)==0)call lecture_spectre(Y,N)  
   if(IO(10)==1)then
-    ! pas de spectre experimental
+    ! Pas de spectre experimental
     Y=0.0_dp
   else
-    ! ajout de IO(1) million(s) demandé en option
+    ! Ajout de IO(1) million(s) demandée en option
     Y = Y + real(IO(1),dp)*1000000_dp
   endif
-!Defnition du niveau zero-----------------------------------------------
+  ! Défnition du niveau zéro-----------------------------------------------
   if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
-!modification des poids pour canaux ignorés-----------------------------
+  ! Modification des poids pour canaux ignorés-----------------------------
   call spectres_poids(IZ)
 !=======================================================================
 ! Ajustement par moindres-carres
 !=======================================================================
   if(NMAX==0) then
-    ! Pas d'ajustement, simple calcul du spectre theorique à partir des parametres initiaux
+    ! Pas d'ajustement, simple calcul du spectre théorique à partir des paramètres initiaux
     call ecriture_info_iteration(NMAX,NMAX,B)
     call spectres_theorique_total
   else
     ! Algorithme d'estimation moindres-carrés de Marquardt
     call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
-    !inversion de la matrice des variances-covariances------------------
+    ! Inversion de la matrice des variances-covariances------------------
     call algebre_matrice_vers_vecteur(VQ,AA,K,K)
     call algebre_inverser_matrice(AA,K,dump)
     call algebre_vecteur_vers_matrice(AA,VQ,K,K)
-    ! remise des bonnes valeurs dans les tableaux X0,H,G----------------
+    ! Remise des bonnes valeurs dans les tableaux X0,H,G----------------
     do nt=1,NS
       call variablesAjustables_calculer_ecart_type(PH,nt,N) 
       call variablesAjustables_actualiser_rangement(nt)
@@ -145,13 +146,13 @@ program mosfit
   call ecriture_titre(0)
   ! Ecarts type
   call ecriture_ecart_type(NS,BT,ETBT,GVT,ETGVT,IOGVT)
-  ! Largeurs, hauteur et energie des raies
+  ! Largeurs, hauteur et énergie des raies
   if(IO(8)==1) call ecriture_raies_covariance(NS,X0,G,H)
-  ! Absorptions,moyenne et lissage des sous-spectres
+  ! Absorptions, moyennes et lissage des sous-spectres
   call spectres_absorption_dispersion(K,N,B,Y,Q(:,K+2),BF,TY,HBRUIT,sExp,sFit,sBruit,daExp,daFit)
   call spectres_contributions_distributions(1,NS,s,sInt,champ)
   call ecriture_absorption_dispersion_contributions(1,NS,K,HBRUIT,daExp,daFit,sExp,sFit,sBruit,B,s,sInt)
-  select case(IO(13)) !Selection de la plage de sous-spectres à sommer
+  select case(IO(13)) ! Sélection de la plage de sous-spectres à sommer
     case(2)
     nsmin=NS1
     nsmax=NS2
@@ -174,14 +175,14 @@ program mosfit
   call ecriture_ecart_stat(KHI2)
   call ecriture_tracer_spectres(N,Y,Q(:,k+2),cmin,cmax)
   if((IO(6)==1) .OR. (IO(11)==1)) then
-    ! Ecriture des de la difference entre le spectre experimental et le spectre calculé
+    ! Ecriture de la difference entre le spectre expérimental et le spectre calculé
     diffSpectres=Y-Q(:,K+2)
     if(IO(6)==1) call ecriture_spectre_entier(diffSpectres)
     if(IO(11)==1) call ecriture_tracer_spectres(N,diffSpectres,diffSpectres,cmin,cmax)
   endif
   ! Ecriture du spectre calculé
   if(IO(7)==1) call ecriture_spectre_entier(Q(:,K+2))
-  ! Résumé et ecriture des sous-spectres dans un fichier gnuplot
+  ! Résumé et écriture des sous-spectres dans un fichier gnuplot
   if(IO(12)==1)then
     if(IO(17)==1)then
     ! Tracé des sous-spectres-------------------------------------------

@@ -9,13 +9,14 @@ module ecriture
   use precision
   use options
   implicit none
-  integer::NOUT=6  ! label du fichier de sortie (sortie par defaut)
-  character(len=255),private::fichierOut !<fichier de sortie complet
-  character(len=255),private::fichierDat !<fichiers de donnees des spectres (pour tracé eventuel)
-  character(len=255),private::fichierDoc !<fichier de resumé des résultats
+  integer,save::NOUT=6  ! Label du fichier de sortie (sortie par défaut)
+  character(len=255),save,private::fichierOut !< Fichier de sortie complet
+  character(len=255),save,private::fichierDat !< Fichier de données des spectres (pour tracé éventuel)
+  character(len=255),save,private::fichierDoc !< Fichier de resumé des résultats
   contains
   !=====================================================================
-  !>@brief Creation du fichier fit.out 
+  !>@brief Création du fichier fit.out 
+  !!@details Le fichier est effacé avant le début de l'ecriture.
   subroutine ecriture_nommer_fichier_de_sortie(nom)
     character(len=*)::nom
     integer::taille
@@ -39,7 +40,7 @@ module ecriture
   !=====================================================================
   !>@brief Ecriture des titres et sous-titres
   subroutine ecriture_titre(option)
-    integer::option !< choix du titre ou sous-titre à écrire
+    integer::option !< Choix du titre ou sous-titre à écrire
     select case(option)
       case(0)
         write(NOUT,'(A)') TITRE
@@ -53,8 +54,7 @@ module ecriture
   end subroutine ecriture_titre
   !=====================================================================
   !>@brief Ecriture des options précédemment lues
-  !!@details L'ecriture se fait dans le fichier de sortie (unité NOUT précedemment ouverte)
-  !! Le fichier est effacé avant le debut de l'ecriture.
+  !!@details L'écriture se fait dans le fichier de sortie (unité NOUT précédemment ouverte)
   subroutine ecriture_options(cn,nmax,ns,ns1,ns2,plage)
     real(dp),intent(in)::cn
     integer,intent(in)::nmax,ns,ns1,ns2
@@ -72,7 +72,7 @@ module ecriture
     if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
   end subroutine ecriture_options
   !=====================================================================
-  !>@brief Ecriture des valeurs des parametres hyperfins dans le fichier de sortie
+  !>@brief Ecriture des valeurs des paramètres hyperfins dans le fichier de sortie
   !!@details Le fichier n'est pas effacé, les données sont ajoutées à la fin.
   subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb,iogv,gv,ng)
     integer,intent(in)::monoc
@@ -102,11 +102,11 @@ module ecriture
     cpt=cpt+1
   end subroutine ecriture_param
   !=====================================================================
-  !>@brief Ecriture d'infos sur l'iteration en cours dans l'algorithme des moindres carrés
+  !>@brief Ecriture d'infos sur l'itération en cours dans l'algorithme des moindres carrés
   subroutine ecriture_info_iteration(npas,nmax,b)
-    integer,intent(in)::npas !<numero de l'iteration
-    integer,intent(in)::nmax !< nombre maximum d'iterations
-    real(dp),intent(in)::b(:) !< parametres ajustés
+    integer,intent(in)::npas !< Numéro de l'itération
+    integer,intent(in)::nmax !< Nombre maximum d'itérations
+    real(dp),intent(in)::b(:) !< Paramètres ajustés
     integer::i,k
     k=size(b)
     write(NOUT,'(1X,A,I6)') '  NUMERO DU PASSAGE ', npas
@@ -159,7 +159,7 @@ module ecriture
     enddo
   end subroutine ecriture_ecart_type
   !=====================================================================
-  !>@brief Ecriture des caracteristiques des raies (largeur, hauteur, energie)
+  !>@brief Ecriture des caractéristiques des raies (largeur, hauteur, energie)
   subroutine ecriture_raies_covariance(ns,x0,g,h)
     integer,intent(in)::ns
     real(dp),intent(in)::x0(8,40)
@@ -185,17 +185,10 @@ module ecriture
     integer,intent(in)::nsmax
     real(dp),intent(in)::s(44)
     real(dp),intent(in)::sl(42)
-!~     real(dp),intent(out)::sl(42)
     real(dp),intent(in)::champ(44)
     real(dp)::ordS,ordT
     integer::i,ic,colMax,colonneS,colonneT
     character::chaine(256)
-!~     sl(nsmin)=5
-!~     sl(nsmin+1)=10
-!~     sl(nsmin+2)=15
-!~     sl(nsmin+3)=20
-!~     sl(nsmin+4)=25
-!~     sl(nsmin+5)=30
     ! Lissage de la distribution
     if(IO(14)==0)then
       write(NOUT,'(10X,"LISSAGE",16X,"%",22X,"%LISSE",22X,"CH",22X,/)')
@@ -289,12 +282,12 @@ module ecriture
     write(NOUT,'("1",//,50X,"KHI2 = ",E15.8)') khi2
   end subroutine ecriture_ecart_stat
   !=====================================================================
-  !>@brief tracé des deux spectres experimentaux dans un fichier texte, Ascii-art style
-  !... Parceque les interfaces graphiques c'est pour les faibles.
+  !>@brief Tracé des deux spectres expérimentaux dans un fichier texte, Ascii-art style
+  !... Parce que les interfaces graphiques c'est pour les faibles.
   subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cMin,cMax)
     integer,intent(in)::n
-    real(dp),intent(in)::spectre_exp(n) !<spectre experimental
-    real(dp),intent(in)::spectre_fit(n)	!<spectre calculé
+    real(dp),intent(in)::spectre_exp(n) !< Spectre expérimental
+    real(dp),intent(in)::spectre_fit(n)	!< Spectre calculé
     real(dp),intent(out)::cmin,cmax
     character::chaine(120)
     integer::i,ic,colExp,colFit,colMax
@@ -319,7 +312,7 @@ module ecriture
     enddo
   end subroutine ecriture_tracer_spectres
   !=====================================================================
-  !>@brief Ecriture des valeurs d'un spectre sous forme d'entiers, par groupe de 8 canaux
+  !>@brief Ecriture des valeurs d'un spectre sous forme d'entiers, par groupes de 8 canaux.
   subroutine ecriture_spectre_entier(spectre)
     real(dp),intent(in)::spectre(:)
     integer::i,j,n
@@ -329,35 +322,35 @@ module ecriture
     enddo
   end subroutine ecriture_spectre_entier
   !=====================================================================
-  !>@brief Ecriture des spectres experimental et calculé, ainsi que des sous-spectres
-  !>@details L'ecriture se fait dans un fichier à part, facilement exploitable par un logiciel tiers (ex: Gnuplot)
+  !>@brief Ecriture des spectres (expérimental et calculé), ainsi que des sous-spectres. 
+  !>@details L'écriture se fait dans un fichier à part, facilement exploitable par un logiciel tiers (ex: Gnuplot)
   subroutine ecriture_pour_gnuplot(n,nts,cn,spectreExp,spectreFit,totalSousSpectres)
     integer,intent(in)::n
-    integer,intent(in)::nts !< nombre de plages de sous-spectres
-    real(dp),intent(in)::cn !<vitesse par canaux
-    real(dp),intent(in)::spectreExp(n) !<spectre experimental
-    real(dp),intent(in)::spectreFit(n) !<spectre theorique (calculé)
-    real(dp),intent(in)::totalSousSpectres(n,5)!< sous-spectres
-    real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau
+    integer,intent(in)::nts !< Nombre de plages de sous-spectres
+    real(dp),intent(in)::cn !< Vitesse par canaux
+    real(dp),intent(in)::spectreExp(n) !< Spectre expérimental
+    real(dp),intent(in)::spectreFit(n) !< Spectre théorique (calculé)
+    real(dp),intent(in)::totalSousSpectres(n,5)!< Sous-spectres
+    real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau.
     integer::i,j,NoutSave
     NoutSave=NOUT
     NOUT=42
-    ! vitesse de la source
+    ! Vitesse de la source
     do i=1,n/2
       tout(i,1)=(i-(n/2+1))*cn
       tout(n/2+i,1)=i*cn
     enddo
-    ! spectre theorique
+    ! Spectre théorique
     tout(:,2)=spectreFit
-    ! spectre experimental
+    ! Spectre expérimental
     tout(:,3)=spectreExp
-    ! sous-spectres theoriques
+    ! Sous-spectres théoriques
     if(IO(17)/=0)then
       do i=1,nts
         tout(:,i+3)=totalSousSpectres(:,i)
       enddo
     endif
-    ! ecriture dans le fichier 
+    ! Ecriture dans le fichier 
     open(NOUT,file=trim(fichierDat), status='unknown', form='formatted')
     do i=1,n
       write(NOUT,'(2X,F6.2,7(1X,F12.2))') (tout(i,j),j=1,nts+3)
@@ -366,10 +359,10 @@ module ecriture
     NOUT=NoutSave
   end subroutine ecriture_pour_gnuplot
   !=====================================================================
-  !>@brief Ecriture d'un resumée des resultats dans le fichier .doc
+  !>@brief Ecriture d'un resumé des résultats dans le fichier .doc
   subroutine ecriture_resultats_resume(nsmin,nsmax,s,sl,bt,btmoy)
-    integer,intent(in)::nsmin !<nombre de sous-spectres
-    integer,intent(in)::nsmax !< nombre de sous-spectres sommés
+    integer,intent(in)::nsmin !< Nombre de sous-spectres
+    integer,intent(in)::nsmax !< Nombre de sous-spectres sommés
     real(dp),intent(in)::s(44)
     real(dp),intent(in)::sl(42)
     real(dp),intent(in)::bt(10,40)

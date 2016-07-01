@@ -2,85 +2,84 @@
 !***********************************************************************
 !                        MODULE VARIABLESAJUTABLES
 !***********************************************************************
-!>@brief Rangements et manipulation des parametres hyperfins (PHF)
-!!et des variables ajustables (largeur de raie, hbruit)
+!>@brief Rangement et manipulation des paramètres hyperfins (PHF)
+!! et des autres variables ajustables (largeur de raie, hbruit)
 !>@version juin 2016
-!>@details Les parametres variables sont rangés dans le tableau B.
-!>@n Pour chaque spectre, la lecture du tableau NB dans le fichier d'entree
-!! indique quels parametres sont variables.
-!! parametre          |DI|GA|H1|SQ|CH|ETA|TETA|GAMA|BETA|ALFA
+!>@details Les paramètres variables sont rangés dans le tableau B.
+!>@n Pour chaque spectre, la lecture du tableau NB dans le fichier d'entrée
+!! indique quels paramètres sont variables.
+!! paramètre          |DI|GA|H1|SQ|CH|ETA|TETA|GAMA|BETA|ALFA
 !!--------------------|-:|-:|-:|-:|-:|--:|---:|---:|---:|---:|
 !! position dans NB(J)| 1| 2| 3| 4| 5|  6|   7|   8|   9|  10|
-!! Les PHF sont bloqués par defaut (NB(i)=0), sauf TY qui est toujours ajustable
+!! Les PHF sont bloqués par défaut (NB(i)=0), sauf TY qui est toujours ajustable
 module variablesAjustables
   use precision
   use connex
   use options
   implicit none
-  integer:: K  !< nombre courant de parametres ajustables stockés dans B
-  ! hauteur de bruit
-  real(dp)::HBRUIT !< si HBRUIT /= 0, introduction d'un spectre de bruit de fond
+  integer,save:: K  !< Nombre courant de paramètres ajustables stockés dans B
+  real(dp),save::HBRUIT !< Si HBRUIT /= 0, introduction d'un spectre de bruit de fond
   ! PHF pour un sous-spectre:
-  real(dp)::DI    !< déplacement isomérique
-  real(dp)::GA    !< demi-largeur (commune aux raies du spectre)
-  real(dp)::H1    !< intensité totale (nombre de coups)
-  real(dp)::SQ    !< interaction quadrupolaire
-  real(dp)::CH    !< champ interne (kOe)
-  real(dp)::ETA   !< parametre d'asymétrie
-  real(dp)::THETA  !< THETA et GAMA :    angles polaires du chp interne
-  real(dp)::GAMA  !<   dans les axes principaux du gradient (degres)
-  real(dp)::BETA  !<  ALPHA et BETA : angles polaires de la direction du
-  real(dp)::ALPHA  !<         rayonnement (meme axes que pour ETA, THETA)
-  real(dp)::TY    !< niveau moyen hors d'absorption
-  integer::NB(10) !< Type d'ajustement des 10 paramètres hyperfins (pour le sous-spectre en cours de lecture)
+  real(dp),save::DI    !< Déplacement isomérique
+  real(dp),save::GA    !< Demi-largeur (commune aux raies du spectre)
+  real(dp),save::H1    !< Intensité totale (nombre de coups)
+  real(dp),save::SQ    !< Interaction quadrupolaire
+  real(dp),save::CH    !< Champ interne (kOe)
+  real(dp),save::ETA   !< Paramètre d'asymétrie
+  real(dp),save::THETA !< THETA et GAMA :  angles polaires du champ interne
+  real(dp),save::GAMA  !<   dans les axes principaux du gradient (degrés)
+  real(dp),save::BETA  !<  ALPHA et BETA : angles polaires de la direction du
+  real(dp),save::ALPHA  !<         rayonnement (mêmes axes que pour ETA, THETA)
+  real(dp),save::TY    !< Niveau moyen hors d'absorption
+  integer,save::NB(10) !< Type d'ajustement des 10 paramètres hyperfins (pour le sous-spectre en cours de lecture)
                   !! exemple | signification 
                   !!--------:|--------------
                   !!NB(3)=0  | H1 est bloqué
                   !!NB(3)=1  | H1 est à ajuster
-                  !!NB(3)=2  | H1 est à ajuster de maniere identique a H1 du sous-spectre precedent
+                  !!NB(3)=2  | H1 est à ajuster de manière identique a H1 du sous-spectre précédent
                   !!NB(3)=3  | H1 est relié a d'autres PHF ajustables, par la routine CONNEX
-  ! toutes les variables ajustables
-  real(dp)::B(40) !< variables ajustables,
+  ! Toutes les variables ajustables
+  real(dp),save::B(40) !< Variables ajustables,
                   !! B(K) = TY, B(K-1) = bruit ajustable
-  real(dp)::VQ(40,40)  !< matrice de variance/covariance des variables ajustables
+  real(dp),save::VQ(40,40)  !< matrice de variance/covariance des variables ajustables
 
-  !indications supplementaires :
-  integer::MONOC      !<   MONOC=1 : monocristal, 
+  ! Indications supplementaires :
+  integer,save::MONOC      !<   MONOC=1 : monocristal, 
                       !!   MONOC=0 : poudre
-  integer::MONOT(40)  !< Indication cristal/non cristal de chaque sous-spectre, cf. MONOC
-  integer::IOGV       !<   IOGV   |      type d'ajustement des raies
+  integer,save::MONOT(40)  !< Indication cristal/non cristal de chaque sous-spectre, cf. MONOC
+  integer,save::IOGV       !<   IOGV   |      type d'ajustement des raies
                       !! --------:|-------------------------------------
                       !!        0 | largeur unique pour toutes les raies (ajustable si NB(2)= 1 ou 2)
-                      !!        1 | spectre quadrupolaire à raies de largeurs differentes (2 largeurs independantes)
-                      !!        2 | spectre magnétique formé de 3 doublets symetriques d'entensité 3,2,1 (3 largeurs indépendantes)
+                      !!        1 | spectre quadrupolaire à raies de largeurs différentes (2 largeurs indépendantes)
+                      !!        2 | spectre magnétique formé de 3 doublets symétriques d'intensité 3,2,1 (3 largeurs indépendantes)
                       !!        3 | cas général
-  integer::IOGVT(40)  !< type d'ajustement des raies de chaque sous-spectre, cf IOGV
-  ! PHF initiaux dans le cas d'une distribution arithmetique du spectre
+  integer,save::IOGVT(40)  !< Type d'ajustement des raies de chaque sous-spectre, cf IOGV
+  ! PHF initiaux dans le cas d'une distribution arithmetique de spectre
   integer::NB0(10)!< Équivalent NB pour le premier sous-spectre de la distribution
-  real(dp)::DI0   !< DI du premier sous-spectre de la distribution
-  real(dp)::PDI   !< Increment de DI
-  real(dp)::CH0   !< cf. DI0
-  real(dp)::PCH   !< Increment de CH
-  real(dp)::SQ0   !< cf. DI0
-  real(dp)::PSQ   !< Increment de SQ
-  real(dp)::THETA0 !< cf. DI0
-  real(dp)::PTHETA !< Increment de TETA
-  ! PHF pour tout les spectre (une fois la lecture des données terminées)
-  real(dp)::BT(10,40) !< Parametres hyper fins de tous les spectres (cf. DI à ALFA)
-  real(dp)::ETBT(10,40)!< Ecart type de BT
-  integer(dp)::NBT(10,40) !< Type d'ajustement des PHF de tous les spectres (cf. NB)
-  integer ::IAD(10,40) !< IAD(i,n) = emplacement du PHF ajustable BT(i,n) dans B
+  real(dp),save::DI0   !< DI du premier sous-spectre de la distribution
+  real(dp),save::PDI   !< Incrément de DI
+  real(dp),save::CH0   !< cf. DI0
+  real(dp),save::PCH   !< Incrément de CH
+  real(dp),save::SQ0   !< cf. DI0
+  real(dp),save::PSQ   !< Incrément de SQ
+  real(dp),save::THETA0 !< cf. DI0
+  real(dp),save::PTHETA !< Incrément de TETA
+  ! PHF pour tout les spectres (une fois la lecture des données terminées)
+  real(dp),save::BT(10,40) !< Paramètres hyperfins de tous les spectres (cf. DI à ALFA)
+  real(dp),save::ETBT(10,40)!< Ecart type de BT
+  integer(dp),save::NBT(10,40) !< Type d'ajustement des PHF de tous les spectres (cf. NB)
+  integer,save::IAD(10,40) !< IAD(i,n) = emplacement du PHF ajustable BT(i,n) dans B
   ! Largeur des raies
-  integer::NG(8)      !< NG(i)| Ajustement des largeurs 
+  integer,save::NG(8)      !< NG(i)| Ajustement des largeurs 
                       !! ----:|-------------------------
-                      !!  0   | pas d'ajustement de la ieme largeur , 
-                      !!  1   | ajustement de la ieme largeur , valeur initiale GV(i)
-  real(dp)::GV(8)     !< GV(i)=valeur initiale de la ieme largeur, si NG(i)=1
-  real(dp)::GVT(8,40) !< valeur des largeurs variables, pour tout les sous-spectres
-  real(dp)::ETGVT(8,40)!< Ecart type de GVT
-  integer::NGT(8,40)  !< equivalent de NG, pour tout les sous-spectres 
-  integer::IADG(8,40) !< IADG(i,n) = emplacement de la largeur variable GVT(i,n) dans B
-  !gestion d'erreur
+                      !!  0   | pas d'ajustement de la ième largeur , 
+                      !!  1   | ajustement de la ième largeur , valeur initiale GV(i)
+  real(dp),save::GV(8)     !< GV(i)=valeur initiale de la ième largeur, si NG(i)=1
+  real(dp),save::GVT(8,40) !< Valeur des largeurs variables, pour tout les sous-spectres
+  real(dp),save::ETGVT(8,40)!< Ecart type de GVT
+  integer,save::NGT(8,40)  !< Equivalent de NG, pour tout les sous-spectres 
+  integer,save::IADG(8,40) !< IADG(i,n) = emplacement de la largeur variable GVT(i,n) dans B
+  ! Gestion d'erreur
   character(len=*),parameter:: erreur_kmax='Nombre de parametres ajustables superieur à 40' !<gestion d'erreur
   contains
   !=====================================================================
@@ -95,7 +94,7 @@ module variablesAjustables
       call variablesAjustables_raz0
   end subroutine variablesAjustables_raz
   !=====================================================================
-  !> @brief Remise à zero des dernier PHF lues dans le fichier de donnees
+  !> @brief Remise à zéro des dernier PHF lues dans le fichier de données
   subroutine variablesAjustables_raz_hyperfins
       DI=0.0_dp
       GA=0.1_dp
@@ -111,7 +110,7 @@ module variablesAjustables
       TY=0.0_dp
   end subroutine variablesAjustables_raz_hyperfins
   !=====================================================================
-  !>@brief Remise à zero des paramètres hyperfins du premier spectre de la distribution
+  !>@brief Remise à zéro des paramètres hyperfins du premier spectre de la distribution
   subroutine variablesAjustables_raz0
       DI0=0.0_dp
       PDI=0.0_dp
@@ -126,8 +125,8 @@ module variablesAjustables
   !=====================================================================
   !> @brief Calcul des paramètres hyperfins du NTième spectre selon une distribution arithmétique 
   subroutine variablesAjustables_super(nt,ns1)
-      integer,intent(in)::nt !< numero du spectre
-      integer,intent(in)::ns1!< numéro du premier spectre
+      integer,intent(in)::nt !< Numéro du spectre
+      integer,intent(in)::ns1!< Numéro du premier spectre
       real(dp):: step
       step = real(nt-ns1,dp)
       DI=DI0+step*PDI
@@ -139,28 +138,28 @@ module variablesAjustables
   !=====================================================================
   !>@brief Définition des largeurs variables des raies du spectre d'apres IOGV. 
   !!@details Cette routine travaille de concert avec  variablesAjustables_actualiser_largeur_raies
-  !! Une fois les differentes largeurs de raies calculées et affinées
+  !! Une fois les différentes largeurs de raies calculées et affinées
   !!Remarque: dans le cas d'une distribution arithmétique, IOGV=0
   subroutine variablesAjustables_definir_largeurs_raies
     integer::i
     select case(IOGV)
       case(0)
-        NG=0 ! toutes les raies sont égale à GA
+        NG=0 ! Toutes les raies sont égale à GA
         GV=0.0_dp
       case(1)
         GV = GA
         NB(2)=0 !GA devient non ajustable  
-        !Deux largeurs de raies independantes.
+        ! Deux largeurs de raies indépendantes.
         NG(1)=1 
         NG(3)=1
       case(2)
         GV = GA
-        NB(2)=0 !GA devient non ajustable  
-        !trois largeurs de raies independantes.
+        NB(2)=0 ! GA devient non ajustable  
+        ! Trois largeurs de raies indépendantes.
         NG(2)=1
         NG(3)=1
         NG(4)=1
-      case(3)!largeur de raies définies par utilisateur
+      case(3)! Largeur de raies définies par utilisateur
         do i=1,8
           !Les raies sont ajustables si NB(i)=1, défini par l'utilisateur
           if(NG(i)==0) GV(i)=0.0_dp 
@@ -174,12 +173,12 @@ module variablesAjustables
   !===================================================================== 
   !>@brief en fonction de IOGVT(NT),applique les relations demandées entre les 
   !! largeurs de raies (spectre quadrupolaire, spectre magnétique...)
-  !!@details Les largeurs à ajuster ont été definie dans la routine 
+  !!@details Les largeurs à ajuster ont été définie dans la routine 
   !! variablesAjustables_definir_largeurs_raies. 
-  !!@n Il s'agit ici d'appliquer les largeurs de raies calculées à toute les raies
+  !!@n Il s'agit ici d'appliquer les largeurs de raies calculées à toutes les raies
   !! pour la construction du spectre.
   subroutine variablesAjustables_actualiser_largeur_raies(nt)
-    integer,intent(in)::nt !< numéro du spectre en cours de traitement. 
+    integer,intent(in)::nt !< Numéro du spectre en cours de traitement. 
     if(IOGVT(nt)==1)then 
       GVT(2,nt)=GVT(1,nt)
       GVT(5,nt)=GVT(1,nt)
@@ -194,12 +193,12 @@ module variablesAjustables
     endif
   endsubroutine variablesAjustables_actualiser_largeur_raies
   !=====================================================================
-  !>@brief Rangement des parametres hyperfins du NTième spectre dans les tableaux BT,NBT et B,
+  !>@brief Rangement des paramètres hyperfins du NTième spectre dans les tableaux BT,NBT et B,
   !!Rangement des largeur de raie dans les tableaux NGT, GVT et B
   subroutine variablesAjustables_ranger(nt)
     integer,intent(in)::nt
     integer::i
-    !rangement dans BT
+    ! Rangement dans BT
     BT(1,nt)=DI
     BT(2,nt)=GA
     BT(3,nt)=H1
@@ -212,15 +211,15 @@ module variablesAjustables
     BT(10,nt)=ALPHA
     MONOT(nt)=MONOC
     IOGVT(nt)=IOGV
-    ! Rangement dans B (parametres ajustables)
+    ! Rangement dans B (paramètres ajustables)
     do i=1,10
       if(k>40) stop erreur_kmax
       NBT(i,nt)=NB(i)
-      if(NB(i)==1)then    !si le PHF est à ajuster, on le range dans B
+      if(NB(i)==1)then    ! Si le PHF est à ajuster, on le range dans B
         IAD(i,nt)=K
         B(K)=BT(i,nt)
         K=K+1
-      elseif(NB(i)==2)then ! cas où le PHF s'ajuste comme celui du spectre precedent
+      elseif(NB(i)==2)then ! Cas où le PHF s'ajuste comme celui du spectre précedent
         IAD(i,nt) = IAD(i,nt-1)
       endif
     enddo
@@ -237,11 +236,11 @@ module variablesAjustables
     enddo
   end subroutine variablesAjustables_ranger
   !=====================================================================
-  !>@brief Actualisation du rangement des parametre ajustables du  NTième spectre
+  !>@brief Actualisation du rangement des paramètre ajustables du  NTième spectre
   subroutine variablesAjustables_actualiser_rangement(nt)
-    integer,intent(in)::nt!< numéro du spectre concerné
+    integer,intent(in)::nt!< Numéro du spectre concerné
     integer::i,l
-    !mise dans BT et GVT des parametres---------------------------------
+    ! Mise dans BT et GVT des paramètres---------------------------------
     do i=1,10
       if(NBT(i,nt)/=0)then
         l=IAD(i,nt)
@@ -250,20 +249,20 @@ module variablesAjustables
       if(IO(5)/=0 .AND. NBT(i,nt)==3) call connex_connexions(BT,IO)
     enddo
     do i=1,8
-      GVT(i,nt)=BT(2,nt)  ! par defaut, largeur de raie actualisée à la valeur trouvée pour GA
-      if(NGT(i,nt)/=0)then ! Selon la valeur de NGT, une autre largeur de raies peut être utilisée
+      GVT(i,nt)=BT(2,nt)  ! Par défaut, largeur de raie actualisée à la valeur trouvée pour GA
+      if(NGT(i,nt)/=0)then ! Selon la valeur de NGT, une autre largeur de raie peut être utilisée
         l=IADG(i,nt)
         GVT(i,nt)=B(l)
       endif
     enddo
-    ! option beta=theta, alpha=gama ------------------------------------
+    ! Option beta=theta, alpha=gama ------------------------------------
     if(IO(9)==1)then
       BT(9,nt)=BT(7,nt)
       BT(10,nt)=BT(8,nt)
     endif
   end subroutine variablesAjustables_actualiser_rangement
   !=====================================================================
-  !>@brief ajout du bruit dans le tableau des parametres ajustables
+  !>@brief Ajout du bruit dans le tableau des paramètres ajustables
   subroutine variablesAjustables_ranger_bruit
       if(k>40) stop erreur_kmax
       B(K)=HBRUIT
@@ -282,16 +281,16 @@ module variablesAjustables
     do i=ny-9,ny
           TY=TY+0.05_dp*spectre(i)
     enddo
-    !rangement dans les parametres variables B
+    ! Rangement dans les paramètres variables B
     if(k>40)  stop erreur_kmax
     B(K)=TY
   end subroutine variablesAjustables_nivzer
   !=====================================================================
-  !<@brief ! Calcul des ecarts type des paramètres ajustables
+  !<@brief ! Calcul des écarts type des paramètres ajustables
   subroutine variablesAjustables_calculer_ecart_type(phi,nt,n)
-    integer,intent(in)::nt!< numéro du spectre concerné
-    integer,intent(in)::n !<nombre de canaux par spectre
-    real(dp),intent(in)::phi !<Somme des Ycalc-Yexp
+    integer,intent(in)::nt!< Numéro du spectre concerné
+    integer,intent(in)::n !< Nombre de canaux par spectre
+    real(dp),intent(in)::phi !< Somme des Ycalc-Yexp
     integer::i,l
     do i=1,10
       if(NBT(i,nt)/=0)then 

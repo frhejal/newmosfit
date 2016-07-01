@@ -2,8 +2,8 @@
 !***********************************************************************
 !                         MODULE HAMILTONIEN
 !***********************************************************************
-!>@brief Définition du champ interne utilisé et résolution de l'hamiltonien
-!>@details Calcul des énergie et des fonctions d'onde des états fondamentaux et excités
+!>@brief Définition du champ interne utilisé et résolution de l'hamiltonien.
+!>@details Calcul des énergies et des fonctions d'onde des états fondamentaux et excités.
 !>@version juin 2016
 module hamiltonien
   use precision
@@ -15,20 +15,20 @@ module hamiltonien
   real(dp)::HZ    !< Champ hyperfin, composante selon z
   complex(dp)::hamilF(10) !<Etat fondamental :hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
   complex(dp)::hamilE(10) !<Etat excité hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
-  complex(dp)::fctF(16)!< fonction d'onde etat fondamental
-  complex(dp)::fctE(16)!< fonction d'onde etat excité
+  complex(dp)::fctF(16)!< fonction d'onde état fondamental
+  complex(dp)::fctE(16)!< fonction d'onde état excité
   
   contains
   !---------------------------------------------------------------------
   !> @brief Définition du champ hyperfin
   !> @details Les valeurs de Hx, Hy, Hz sont calculées en fonction de l'amplitude CH du champ,
-  !! des angles polaires (theta, gamma) dans les axes du gradient, oud e l'angle theta et du parametre cycloidal Wm
-  !! dans le cas d'un cycloide
+  !! des angles polaires (theta, gamma) dans les axes du gradient, ou de l'angle theta et du paramètre cycloidal Wm
+  !! dans le cas d'un cycloide.
   subroutine hamiltonien_definition_champ_hyperfin(ch,theta,gama,wm)
-    real(dp),intent(in)::ch !< intensité du champ interne 
-    real(dp),intent(in)::theta !< angle polaire du champ interne par rapport à l'axe Z
-    real(dp),intent(in)::gama !< angle polaire du champ interne par rapport à l'axe X
-    real(dp),intent(in)::wm !<Paramètre cycloidal Hperp/Hz (Hper = dans le plan OXY)
+    real(dp),intent(in)::ch !< Intensité du champ interne 
+    real(dp),intent(in)::theta !< Angle polaire du champ interne par rapport à l'axe Z
+    real(dp),intent(in)::gama !< Angle polaire du champ interne par rapport à l'axe X
+    real(dp),intent(in)::wm !< Paramètre cycloidal Hperp/Hz (Hperp = dans le plan OXY)
     real(dp)::sint,cost,sing,cosg,rmh
     sint=sin(theta)  
     cost=cos(theta)  
@@ -49,22 +49,22 @@ module hamiltonien
     end select
   end subroutine hamiltonien_definition_champ_hyperfin
   !---------------------------------------------------------------------
-  !>@brief Calcul des hamiltoniens des états fondametaux et excités, recherche de leurs valeurs propres
-  !>@details Les équations correspondantes proviennent de la thèse de F.Varret (1972),chap 4
+  !>@brief Calcul des hamiltoniens des états fondametaux et excités, recherche de leurs valeurs propres.
+  !>@details Les équations correspondantes proviennent de la thèse de F.Varret (1972),chap 4.
   subroutine hamiltonien_calculer_fonction_onde(ze,zf,sq,eta)
     real(dp),intent(in)::ze !< Rapport gyromagnétique de l'état excité
     real(dp),intent(in)::zf !< Rapport gyromagnétique de l'état fondamental
-    real(dp),intent(in)::sq !< Interaction quadrupolaire
+    real(dp),intent(in)::sq !< Intéraction quadrupolaire
     real(dp),intent(in)::eta !< Paramètre d'asymétrie
     real(dp)::Q
-    !Etats fondamentaux-------------------------------------------------
+    ! Etats fondamentaux-------------------------------------------------
     hamilF=(0.0_dp,0.0_dp)
-    hamilF(1)= cmplx( -0.5_dp*HZ*zf, 0.0_dp      ,dp) !Etat <1/2|1/2>
-    hamilF(2)= cmplx( -0.5_dp*HX*zf, 0.5_dp*HY*zf, dp)!Etat <1/2|-1/2>
-    hamilF(3)= cmplx( 0.5_dp*HZ*zf , 0.0_dp      , dp)!Etat <-1/2|-1/2>
-    !recherche energies (valeurs propres) et fonctions d'onde (vecteurs propres)
+    hamilF(1)= cmplx( -0.5_dp*HZ*zf, 0.0_dp      ,dp) ! Etat <1/2|1/2>
+    hamilF(2)= cmplx( -0.5_dp*HX*zf, 0.5_dp*HY*zf, dp)! Etat <1/2|-1/2>
+    hamilF(3)= cmplx( 0.5_dp*HZ*zf , 0.0_dp      , dp)! Etat <-1/2|-1/2>
+    ! Recherche énergies (valeurs propres) et fonctions d'onde (vecteurs propres)
     call algebre_eigenvalues(hamilF,fctF,2,0)
-    !Etats  Excités-----------------------------------------------------
+    ! Etats  excités-----------------------------------------------------
     hamilE=(0.0_dp,0.0_dp)
     Q=0.5_dp*sq/sqrt(1.0_dp+eta**2/3.0_dp)
     hamilE(1) = cmplx( -1.5_dp*HZ*ze+Q, 0.0_dp , dp)
@@ -76,12 +76,12 @@ module hamiltonien
     hamilE(8) = cmplx( eta*root3*Q/3.0_dp, 0.0_dp,dp)
     hamilE(9) = hamilE(2)
     hamilE(10)= cmplx(1.5_dp*HZ*ze+Q, 0.0_dp,dp)
-    !recherche des energies et fonctions d'onde par recherche des valeurs
+    ! Recherche des énergies et fonctions d'onde par recherche des valeurs
     call algebre_eigenvalues(hamilE,fctE,4,0)
   endsubroutine hamiltonien_calculer_fonction_onde
   !---------------------------------------------------------------------
-  !>@brief Calcul des energies de transition
-  !>@details Simples differences entre les niveaux d'énérgie fondamentaux et excités
+  !>@brief Calcul des énergies de transition
+  !>@details Simples différences entre les niveaux d'énergie fondamentaux et excités
   subroutine hamiltonien_energies(energies)  
     real(dp),intent(out)::energies(8)
     integer::i,ii,j,jj,k
@@ -101,10 +101,10 @@ module hamiltonien
   !> contenant des coefficients de Glebsch Gordon.
   !> @n  cf. thèse de F.Varret (1972),chap 4
   subroutine hamiltonien_intensites(alpha,beta,monoc,intensites)
-    integer,intent(in)::monoc !< option poudre (0) ou monocristal (1)
-    real(dp),intent(in)::alpha !< angle polaire dans la direction du rayonnement (par rapport à l'axe X)
-    real(dp),intent(in)::beta  !< angle polaire dans la direction du rayonnement (par rapport à l'axe Z)
-    real(dp),intent(out)::intensites(8) !intensité des raies calculées
+    integer,intent(in)::monoc !< Option poudre (0) ou monocristal (1)
+    real(dp),intent(in)::alpha !< Angle polaire dans la direction du rayonnement (par rapport à l'axe X)
+    real(dp),intent(in)::beta  !< Angle polaire dans la direction du rayonnement (par rapport à l'axe Z)
+    real(dp),intent(out)::intensites(8) ! Intensité des raies calculées
     integer::i,ii,ik,il,j,jj,jk,jl,k
     real(dp)::cosa,cosb,sina,sinb
     complex(dp)::cu,ap,am,a0
@@ -116,7 +116,7 @@ module hamiltonien
     tMm=(0.0_dp)
     tMp=(0.0_dp)
     tM0=(0.0_dp)
-    !Calcul de tMm------------------------------------------------------
+    ! Calcul de tMm------------------------------------------------------
     tMm(1,1)=cmplx( 0.5_dp*cosa*(1.0_dp + cosb),&
                   & 0.5_dp*sina*(1.0_dp +cosb), dp )
     tMm(1,2)=cmplx( sinb/Root3, 0.0_dp, dp)
@@ -127,7 +127,7 @@ module hamiltonien
     tMm(2,3)=cmplx( sinb/Root3, 0.0_dp, dp)
     tMm(2,4)=cmplx( 0.5_dp*cosa*(1.0_dp-cosb),&
                   & -0.5_dp*sina*(1.0_dp-cosb), dp)
-    !calcul de tMp------------------------------------------------------
+    ! Calcul de tMp------------------------------------------------------
     do j=1,4
       do i=1,2
         ii=3-i
@@ -138,7 +138,7 @@ module hamiltonien
     enddo
     if(monoc==0)then
     ! Calcul de TM0 si on est dans une poudre---------------------------
-    ! remarque : si alpha=0, beta=0, on retrouve l'expression de M0 donnée par la F.Varret (thèse, p48)
+    ! Remarque : si alpha=0, beta=0, on retrouve l'expression de M0 donnée par la F.Varret (thèse, p48)
       tM0(1,1) = cmplx( -cosa*sinb/Root2, -sina*cosb/Root2, dp )
       tM0(1,2) = cmplx( cosb*root2/root3, 0.0_dp, dp)
       tM0(1,3) = cmplx( cosa*sinb/(root2*root3), -sina*sinb/(root2*root3),dp) 
@@ -156,17 +156,17 @@ module hamiltonien
     ! Transition du niveau fondamental i...
       do j=1,4
       ! ...vers le niveau excité j
-        k=k+1 ! numero de raie
-        ik=2*(i-1)+1  ! debut du  ieme vecteur propre dans fctF
-        jk=4*(j-1)+1  ! debut du jieme vecteur propre dans fctE
+        k=k+1 ! Muméro de raie
+        ik=2*(i-1)+1  ! début du  ieme vecteur propre dans fctF
+        jk=4*(j-1)+1  ! début du jieme vecteur propre dans fctE
         ap=(0.0_dp,0.0_dp)
         a0=(0.0_dp,0.0_dp)
         am=(0.0_dp,0.0_dp)
         !Multiplication vecteur-matrice-vecteur :        
         do jj=1,4
           do ii=1,2
-            il=ik-1+ii  ! ieme terme du iieme vecteur propre de fctF
-            jl=jk-1+jj  ! jieme terme du jieme vecteur propre de fctE
+            il=ik-1+ii  ! ième terme du ième vecteur propre de fctF
+            jl=jk-1+jj  ! jième terme du jième vecteur propre de fctE
             ap=ap+ conjg(fctF(il))*tMp(ii,jj)*fctE(jl)
             a0=a0+ conjg(fctF(il))*tM0(ii,jj)*fctE(jl)
             am=am+ conjg(fctF(il))*tMm(ii,jj)*fctE(jl)

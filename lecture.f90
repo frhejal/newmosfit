@@ -2,16 +2,14 @@
 !**********************************************************************
 !                             MODULE LECTURE
 !**********************************************************************
-!>@brief  Gestion des entrees du code :
-!>@details  La lecture se fait dans l'entree standard 
-!! (ex : fichier donné en entrée lors du lancement du programme)
+!>@brief  Gestion des entrées du code.
 !!@version juin 2016
 module lecture
   use precision
   use options
   implicit none
-  integer::NIN=5 !<Entree standard
-  character(len=255)::fichierCoo
+  integer,save::NIN=5
+  character(len=255),save::fichierCoo
   contains
 !=======================================================================
   !>@brief Ouverture du fichier donné en argument
@@ -25,18 +23,20 @@ module lecture
     endif
   end subroutine lecture_ouvrir_fichier_entree
 !=======================================================================
+  !>@brief Lecture du titre du fichier d'entrée. 256 caractères maximum,
+  !! les caractères supplémentaires sont ignorés.
   subroutine lecture_titre
     read(NIN,'(256A)') titre      
   end subroutine lecture_titre
 !=======================================================================
   !> @brief Lecture des options et des valeurs initiales des parametres hyperfins ajustables
   subroutine lecture_options(cn,nmax,ns,ns1,ns2,hbruit,grass,plage)
-    integer,intent(out)::nmax !<Nombre maximal d'itérations dans l'algorithme des moindres carrés 
-    integer,intent(out)::ns !<nombre de sous-spectres 
-    integer,intent(out)::ns1 !< numéro du premier sous spectre de la distribution
-    integer,intent(out)::ns2 !< numéro du dernier sous-spectre de la distribution
-    real(dp),intent(out)::cn !< largeur d'un canal (mm/s)
-    real(dp),intent(out)::hbruit !< hauteur du spectre de bruit
+    integer,intent(out)::nmax !< Nombre maximal d'itérations dans l'algorithme des moindres carrés
+    integer,intent(out)::ns !< Nombre de sous-spectres
+    integer,intent(out)::ns1 !< Numéro du premier sous spectre de la distribution
+    integer,intent(out)::ns2 !< Numéro du dernier sous-spectre de la distribution
+    real(dp),intent(out)::cn !< Largeur d'un canal (mm/s)
+    real(dp),intent(out)::hbruit !< Hauteur du spectre de bruit
     integer,intent(out)::grass(10) !< Plages de sous-spectres à sommer
     integer,intent(out)::plage(2) !< Plages de sous-spectres à lisser
     integer::i
@@ -48,14 +48,14 @@ module lecture
   end subroutine lecture_options
 !=======================================================================
     !> @brief Lecture des paramètres hyperfins et de leurs options d'ajustement (ajustable vs fixe),
-    !! et eventuellement des largeurs de raies (si IOGV lue vaux 3)
+    !! et éventuellement des largeurs de raies (si IOGV lue vaut 3)
     subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc,nb,iogv,gv,ng)
-      integer,intent(out)::monoc!< monocristal ou pas monocristal
-      integer,intent(out)::iogv ! type d'ajustement des raies
-      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha !< params hyperfins
-      integer,intent(out)::nb(10) !< type d'ajustement des params hyperfins
-      real(dp),intent(out)::gv(8)
-      integer,intent(out)::ng(8)
+      integer,intent(out)::monoc!< Monocristal ou pas monocristal
+      integer,intent(out)::iogv !< Type d'ajustement des raies
+      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha !< Paramètres hyperfins
+      integer,intent(out)::nb(10) !< Type d'ajustement des paramètres hyperfins
+      real(dp),intent(out)::gv(8) !< Largeur des raies (si IOGV==3)
+      integer,intent(out)::ng(8)  !< Ajustement des raies (si IOGV==3)
       integer::i
       read(NIN,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc
       read(NIN,*) (nb(i), i=1,10), iogv
@@ -65,7 +65,7 @@ module lecture
       endif
     end subroutine lecture_param
 !=======================================================================
-    !> @brief Lecture des parametres hyperfins à partir desquels construire une progression arithmetique 
+    !> @brief Lecture des paramètres hyperfins à partir desquels construire une progression arithmétique
     subroutine lecture_param0( di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha,monoc,nb)
       integer,intent(out):: monoc
       real(dp),intent(out)::di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha
