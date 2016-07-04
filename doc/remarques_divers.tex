@@ -1,0 +1,37 @@
+\subsection{Calculer et tracer des spectres théoriques}
+On  peut calculer un spectre théorique seul à partir des paramètres hyperfins, en fournissant :
+\begin{itemize}
+\item le titre,
+\item la lste des variables générales,
+\item les options (\lstinline{IOPT=1}),
+\item les paramètres hyperfins de chaque sous-spectre,
+\item le tableau \lstinline{NB} avec ses valeur par défaut (\lstinline{NB(I)}=0).
+\end{itemize}
+
+Exemple de fichier pour calculer un spectre, composé de 8 sous-spectres (dont une distribution du sous-spectre 5 à 8)
+\begin{lstlisting}[frame=single]
+spectre theorique, 30/06/2016, 11:16
+0.0600356 0 8 5 8 0 1 0
+0 0 0 0 0 0 1 0 0 1 0 1 0 0 0 0 0 1 0 0
+0.13  .18  81000  0.27   277  0 0 0 0 0 0 
+ 0     0    0      0     0    0 0 0 0 0 0
+0.13  .18  81000  0   280  0 0 0 0 0 0 
+ 0     0    0     0     0  0 0 0 0 0 0
+-0.072  .18  81000 0.19   241  0 0 0 0 0 0 
+ 0     0      0     0      0   0 0 0 0 0 0
+0.11   .18  125000 0.07   115  0 0 0 0 0 0 
+ 0     0      0     0      0   0 0 0 0 0 0
+.065  0  .18   4738   0  0 100 -15 0 0 0 0 0 0 0
+ 0        0     0     0     0      0 0   0 0 0
+\end{lstlisting}
+\subsection{Comparer et tracer un spectre théorique et un spectre expérimental}
+pour comparer et tracer un spectre expérimental et un spectre théorique sans effectuer d'ajustement,
+ prendre le jeu de données complet avec \lstinline{NMAX=1} et \lstinline{NB(I)=0} pour tout les sous-spectres.
+\subsection{Remarques importante}
+
+Il est très important de remarquer qu'il s'agit d'un programme d'affinement qui nécessite de bonnes valeurs initiales, à chaque itération il propose un nouveau jeu de paramètres, en principe meilleur du point de vue des moindres carrées.
+Le listing que l'on reçoit indique les résultats successsifs, et il est nécéssaire de s'assurer que la convergence des paramètres
+vers leur valeur finale n'a pas été trop laborieuse. (Cette estimation ne peut-etre que le fruit de l'expérience).
+
+Lorsque l'on n'a que peu d'idée sur la valeur des paramètres dans un spectre expérimental, il convient d'abord d'essayer toute sorte de combinaisons avec "Spectres théoriques", jusqu'à trouver une assez bonne our commencer l'affinement.
+On peut d'ailleur se constituer une "bibliothèque de spectres" à cette occasion. 

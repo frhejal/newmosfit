@@ -1,11 +1,11 @@
 \FloatBarrier
 \subsection{Modules}
-Le programme est écrit selon la normae Fortran2003. 
-Les sous-soutines sont reparties dans des modules en fonction de leur role
+Le programme est écrit selon la norme Fortran2003. 
+Les sous-routines sont réparties dans des modules en fonction de leur r\^ole
 et des variables qu'elles font intervenir (Voir table \ref{tab:role_module}).
 
-Les variables qui étaient partagés entre les sous-routines à l'aide de l'instruction \lstinline{COMMON} dans la version Fortran77 de Mosfit
-sont à présent déclarées comme variables globales certains modules.
+Les variables qui étaient partagées entre les sous-routines à l'aide de l'instruction \lstinline{COMMON} dans la version Fortran77 de Mosfit
+sont à présent déclarées comme variables globales de certains modules.
 Une variables globale d'un module \lstinline{exemple} est accessible depuis les sous-routines de tout les modules appelant le module \lstinline{exemple} (instruction \lstinline{use exemple}).
 
 \begin{table}
@@ -15,16 +15,16 @@ Nom du module & R\^ole du module\\ \hline \hline
  \lstinline{ajustement} & Algorithme de moindres carrés, vérification de la convergence \\\hline
  \lstinline{algebre} & Méthodes d'algèbre linéaire\\\hline
  \lstinline{connex}	& Connexions entre paramètres \\\hline
- \lstinline{ecriture} &Routines d'écritures dans les fichiers\\\hline
+ \lstinline{ecriture} &Routines d'écriture dans les fichiers\\\hline
  \lstinline{habillage} &Habillage des raies par des lorentziennes\\
-          & ou des convolutions lorentzienne*gaussiennes\\\hline
-  \lstinline{hamiltonien} & Calcul des hamiltonien, des fonctions d'ondes,\\
+          & ou des convolutions lorentzienne*gaussienne\\\hline
+  \lstinline{hamiltonien} & Calcul des hamiltonien, des fonctions d'onde,\\
           & des énergies et des intensités \\\hline
  \lstinline{lecture} &Lecture du fichier d'entrée\\\hline
  \lstinline{main} & Programme principal \\ \hline
  \lstinline{options} & Déclaration des variables de spécification des options\\\hline
  \lstinline{spectres}	& Manipulation des spectres : création des spectres théoriques, \\
-        &  manipulation des sous-spectres, calculs de dérivée des spectres\\\hline
+        &  manipulation des sous-spectres, calculs des dérivées des spectres\\\hline
  \lstinline{variablesAjustables} & Ensemble des paramètres hyperfins \\
       & et des variables pouvant être affinées par la méthode des \\
       &moindres carrés, tableaux de rangement de ces variables\\\hline
@@ -33,15 +33,15 @@ Nom du module & R\^ole du module\\ \hline \hline
 \caption{\label{tab:role_module}Nom et rôle des modules}
 \end{table}
 
-\subsection{nomenclature}
+\subsection{Nomenclature}
 \paragraph{Modules :}
 Les noms de modules sont écrits avec la casse lowerCamelCase (mots reunis sans espace ni {\it underscore}, avec majuscule pour identifier le début des mots) : \lstinline{nomDuModule}.
-Le nom du module doit indiquer le r\^ole général des routines et des variables qu'il contient.
+Le nom du module doit indiquer le r\^ole général des routines et/ou des variables qu'il contient.
 
 \paragraph{Sous-routines :} 
 Les sous-routines sont nommées en fonction du module auquel elles appartiennent.
-Le nom d'une sous-routine nom doit indiquer de manière claire et succinte l'opération principale qu'elle effectue.
-Ainsi, une sous-routine appartenant au module \lstinline{moduleExemple} qui remplie la fonction d'afficher \lstinline{N} messages aléatoires pourra s'appeler 
+Le nom d'une sous-routine doit indiquer de manière claire et succinte l'opération principale qu'elle effectue.
+Ainsi, une sous-routine appartenant au module \lstinline{moduleExemple} et remplissant la fonction d'afficher \lstinline{N} messages aléatoires pourra s'appeler 
 
 \lstinline{moduleExemple_afficher_messages_aleatoires}
 
@@ -49,11 +49,11 @@ Ainsi, une sous-routine appartenant au module \lstinline{moduleExemple} qui remp
  
  \lstinline{ call  moduleExemple_afficher_messages_aleatoires(N)}
 
-Les fonctions étant destinées à être appelées au cours d'aures instructions, on prèfère choisir un nom plus court.
+Les fonctions étant destinées à être appelées au cours d'autres instructions, on prèfère choisir un nom plus court, par exemple en omettant le nom du module si la fonction n'est pas destinée à être utilisée en dehors de ce module.
 
 \paragraph{Variables :}
-Pour une meilleure comprehension , les noms des variables globales des modules sont écrites en majuscules, tandis que les noms des variables locales des sous-routines sont écrites en minuscule.
-Fortran est indifférent à la casse, ce choix majuscules/minuscules est donc purement esthétique, afin de faciliter la comprehension du developpeur.
+Pour une meilleure compréhension, les noms des variables globales des modules sont écrites en majuscules, tandis que les noms des variables locales des sous-routines sont écrites en minuscule.
+Fortran est indifférent à la casse, ce choix majuscules/minuscules est donc purement esthétique.
 
 Exemple : 
 \begin{itemize}
@@ -64,10 +64,8 @@ Exemple :
 La variable \lstinline{dp}, qui indique le \lstinline{kind} de la double precision, est l'exception à cette règle de casse.
 
 \subsection{Documentation interne du code}
-
-Utilisation de Doxygen ?
-description du role des modules
--routines de lecture/ecriture
-
+Les commentaires présents dans le code source du programme sont utilisables par le logiciel Doxygen.
+Doxygen permet de documenter les variables et les routines du programme.
+L'interet de Doxygen est de fournir un recencement des variables du programme, ainsi que des graphiques d'appel des routines entre elles.
 
 \FloatBarrier

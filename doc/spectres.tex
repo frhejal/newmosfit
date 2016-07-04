@@ -1,0 +1,151 @@
+%=======================================================================
+\subsection{Sous-spectres}
+%-----------------------------------------------------------------------
+\subsubsection{Description d'un sous-spectre}
+Pour rendre compte d'un spectre expérimental, on peut utiliser jusqu'à 40 sous-spectres théoriques.
+Chaque sous-spectre est défini par une liste de paramètres hyperfins (Table \ref{tab:param}), dont les valeurs initiales sont données dans le fichier d'entrée (voir \ref{part:fichier_entree}).
+Ces paramètres hyperfins sont donnés dans un ordre précis (Table \ref{tab:position_param}).
+Leurs options d'ajustements sont contenues dans le tableau \lstinline{NB}. 
+La valeur de \lstinline{NB(I)} indique comment le \lstinline{I}ème paramètre doit être ajusté au cours de l'affinement en moindres carrés (Table \ref{tab:NB}).
+
+La variable \lstinline{MONOC} indique s'il s'agit d'un monocristal, et la variable \lstinline{IOGV} indique si des relations lient la largeur des raies du sous-spectre entre elles (voir \S \ref{part:largeurs}).% (Table \ref{tab:IOGV}).
+
+\begin{table}[!h]
+\caption{\label{tab:param}Paramètres hyperfins}
+\begin{tabular}{c|l}
+Paramètre & Description\\
+\hline
+\hline
+  \lstinline{DI}    & Déplacement isomérique\\
+\hline
+  \lstinline{GA}    & Demi-largeur (\milli\meter.\reciprocal\second),\\
+        & commune aux raies du spectre\\
+\hline
+  \lstinline{H1}    & Intensité totale (nombre de coups)\\
+\hline
+  \lstinline{SQ}    & Interaction quadrupolaire\\
+\hline
+  \lstinline{CH}   & Champ interne (kOe)\\
+\hline
+  \lstinline{ETA}   & Paramètre d'asymétrie\\
+\hline
+  \lstinline{THETA}  & Angles polaires du champ interne\\
+  \lstinline{GAMA}  &   dans les axes principaux du gradient (degrés)\\
+\hline
+  \lstinline{BETA}  &   Angles polaires de la direction du\\
+  \lstinline{ALPHA}  &         rayonnement (m\^emes axes que pour \lstinline{THETA},\lstinline{GAMA})\\
+\end{tabular}
+\end{table}
+
+\begin{table}[!h]
+\caption{\label{tab:position_param}Ordre de rangement des paramètres hyperfins}
+\begin{tabular}{c|cccccccccc}
+\lstinline{I} & 1  &2  & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+Paramètre & \lstinline{DI} &\lstinline{GA} &\lstinline{H1}&  \lstinline{SQ}&  \lstinline{CH} & \lstinline{ETA}& \lstinline{THETA}&\lstinline{GAMA}& \lstinline{BETA}&\lstinline{ALPHA}
+\end{tabular}
+\end{table}
+
+ \begin{table}[!h]
+ \caption{\label{tab:NB}Type d'ajustement des paramètres hyperfins}
+ \begin{tabular}{c|l}
+  \lstinline{NB(I)}=0 & Le \lstinline{I}ème paramètre est fixé \\
+  \hline
+  \lstinline{NB(I)}=1 & Le \lstinline{I}ème paramètre est ajustable \\
+  \hline
+  \lstinline{NB(I)}=2 & Le \lstinline{I}ème paramètre est ajusté de manière identique \\
+    & au \lstinline{I}ème paramètre du spectre précédent. \\
+  \hline
+  \lstinline{NB(I)}=3 & Le \lstinline{I}ème paramètre est relié à d'autres paramètres ajustables.\\
+    & Il n'est pas ajusté directement,  mais par l'intermédiaire\\
+    &  d'une relation définie dans le module \lstinline{CONNEX}. 
+ \end{tabular}
+\end{table}
+\FloatBarrier
+%-----------------------------------------------------------------------
+\subsubsection{Largeur des raies d'un sous-spectre}
+Plusieurs types d'ajustement sont possibles pour les raies d'un sous-spectre, selon la valeur donnée à l'option \lstinline{IOGV}(voir Table \ref{tab:IOGV}).
+La valeur de \lstinline{IOGV} pour chaque sous-spectre est spécifiée dans le fichier d'entrée du programme (voir \S\ref{part:fichier_entree}).
+Pour un sous-spectre :
+\begin{itemize}
+\item Si \lstinline{IOGV} = 0, toutes les raies ont la largeur  \lstinline{GA}, et leur ajustement dépend donc de la valeur donnée à  \lstinline{NB(2)},
+\item  si \lstinline{IOGV} = 1 ou 2, \lstinline{GA} est automatiquement non ajustable (\lstinline{NB(2)}=0),
+\item  si \lstinline{IOGV} = 3, on peut ajuster :
+  \begin{itemize}
+    \item La largeur d'un certain nombre de raies de manière commune (\lstinline{NB(2)}=1, \lstinline{NG(I)}=0),
+    \item La largeur des autres raies de manière indépendante (\lstinline{NG(I)}=1).
+  \end{itemize}
+\end{itemize}
+\label{part:largeurs}
+\begin{table}[!h]
+  \caption{\label{tab:IOGV}Type d'ajustement des raies d'un sous-spectre selon la valeur de l'option \lstinline{IOGV}}
+  \begin{tabular}{c|l}
+    \lstinline{IOGV}=0& Largeur unique pour toutes les raies, ajustable si \lstinline{NB(2})=1 ou 2 \\
+    \hline
+    \lstinline{IOGV}=1& Spectre quadrupolaire à raies de largeurs différentes\\
+                      & (2 largeurs indépendantes)\\
+    \hline
+    \lstinline{IOGV}=2& Spectre magnétique formé de trois doublets symétriques d'intensité 3,2,1\\
+                      & (3 largeurs différentes)\\
+    \hline
+    \lstinline{IOGV}=3& Cas général, les tableaux \lstinline{NG} et \lstinline{GV} sont alors utilisés :\\
+    &\begin{tabular}{cl}
+      \lstinline{NG(I)}=0 : & La \lstinline{I}ème largeur correspond à la valeur ajustée/fixée \\
+                            & pour \lstinline{GA} \\
+      \lstinline{NG(I)}=1 : & Ajustement indépendant de la \lstinline{I}ème largeur à partir \\
+                            & de la valeur initiale \lstinline{GV(i)}
+    \end{tabular}\\
+    & \lstinline{GV(I)} : Valeur initiale de la \lstinline{I}ème largeur
+  \end{tabular}
+\end{table}
+%-----------------------------------------------------------------------
+\subsubsection{\'Etapes de la lecture d'un sous-spectre}
+Lors de la lecture du sous-spectre numéro \lstinline{NT}, le programme effectue les étapes suivantes :
+\begin{itemize}
+  \item Les paramètres hyperfins sont placés dans le tableau \lstinline{BT(I,NT)}, et la valeur de \lstinline{MONOC} est placée dans \lstinline{MONOT(NT)},
+  \item Les paramètres d'ajustements \lstinline{NB(I)} sont rangés dans le tableau \lstinline{NBT(I,NT)},
+  \item Les paramètres hyperfins définis comme ajustables (\lstinline{NB(I)$\neq$0}) sont placés dans le tableau \lstinline{B}.
+   C'est ce tableau qui consituera le vecteur à ajuster lors de l'affinement,
+  \item Dans l'alternative où les largeurs de raies ne sont pas identiques (\lstinline{IOGV}$\neq$0), les valeurs initiales des largeurs variables sont introduites dans le tableau \lstinline{GVT(J,NT)} (\lstinline{J}=1 à 8). 
+\end{itemize}
+
+Les tableaux \lstinline{IAD} et \lstinline{IADG} permettent d'assurer la correspondance entre \lstinline{B} 
+(qui ne contient que les paramètres ajustables) et les tableaux \lstinline{BT} et \lstinline{GVT} (qui contiennent l'ensemble des paramètres qui permettent de calculer les sous-spectres).
+
+\begin{tabular}{rcl}
+  \lstinline{IAD(I,NT)}&=&adresse dans le tableau \lstinline{B}  du paramètre  hyperfin \lstinline{BT(I,NT)}\\
+  \lstinline{IADG(J,NT)}&=&adresse dans le tableau \lstinline{B} de la largeur de raie \lstinline{GVT(J,NT)}\\
+\end{tabular}
+%-----------------------------------------------------------------------
+\subsubsection{Distribution arithmétique et affichage de groupes de sous-spectres}
+Il est possible de contruire une distribution de sous-spectres selon une progression arithmétique.
+Une fois l'affinement réalisé, il est également possible de regrouper et sommer certains des sous-spectres lors de l'affichage des résultats. 
+Ainsi, dans la plupart des cas, on cherchera principalement à regrouper les sous-spectres de la distribution, mais ce n'est pas obligatoire.
+C'est l'utilisateur qui choisi quels sous-spectres il souhaite regrouper, selon ses besoins.
+
+\paragraph{Définition d'une distribution de sous-spectres}
+Le premier spectre de la distribution porte le numéro \lstinline{NS1}, le dernier sous-spectre porte le numéro \lstinline{NS2}.
+Le premier sous-spectre de la distribution  est défini par les paramètres hyperfins : \\
+
+\lstinline{DI0} \lstinline{SQ0} \lstinline{CH0} \lstinline{TETA0} \lstinline{ETA0} \lstinline{GAMA0} \lstinline{BETA0}, \lstinline{ALPHA0} \lstinline{MONOC0}. \\
+
+On définit également \lstinline{PDI}, \lstinline{PSQ}, \lstinline{PCH} et \lstinline{PTHETA}, qui sont les pas de la distribution.
+Les paramètres hyperfins \lstinline{DI0}, \lstinline{SQ0}, \lstinline{CH0} et \lstinline{THETA0} des sous-spectres de la distribution  sont incrémentés de ces valeurs, du spectre \lstinline{NS1} au spectre \lstinline{NS2} inclus.
+
+Toutes les raies de tous les sous-spectres de la distribution ont la même largeur.
+ L'intensité des raies de chacun des sous-spectres est prise égale à \lstinline{H1} pour tous au départ.
+
+Les paramètres de tous les sous-spectres de la distribution obéissent aux mêmes options d'ajustement définies par \lstinline{NB0}, équivalent de \lstinline{NB}.
+
+\paragraph{Affichage de groupes de sous-spectres}
+L'affichage de groupes de sous-spectres se fait si  \lstinline{IO(17)}=1 (voir \ref{part:options}). 
+Les groupes de sous-spectres sont alors spécifiés dans le tableau \lstinline{GRASS}. 
+Le \lstinline{I}ème groupe s'étend du sous-spectre \lstinline{GRASS(2i-1)} au sous-spectre \lstinline{GRASS(2i)}.
+
+Exemple: 
+
+\lstinline{GRASS = [1 3 5 6 7 7 0 0 0 0]}
+
+Trois groupes de spectres sont définis: le groupe contenant les spectres 1, 2 et 3, le groupe contenant les spectres 5 et 6, et le groupe contenant uniquement le spectre 7. 
+
+
+\FloatBarrier

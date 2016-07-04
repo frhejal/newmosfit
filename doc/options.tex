@@ -1,0 +1,116 @@
+%-----------------------------------------------------------------------
+\subsection{Options}
+\label{part:options}
+Avant de fournir les sous-spectres, il convient de fournir un certain nombre de variables et d'options (voir table \ref{tab:var_gen}).
+Ces options précisent entre autres le nombre de sous-spectres, l'existence éventuelle d'une distribution de sous-spectres, les éventuels canaux à ignorer, une limite supérieure au nombre d'itérations lors de l'affinement.
+De plus, \lstinline{IOPT}=1 donne accès au options commandées par le tableau \lstinline{IO}, qui sont listée en table \ref{tab:IO}. 
+
+En plus des paramètres hyperfins de chaque sous-spectre, la hauteur de bruit \lstinline{HBRUIT} et le niveau moyen hors d'absorption \lstinline{TY} peuvent être ajustés.
+\lstinline{TY} est toujours ajustable. 
+\lstinline{HBRUIT} sera ou non  ajustable, selon la valeur de l'option \lstinline{IO(4)}.
+La valeur de \lstinline{IO(4)} détermine également si un spectre de bruit doit être lu dans le fichier d'entrée.
+
+\begin{table}[!h]
+\caption{\label{tab:var_gen}Variables générales}
+\begin{tabular}{c|l}
+variable & description \\ \hline
+\lstinline{CN} & Largeur des canaux (en ~\milli\meter.\reciprocal\second)\\
+\hline
+\lstinline{NMAX} & Nombre maximum d'itérations dans l'ajustement par moindres carrés. \\
+                & Lorsque \lstinline{NMAX} est atteint, la convergence souhaitée n'a \\
+                & pas été obtenue, et l'on sort la mention "\lstinline{COUPURE PAR NMAX}"\\
+                &  ainsi que les résultats provisoires dans le fichier .out \\
+\hline
+\lstinline{NS} & Nombre de sous-spectres théoriques utilisés pour \\
+    & représenter le spectre expérimental (\lstinline{NS}<40)\\
+\hline
+\lstinline{NS1} & Premier sous-spectre de la distribution (0 si pas de distribution)\\
+\hline
+\lstinline{NS2} & Dernier  sous-spectre de la distribution (0 si pas de distribution)\\
+\hline
+\lstinline{IZZ} & Si \lstinline{IZZ}$\neq 0$, Existence de canaux à ignorer, précisés dans le tableau \lstinline{IZ}\\
+\hline
+\lstinline{IOPT} & Si \lstinline{IOPT}$= 1$, un tableau d'options \lstinline{IO} est spécifié\\
+\hline
+\lstinline{HBRUIT}& Si \lstinline{IO(4)}$\neq$0, \lstinline{HBRUIT} est la hauteur du spectre de bruit.
+\end{tabular}
+\end{table}
+\begin{table}
+\caption{\label{tab:IO} Options définies par le tableau \lstinline{IO}. Lorsque ce n'est pas précisé, une option nulle correspond à une absence d'effet.}
+\begin{tabular}{|rcl|l|}
+%~ \hline
+%~ \lstinline{IO}& Valeur & Option\\
+%~ \hline
+\hline
+\lstinline{IO(1)} &=& N & Le programme ajoute N millions de coups par canal au \\
+                  & &    & spectre expérimental fourni.\\
+\hline
+\lstinline{IO(2)} &=& 1 & Option obsolete : changement d'echelle du tracé du spectre \\
+                  & &   & dans le fichier .out .  \\
+\hline
+\lstinline{IO(3)} &=& 0 & Choix de l'élement Fe57,\\
+                  &=& 1 & Choix de l'élement Sn119. \\
+\hline
+\lstinline{IO(4)} &=& 0 & Pas de spectre de bruit dans le fichier d'entrée, \lstinline{HBRUIT}=0, \\
+                  &=& 1 & Spectre de bruit fourni, de hauteur \lstinline{HBRUIT} non ajustable. \\
+                  &=& 2 & Spectre de bruit fourni, de hauteur \lstinline{HBRUIT}.\\
+\hline  
+\lstinline{IO(5)} &=& N & Choix de connexion entre paramètres (module \lstinline{CONNEX}). Ces relations\\
+                  & &  & doivent être décrites dans le module \lstinline{CONNEX}. On peut \\
+                  & &  & utiliser la valeur de \lstinline{IO(5)}  pour choisir entre plusieures \\
+                  & &  & connexion réalisables.\\
+\hline  
+\lstinline{IO(6)} &=& 1 & \'Ecriture de la différence entre le spectre exprérimental et le spectre calculé\\
+                  & &  & dans le fichier .out.\\
+\hline  
+\lstinline{IO(7)} &=& 1 & \'Ecriture du spectre calculé dans le fichier .out.\\
+\hline
+\lstinline{IO(8)} &=& 1 & \'Ecriture des positions, largeur et hauteur des différentes\\
+                  & &   & raies ajustées. \\
+\hline  
+\lstinline{IO(9)} &=& 1 & $\beta=\theta$, $\alpha=\gamma$. Seuls $\theta$ et  $\gamma$ sont à indiquer. Option utilisée pour les \\
+                  & &   &spectres sous champ magnétique intense longitudinale.\\
+\hline  
+\lstinline{IO(10)}&=& 0 & Lecture d'un spectre expérimental et affinement des paramètres hyperfins. \\
+                  &=& 1 & Calcul et tracé du spectre théorique seul à partir des paramètres hyperfins\\
+                  & &   & fournis. \\
+\hline  
+\lstinline{IO(11)}&=& 1 & Calcul de la différence du contenu des canaux du spectre expérimental\\
+                  & &  & et du spectre calculé.\\
+\hline  
+\lstinline{IO(12)}&=& 1 & \'Ecriture du résumé dans le fichier .doc, écriture du spectre expérimental\\
+                  & &   & et du spectre calculé dans dans un fichier exploitable par un logiciel\\
+                  & &   &  tiers (ex: gnuplot). Les eventuels groupes de sous-spectres définis dans \lstinline{GRASS}\\
+                  & &   &  sont également écrits dans le fichier .doc si \lstinline{IO(17)}=1.\\
+\hline  
+\lstinline{IO(13)}&=& 1 & Lissage de tous les sous-spectres. \\
+                  &=& 2 & Lissage des sous-spectres de la distribution uniquement \\
+                  &=& 3 & Lissage de la plage de sous-spectres spécifiée par \lstinline{PLAGEL} \\
+\hline  
+\lstinline{IO(14)}&=& 1 & Si \lstinline{IO(13)}$\neq$0, tracé les sous-spectres avant et après lissage dans le fichier .out \\
+\hline  
+\lstinline{IO(15)}&=& 1 & Utilisation de la formulation du champ hyperfin \\
+                  & &   & pour des cycloïdes (\lstinline{GAMMA} est remplacé par \lstinline{WM})\\
+\hline
+\lstinline{IO(16)}&=& N & Convolution Gauss*Lorentz pour les enveloppes des raies\\
+                  & &  & (N=nombre de sous canaux)\\
+\hline  
+\lstinline{IO(17)}&=& 1 & Si \lstinline{IO(12)}$\neq$0, trace les sous-spectres tels que definis par \lstinline{GRASS}\\
+                  & &   & dans le fichier .dat. \\
+\hline  
+\lstinline{IO(18)}&=& 0 & Les fichiers de sortie se nomment \lstinline{fit.out}, \lstinline{Spect.dat}, \lstinline{RESULTAT.doc}, et sont\\
+                  & &   & placés dans le même répertoire que l'exécutable.\\
+                  &=& 1 & Les fichiers de sortie se nomment d'après le fichier d'entrée. Ils sont \\
+                  & &   & placés dans le même répertoire que le fichier d'entrée.\\
+\hline  
+\lstinline{IO(19)}& &   & Option vacante.\\
+\hline  
+\lstinline{IO(20)}&=&1 & Horizontalise le fond continu expérimental (dans les cas de déviation \\
+                  & &  & de fond continu observé dans les expériences sous champ magnétique).\\
+\hline  
+\end{tabular}
+\end{table}
+
+
+
+\FloatBarrier

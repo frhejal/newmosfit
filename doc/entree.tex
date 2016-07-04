@@ -1,0 +1,193 @@
+\subsection{Fichier d'entrée}
+\label{part:fichier_entree}
+%-----------------------------------------------------------------------
+\subsubsection{Composition d'un fichier d'entrée}
+Les opérations de lecture se font dans un fichier d'entree au format ASCII possédant une extension .coo (ou toute autre extension de trois lettres).
+Le contenu typique d'un fichier .coo comprend :
+
+\begin{itemize}
+\item le titre du spectre expérimental. Il est arbitraire et doit tenir sur une ligne.
+    Le titre peut contenir des informations telles que la date de la mesure, la température de l'échantillon, le type de source, l'âge du capitaine, ou tout autre information propre à identifier le spectre,
+\item la liste des variables générales du problème : \lstinline{CN}, \lstinline{NMAX}, \lstinline{NS}, \lstinline{NS1}, \lstinline{NS2}, \lstinline{IZZ}, \lstinline{IOPT}, \lstinline{HBRUIT},
+\item si \lstinline{IZZ=0}, la liste des canaux à ignorer,
+\item si \lstinline{IOPT=1}, la liste des 20 options du tableau d'options \lstinline{IO},
+\item si \lstinline{IO(17)}$\neq 0$, une liste des groupes de sous-spectres à moyenner en sortie,
+\item jusqu'à 40 sous-spectres théoriques (selon la valeur de \lstinline{NS}).
+Un spectre théorique est défini par une liste de 10 paramètres hyperfins, par la valeur de \lstinline{MONOC} et par une liste des paramètres d'ajustements demandés pour ces paramètres.
+    Une distribution arithmétique de sous-spectres peut être insérée parmi les sous-spectres théoriques,
+\item si \lstinline{IO(4)}$\neq 0 $, un spectre de bruit de fond (précédé d'un titre),
+\item si \lstinline{IO(10)}$=0$, un spectre expérimental,
+\end{itemize}
+Les spectres présents dans le fichier (spectre de bruit de fond et spectre expérimental) sont constitués de 256 canaux.
+Les valeurs des canaux sont réparties sur 32 lignes.
+ Au début de chaque ligne, un entier indique le nombre total de canaux présents dans les lignes précédentes. 
+
+
+\begin{figure}
+\caption{\label{fig:format_fichier} 
+Exemple de fichier donnant l'allure général d'un fichier d'entrée.
+Les noms des variables doivent être remplacés par les valeurs numérique.
+Les lignes en italique sont des commentaires qui ne doivent pas appara\^itre dans un vrai fichier d'entrée.}
+\begin{lstlisting}[frame=tbl,escapeinside=<>]
+Ligne de titre, donnant des indications diverses.
+CN NMAX NS NS1 NS2 IZZ IOPT HBRUIT
+<{\it ... si IZZ=1 :}>
+IZ(1) IZ(2) IZ(3) IZ(4) ... IZ(9) IZ(10)
+<{\it ... si IOPT=1 :}>
+IO(1) IO(2) IO(3) IO(4) ... IO(19) IO(20) IO(20)
+<{\it ... si IO(13)=3 :}>
+PLAGEL(1) PLAGEL(2)
+<{\it ... si IO(17)=1 :}>
+GRASS(1) GRASS(2) ...   GRASS(10) 
+<{\it ... 1er sous-spectre}>
+DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) IOGV
+ <{\it ... 2nd sous-spectre}>
+DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC   
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) IOGV
+<{\it ...etc...}>
+<{\it ... cas d'un sous-spectre avec IOGV=3 :}>
+ DI GA H1 SQ CH ETA THETA GAMA BETA ALPHA MONOC
+ NB(1) NB(2) NB(3) ... NB(9) NB(10) 3
+ GV(1) GV(2) ... GV(8)
+ NG(1) NG(2) ... NG(8)
+<{\it ... cas d'une distribution arithmetique de sous-spectre :}>
+DI0 PDI GA H1 SQ0 PSQ CH0 PCH ETA0 THETA0 PTHETA GAMA BETA ALPHA MONOC
+NB0(1) NB0(2) NB0(3)... NB0(9) NB0(10)
+<{\it ... spectre experimental :}>
+  0 29368 29374 29374 29378 29361 29336 29358 29389
+  8 29383 29359 29345 29351 29372 29384 29393 29388
+ 16 29365 29369 29370 29377 29389 29393 29382 29384
+<{\it ... reste du spectre ...}>
+240 29380 29348 29379 29376 29349 29367 29380 29363
+248 29369 29367 29369 29384 29383 29370 29385 29389
+<{\it si IO(4)=1, presence d'un spectre  de bruit :}>
+ TITRE du spectre de bruit
+  0 29262 29297 29297 29320 29335 29322 29327 29345
+  8 29352 29345 29342 29326 29305 29290 29285 29301
+<{\it ... reste du spectre ... }>
+ 248 29330 29336 29339 29358 29387 29354 29373 29363
+ \end{lstlisting}
+\end{figure}
+
+\FloatBarrier
+\newpage
+
+\subsubsection{Exemple de fichier d'entrée}
+Prenons l'exemple du fichier suivant :
+\begin{lstlisting}[frame=tbl]
+0/09/97 NR Fe51Pt27Nb2B20 900C Mot:H1 8mm/s App:1 Temp:300K
+0.0600356 80 8 5 8 0 1 0
+0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 0 0 0
+1 1 2 2 3 3 4 8 0 0
+0.13    .18  81000  0.27   277  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+0.13    .18  81000   0     280  0 0 0 0 0 0 
+ 1       0    1       1      1  0 0 0 0 0 0
+-0.072  .18  81000  0.19   241  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+0.11    .18  125000 0.07   115  0 0 0 0 0 0 
+ 1       0    1       1      0  0 0 0 0 0 0
+.065  0  .18   4738  0  0 100 -15 0 0 0 0 0 0 0
+  2   0   1      2      0  0      0 0   0 0 0
+   0 2936866 2937414 2937448 2937813 2936118 2933607 2935895 2938930
+   8 2938309 2935942 2934521 2935197 2937298 2938432 2939326 2938806
+  16 2936536 2936904 2937098 2937780 2938907 2939332 2938254 2938458
+  24 2936899 2937734 2937058 2934998 2936177 2936895 2938978 2937656
+  32 2936772 2938535 2937290 2938995 2936098 2937345 2937792 2937642
+  40 2938637 2936002 2935063 2936945 2939254 2935946 2935282 2937072
+  48 2936534 2935796 2933706 2934070 2934227 2933531 2931402 2929126
+  56 2925986 2924042 2921245 2920892 2920914 2920639 2922117 2926364
+  64 2929294 2929821 2930991 2932563 2933154 2934197 2935048 2934909
+  72 2934118 2934726 2935826 2936170 2935984 2933513 2934665 2934117
+  80 2934614 2934278 2934327 2928869 2921944 2922008 2923439 2926673
+  88 2926246 2929796 2929768 2932030 2933561 2932213 2932780 2934548
+  96 2935227 2934530 2934215 2932671 2930546 2929025 2928541 2930139
+ 104 2929380 2929394 2925852 2927064 2926582 2924999 2925148 2925250
+ 112 2920879 2921155 2921680 2919556 2922850 2924848 2926294 2928443
+ 120 2930851 2931892 2930184 2927042 2924785 2924610 2927450 2929919
+ 128 2929214 2927812 2926000 2923581 2923963 2926178 2927523 2927325
+ 136 2926201 2925254 2920272 2921388 2924001 2924121 2923356 2925664
+ 144 2927858 2928319 2925991 2927803 2928501 2932273 2931864 2930785
+ 152 2930279 2930946 2930999 2928093 2927205 2926481 2926625 2927818
+ 160 2927922 2926973 2927965 2927396 2929250 2928999 2928383 2928056
+ 168 2923559 2921584 2922414 2924801 2929318 2929648 2931047 2935912
+ 176 2933075 2933607 2933907 2935826 2938741 2935490 2937386 2936315
+ 184 2934837 2935005 2934626 2935319 2934540 2931694 2932804 2933068
+ 192 2932614 2935923 2936230 2934393 2934317 2934267 2934088 2932837
+ 200 2931086 2930906 2928521 2925563 2922992 2918894 2917045 2918983
+ 208 2922561 2926459 2929470 2931752 2934993 2936115 2933460 2933954
+ 216 2936705 2935712 2935155 2935436 2935433 2936745 2935363 2935105
+ 224 2935398 2935381 2936615 2937822 2936971 2936850 2936837 2937205
+ 232 2937418 2936668 2937714 2936877 2935516 2937878 2937874 2938865
+ 240 2938061 2934803 2937958 2937679 2934971 2936772 2938088 2936396
+ 248 2936950 2936746 2936919 2938460 2938389 2937098 2938500 2938994
+\end{lstlisting}
+\paragraph{Explication :}
+La première ligne est le titre, elle n'est pas exploitée par Mosfit. 
+La seconde ligne est :
+\begin{lstlisting}[frame=single]
+0.0600356 80 8 5 8 0 1 0
+\end{lstlisting}
+On a une vitesse par canal \lstinline{CN}$=0.0600356$~\milli\meter.\reciprocal\second.
+\lstinline{NMAX}$=80$, donc l'algorithme des moindres carrés s'arrêtera après la 80ème itération si la convergence n'est pas atteinte avant.
+On souhaite utiliser \lstinline{NS}$=8$ sous-spectres théoriques pour décrire le spectre expérimental.
+Parmi ces sous-spectres, les spectres \lstinline{NS1}=5 à \lstinline{NS2}=8 sont décrits par une distribution arithmétique.
+\lstinline{IZZ}$=0$, aucun canal n'est ignoré. \lstinline{IOPT}$=1$, on doit donc spécifier les options \lstinline{IO} sur la ligne suivante. La ligne suivante est :
+\begin{lstlisting}[frame=single]
+0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 0 0 0
+\end{lstlisting}
+Toutes les options sont mises à zéro et ont donc leur valeur par défaut, sauf les options \lstinline{IO(12)}, \lstinline{IO(13)}, \lstinline{IO(14)} et \lstinline{IO(17)}.
+Comme \lstinline{IO(17)}$=1$, la ligne suivante correspond aux groupes de sous-spectres à moyenner (tableau \lstinline{GRASS}) :
+\begin{lstlisting}[frame=single]
+1 1 2 2 3 3 4 8 0 0
+\end{lstlisting}
+Le premier groupe comprend uniquement le premier sous-spectre.
+ De même, le second groupe et le troisième groupe contiennent le sous-spectre 2 et le sous-spectre 3 respectivement.
+Le dernier groupe contient les sous-spectres 4 à 8. Il n'y a pas de cinquième groupe. 
+Au final, on souhaite donc des informations en sortie sur 4 sous forme de 4 spectres : les sous-spectres \lstinline{NT}$=1$, \lstinline{NT}$=2$  et \lstinline{NT}$=3$,  ainsi qu'un nouveau spectre qui est la moyenne du sous-spectre $\text{NT}=4$  et des sous-spectres de la distribution (\lstinline{NT}$=5$ à \lstinline{NT}$=8$ ).
+
+Les deux lignes suivantes correspondent à la description des paramètres du premier sous-spectre.
+La première ligne donne leurs valeurs initiales, la second donne leurs types d'ajustement.
+\begin{lstlisting}[frame=single]
+0.13    .18  81000  0.27   277  0 0 0 0 0 0 
+ 1        0    1      1      1  0 0 0 0 0 0
+\end{lstlisting}
+On a donc, dans l'ordre: \lstinline{DI}=0.13 (ajustable),  \lstinline{GA}=0.18 (fixée), \lstinline{H1}=81000 (ajustable), \lstinline{SQ}=0.27 (ajustable), \lstinline{CH}=277 (ajustable).
+ Tout les autres paramètres (\lstinline{ETA} et les angles) sont fixés et nuls.
+\lstinline{MONOC}=0, l'échantillon est donc une poudre. Enfin,  \lstinline{IOGV}=0, les largeurs de raies sont don cindéendantes entre elle et on n'a pas d'indications supplémentaires à fournir les concernant.
+Les sous-spectres 2,3 et 4 sont définis de manière similaire par les huit lignes suivantes.
+
+On a ensuite la définition de la distribution qui permet de décrire les sous-spectres 5 à 8 :
+\begin{lstlisting}[frame=single]
+.065  0  .18   4738  0  0 100 -15 0 0 0 0 0 0 0
+  2   0   1      2      0  0      0 0   0 0 0
+\end{lstlisting}
+Enfin, les 32 lignes suivantes contiennent les mesures des 256 canaux du spectre expérimental.
+\FloatBarrier
+
+
+\subsubsection{Utilisation du fichier d'entree}
+Sous Windows: glisser/déposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe, 
+ou, en invite de commande, se déplacer dans le dossier contenant l'éxecutable et entrer la commande: 
+
+\begin{lstlisting}[frame=single]
+mosfit2016 nomDuFichier.coo
+\end{lstlisting}
+
+Sous MacOS/Linux : se placer dans le dossier de Mosfit et entrer la commande: 
+
+\begin{lstlisting}[frame=single]
+mosfit2016 nomDuFichier.coo
+\end{lstlisting}
+\FloatBarrier
+\subsection{Sorties}
+Trois fichiers de sortie sont crées :  \lstinline{fit.out}, \lstinline{RESULTAT.doc} et \lstinline{Spect.dat}, placé dans le répertoire de l'executable.
+\begin{itemize}
+\item Le fichier .out contient les paramètres hyerpfins ajustés, l'ensemble des grandeurs demandées en option, ainsi que les valeurs intermédiares des paramètres ajustables obtenus au cours de la recherche en moindres carrés.
+     Un graphique en caractère ASCII (précision 1/100) est également affiché en fin de fichier, qui donne un apperçu du spectre expérimental et du spectre calculé.
+\item Le fichier .dat contient les valeurs pour chaque canal du spectre expérimental, du spectre calculé et des eventuels groupes de sous-spectres demandés.
+\item Le fichier .doc contient les paramètres hyperfins ajustés, et, si demandé, leurs moyennes pour chaque groupe de sous-spectres. 
+\end{itemize}
+Si \lstinline{IO(18)}=1, le nom des fichiers est adapté au nom du fichier d'entrée : un fichier d'entrée \lstinline{fichier.coo} donnera les fichiers de sortie \lstinline{fichier.out}, \lstinline{fichier.dat}, \lstinline{fichier.doc}.
+Les fichiers de sortie sont alors placés dans le même répertoire que le fichier d'entrée.

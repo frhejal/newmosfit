@@ -10,13 +10,13 @@ module hamiltonien
   use options
   use algebre
   implicit none
-  real(dp)::HX    !< Champ hyperfin, composante selon x
-  real(dp)::HY    !< Champ hyperfin, composante selon y
-  real(dp)::HZ    !< Champ hyperfin, composante selon z
-  complex(dp)::hamilF(10) !<Etat fondamental :hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
-  complex(dp)::hamilE(10) !<Etat excité hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
-  complex(dp)::fctF(16)!< fonction d'onde état fondamental
-  complex(dp)::fctE(16)!< fonction d'onde état excité
+  real(dp),save::HX    !< Champ hyperfin, composante selon x
+  real(dp),save::HY    !< Champ hyperfin, composante selon y
+  real(dp),save::HZ    !< Champ hyperfin, composante selon z
+  complex(dp),save::hamilF(10) !<Etat fondamental :hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
+  complex(dp),save::hamilE(10) !<Etat excité hamiltonien / valeurs propres (sur la diagonale, apres appel de CEGREN)
+  complex(dp),save::fctF(16)!< Fonction d'onde état fondamental
+  complex(dp),save::fctE(16)!< Fonction d'onde état excité
   
   contains
   !---------------------------------------------------------------------

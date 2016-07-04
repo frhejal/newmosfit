@@ -1,0 +1,205 @@
+\newpage
+\subsection{Calcul des spectres théoriques}
+{\it Cette section reprend en grande partie, parfois littéralement, le chapitre 4 de la thèse de F. Varret \cite{varret-these}}.
+
+Le calcul des spectres théoriques se fait en 4 étapes :
+
+\begin{itemize}
+\item \'Ecriture des éléments de matrice des hamiltoniens de l'état excité et de l'état fondamental,
+\item Recherche des énergies (valeurs propres) et des fonctions d'ondes (vecteurs propres) associées à ces hamiltoniens,
+\item Calcul des énergies et des intensités des raies de transition
+\item Habillage des raies.
+\end{itemize}
+
+\subsubsection{\'Eléments de matrice du Hamiltonien}
+\begin{multicols}{2}
+Le Hamiltonien est représenté par une matrice hermitique.
+Les matrices étant symétriques, on ne représente que les éléments situées au dessus de la diagonale, 
+selon la numérotation figurée ci-contre :
+
+\columnbreak
+
+\begin{tabular}{|c|c|c|c|c|}
+  \hline
+    1 & 2 & 4 & 7 & 11\\
+  \hline
+      & 3 & 5 & 8 & \dots\\
+  \hline
+      &   & 6 & 9 & \\
+  \hline
+      &   &   & 10 &\\
+  \hline
+\end{tabular}
+\end{multicols}
+
+Les axes choisis sont les axes principaux du gradient de champ électrique. 
+Le champ interne (\lstinline{CH}) est noté $H_n$, dont les angles polaires (\lstinline{THETA} et \lstinline{GAMA})  sont notés $\theta,\gamma$ (Fig \ref{fig:theta_gamma}).
+Le paramètre d'asymétrie (\lstinline{ETA}) est noté $\eta$, l'interaction quadrupolaire (\lstinline{SQ}) est $(e^2 q_z Q/2)\sqrt{1+\eta^2 /3}$.
+
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{triedre_thga.png}
+\caption{\label{fig:theta_gamma} Champ interne dans le repère $OXYZ$}
+\end{figure}
+
+Les composantes du champ interne sont :
+\begin{align*}
+  H_x &= H_n \sin \theta \cos \gamma,\\
+  H_y &= H_n \sin \theta \sin \gamma,\\
+  H_z &= H_n \cos\theta.
+\end{align*}
+
+\paragraph{\'Etat fondamental}(I=1/2)
+
+\begin{tabular}{ccrcl}
+$\mathcal{H}_f(1)$&$=$&    $\left\langle 1/2 \big\vert 1/2 \right\rangle$ &$=$& $\displaystyle-(1/2)\hbar \gamma_f H_z$, \\
+$\mathcal{H}_f(2)$  &$=$&$\left\langle 1/2 \big\vert -1/2 \right\rangle$ &$=$&$\displaystyle -(1/2)\hbar \gamma_f \left(H_x -i H_y\right)$, \\
+$\mathcal{H}_f(3)$  &$=$&$\left\langle -1/2 \big\vert -1/2 \right\rangle$ &$=$& $\displaystyle(1/2)\hbar \gamma_f H_z.$ \\
+\end{tabular}
+
+\paragraph{\'Etat excité}(I=3/2)
+
+ On note $C=(e^2 q_z Q/4) = $\lstinline{SQ}$/(2\sqrt{1+\eta^2/3})$
+  
+\begin{tabular}{ccrcl} 
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 3/2 \big\vert 3/2 \right\rangle$ &$=$& $\displaystyle-(3/2)\hbar \gamma_e H_z +C$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 3/2 \big\vert 1/2 \right\rangle$ &$=$& $\displaystyle-(\sqrt{3}/2)\hbar \gamma_e \left(H_x - i H_y\right)$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 1/2 \big\vert 1/2 \right\rangle$ &$=$& $\displaystyle-(1/2)\hbar \gamma_e H_z -C$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 3/2 \big\vert -1/2 \right\rangle$ &$=$& $\displaystyle(1/\sqrt{3})\eta C$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 1/2 \big\vert -1/2 \right\rangle$ &$=$& $\displaystyle-(1/2)\left( H_x - i H_y  \right)$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle -1/2 \big\vert -1/2 \right\rangle$ &$=$& $\displaystyle-(1/2)\gamma_e H_z -C$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 3/2 \big\vert -3/2 \right\rangle$ &$=$& $\displaystyle0$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle 1/2 \big\vert -3/2 \right\rangle$ &$=$& $\displaystyle(1/\sqrt{3})\eta C$,\\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle -1/2 \big\vert -3/2 \right\rangle$ &$=$& $\displaystyle-(\sqrt{3}/2)\hbar \gamma_e \left(H_x - i H_y\right)$, \\
+$\mathcal{H}_e(1)$&$=$&$ \left\langle -3/2 \big\vert -3/2 \right\rangle$ &$=$& $\displaystyle-(3/2)\hbar \gamma_e H_z + C$, \\
+\end{tabular}
+
+\subsubsection{Fonctions d'onde et énergies}
+{\it Partie IV.1 de la thèse de F.Varret}
+
+La diagonalisation des matrices $\mathcal{H}_f$ et $\mathcal{H}_e$ donne les énergies et fonctions d'onde des niveaux nucléaires fondamentaux $\left| F\right\rangle$ et excités $\left| E\right\rangle$ dans les axes $OXYZ$.
+On obtient alors par différence les 8 énergies de transition possibles entre les 2 niveaux nucléaires fondamentaux ($I=1/2$) et les 4 niveaux nucléaires excités (I=3/2) ; nous avons donc la position des 8 raies Mössbauer, dont certaines peuvent éventuellement êtres confondues, ou d'intensité nulle. 
+
+Les intensités de raies se calculent de manière différente dans le cas du monocristal et dans le cas de la poudre. 
+
+\paragraph{Cas du monocristal}
+Lorsque l'absorbeur est monocristallin, les intensités des raies dépendent de l'orientation du rayonnement dans le trièdre $OXYZ$ lié à l'absorbeur (Fig \ref{fig:alpha_beta}).
+Il est avantageux de considérer un autre trièdre de référence $OX'Y'Z'$ où OZ' est parallèle à la direction de propagation du rayonnement.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{triedre_albe.png}
+\caption{\label{fig:alpha_beta}Direction de propagation $OZ'$ dans le triedre $OXYZ$}
+\end{figure}
+
+Dans cette nouvelle référence, les fonctions d'onde nucléaires deviennent $\left| F'\right\rangle$ et $\left| E'\right\rangle$, et l'on peut montrer que dans le cas du rayonnement qui est le notre (photon de $L=1$), l'intensité correspondant à la transition considérée est donnée par:
+$$ I(niv.f \rightarrow niv.e) \propto \left| \left\langle F'\right| M^{+1} \left|E'\right\rangle \right|^2  + \left| \left\langle F'\right| M^{-1} \left|E'\right\rangle \right|^2 $$
+
+Les éléments de matrice de $ M^{+1}$ et $ M^{-1}$, tabulés ci-dessous, sont des coefficients de Glebsch-Gordan
+ du type $\left\langle I_f m_f LM/I_e m_e \right\rangle$
+ intervenant dans la probabilité de transition d'un niveau  $\left\langle I_f m_f\right|$ vers un niveau  $\left\langle LM/I_e m_e \right|$ 
+ sous l'effet d'un photon dont le moment orbital $L$ a pour projection $M$ sur la direction de propagation (des expressions  plus générales des probabilités de transistion sont données dans le livre d'Abragam \cite{abragam-appli}, p34)
+
+Il faut donc opérer un changement d'axes sur les fonctions d'onde nucléaires  ($\left|F\right\rangle$ et $\left|E\right\rangle$ dans les axes $OXYZ$ du gradient,  $\left| F'\right\rangle$ et $\left| E'\right\rangle$ dans les axes $OX'Y'Z'$ du rayonnement).
+Ceci s'obtient à l'aide des matrices de rotation $\mathcal{R}(1/2)$ et $\mathcal{R}(3/2)$; les angles d'Euler de la rotation amenant $OXYZ$ sur $OX'Y'Z'$ sont alors $\alpha, \beta, 0$ ; et on a :
+
+
+$$ I(f \rightarrow e) \propto \left| \left\langle F\right|\mathcal{R}(1/2)\, M^{+1}\,\mathcal{R}^{\dagger}(3/2) \left|E\right\rangle \right|^2 
+ + \left| \left\langle F\right| \mathcal{R}(1/2)\, M^{-1}\,\mathcal{R}^{\dagger}(3/2) \left|E\right\rangle \right|^2 $$
+
+soit 
+\begin{equation}
+\label{eq:monoc}
+I(f \rightarrow e) \propto \left| \left\langle F\right| \mathcal{M}^{+1} \left|E\right\rangle \right|^2  
+      + \left| \left\langle F\right| \mathcal{M}^{-1} \left|E\right\rangle \right|^2
+\end{equation}
+où  $\mathcal{M}^{+1}$ et $\mathcal{M}^{-1}$ sont les matrices transmuées de $M^{+1}$ et $M^{-1}$ dans le changement d'axe. 
+Les éléments de matrice de $\mathcal{M}^{+1}$ et $\mathcal{M}^{-1}$ sont :
+
+\begin{equation*}
+\mathcal{M}^{+1}=\left(\begin{array}{cccc}
+e^{i\alpha}(1-\cos{\beta})/2~,~~ -\sin{\beta}/\sqrt{3} ~,~~ e^{-i\alpha}( 1+\cos{\beta})/(2\sqrt{3})~,~~0\\
+\\
+0~,~~ e^{i\alpha}(1-\cos{\beta})/(2\sqrt{3})~,~~-\sin{\beta}/\sqrt{3}~,~~ e^{-i}\alpha(1-\cos{\beta})/2
+\end{array}\right)
+\end{equation*}
+
+\begin{equation*}
+\mathcal{M}^{-1}=\left(\begin{array}{c}
+e^{i\alpha}(1+\cos{\beta})/2~,~~ \sin{\beta}/\sqrt{3}~,~~e^{-i\alpha}( 1-\cos{\beta})/(2\sqrt{3})~,~~0\\
+\\
+0~,~~e^{i\alpha}(1+\cos{\beta})/(2\sqrt{3})~,~~\sin{\beta}/\sqrt{3}~,~~ e^{-i\alpha}(1-\cos{\beta})/2
+\end{array}\right)
+\end{equation*}
+Utilisant l'équation \eqref{eq:monoc} il est donc possible de calculer algébriquement la dépendance angulaire de l'intensité de chaque raie vis-à-vis de l'orientation du rayonnement. 
+
+\paragraph{Cas de la poudre} (Répartition isotrope de l'orientation des cristallites)
+
+Lorsque l'absorbeur est en poudre, on peut montrer (\cite{gabriel-methodo})  que l'intensité d'une raie correspond à la formule 
+
+\begin{equation}
+I(f \rightarrow e) \propto \left| \left\langle F'\right| M^{+1} \left|E'\right\rangle \right|^2  
+      + \left| \left\langle F'\right| M^{0} \left|E'\right\rangle \right|^2
+      + \left| \left\langle F'\right| M^{-1} \left|E'\right\rangle \right|^2
+\end{equation}
+
+Où $M^0$ a pour éléments de matrice : 
+\begin{equation}
+M^0=\left(\begin{array}{ccccccc}
+  0&,&\sqrt{2}/\sqrt{3} &,&0&,& 0 \\
+  \\
+  0&,&0&,&\sqrt{2}/\sqrt{3} &,& 0
+\end{array} \right)
+\end{equation}
+
+En outre la somme apparaissant dans l'équation 4 est indépendante de l'orientation des axes $OX'Y'Z'$ (c'est à dire de la direction du rayonnement, ce qui est naturel).
+Aussi tout changement d'axes est-il inutile, et on peut utiliser :
+
+\begin{equation}
+I(f \rightarrow e) \propto \left| \left\langle F\right| M^{+1} \left|E\right\rangle \right|^2  
+      + \left| \left\langle F\right| M^{0}  \left|E\right\rangle \right|^2
+      + \left| \left\langle F\right| M^{-1} \left|E\right\rangle \right|^2
+\end{equation}.
+\subsubsection{Habillage des raies}
+Il ne reste plus qu'à introduire le profil des raies; la théorie de l'absorption (ou émission) résonnante donne aux raies du spectre un profil Lorentzien et une largeur à mi-hauteur de $\approx0.2~\milli\meter\reciprocal\second$ environ (\cite{abragam-appli} p.37) déduite de la durée de vie de l'état nucléaire excité.
+
+Dans la pratique on n'observe jamais cette largeur "naturelle", par suite d'élargissement d'origine microscopique notament, comme une legère dispersion des valeurs hyperfines,
+ ou d'origine macroscopique , comme les effets de saturation dans les absorbeurs épais, ou même d'origine instrumentale.
+ 
+ On procède donc à l'"habillage" du spectre par des raies lorentziennes dont la largeur n'est pas fixée a priori. On peut également choisir d'habiller les raies par une convolution gaussienne*lorentzienne (le choix se fait via l'option \lstinline{IO(16)}).
+
+\subsection{Cyclo\"ide}
+Mosfit2016 permet le calcul de spectres dans le cas d'un ordre magnétique spiral dans l'axe $c$ du cristal, de pas incommensurable. 
+Le vecteur de propagation est dans le plan de rotation des moments.
+Le calcul se fait dans les axes principaux du gradient de champ électrique.
+Le champ hyperfin possède une composante de norme $H_\parallel$ dans la direction de l'axe $OZ$, et une composante de norme $H_\perp$ dans le plan $OXY$.
+Le champ $H_n$ est la projection avec anisotropie du champ hyperfin dans le plan $XOZ$ avec une distribution uniforme de l'angle $\theta$.
+On admet une dépendance anisotrope :
+\begin{equation}
+  H_n = H_{\parallel}\cos^2  \theta + H_{\perp}\sin^2\theta
+\end{equation}
+On pose le paramètre cyclo\"idal $\omega_m = H_{\perp}/ H_{\parallel}$.
+$H_n$ s'écrit alors :
+\begin{equation}
+  H_n = H_{\parallel}( \cos^2\theta + \omega_m \sin^2 \theta)
+\end{equation}
+Les composantes de $H_n$ sur les axes $OXYZ$ sont alors :
+\begin{align*}
+  H_x &= H_n \sin \theta,\\
+  H_z &= H_n \cos \theta,\\
+  H_y &= 0.
+\end{align*}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{triedre_cyclo.png}
+\caption{\label{fig:cycloide}$H_n$ dans le plan $OXZ$}
+\end{figure}
+
+Pour calculer un spectre, on va appliquer cette formulation du champ $H_n$ pour une distribution de valeur de $\theta$ de $0$ à $2\pi$. 
+Le spectre total est la moyenne de tous les spectres obtenus.
+On doit alors fournir au programme une valeur pour $H_{\parallel}$ (qui sera contenue dans la variable \lstinline{CH}) et une valeur pour le paramètre cyclo\"idal $\omega_m$ (qui sera contenue dans \lstinline{GAMA}).
+Les variables \lstinline{ALPHA} et \lstinline{BETA} doivent etre fixée à zéro.
+

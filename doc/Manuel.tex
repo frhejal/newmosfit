@@ -17,42 +17,43 @@
 \usepackage[squaren,Gray]{SIunits}
 \usepackage{placeins}
 \begin{document}
-\title{Mosfit-2016, Mode d'emploi \\Fittage des spectres Mossbauer Fe 57 (et Sn 119)}
+\title{Mosfit2016, Mode d'emploi \\Fittage des spectres Mossbauer Fe 57 (et Sn 119)}
 \author{Fran\c{c}ois Labb\'e}
 \maketitle
 
 \paragraph{}
-Mosfit-2016 est la refonte en Fortran95 de Mosfit, programme en Fortran66 dont la première version hors carte perforée date de 1983.
+Mosfit2016 est la refonte en Fortran95 de Mosfit, programme en Fortran66 dont la première version (hors cartes perforées) date de 1983.
 Les calculs de spectres théoriques de Mosfit étaient faits par un sous-programme dérivé du programme "Spectres Théoriques de Fe 57 poudre ou monocristal en champ effectif" (SPTH). 
-Bien que la structure du code ait été profondemment revisitée dans Mosfit-2016, les équations originelles sont toujours utilisée, telles que présentées dans la thèse de F. Varret (\'Etude par Effet Mossbauer de composés Ioniques et Ferriques).
+Bien que la structure du code ait été profondément revisitée dans Mosfit-2016, les équations originelles sont toujours utilisées, telles que présentées dans la thèse de F. Varret (\'Etude par Effet Mossbauer de composés Ioniques et Ferriques).
 
 
 \paragraph{}
 Ce programme permet de réaliser l'ajustement de spectres théoriques à des spectres expérimentaux par une méthode de moindres carrés.
-Il permet d'obtenir une valeur ajustée pour les paramètres suivants : déplacement isomérique, largeur de raie, intensité globale d'absoption, 
-séparation quadrupolaire, paramètre d'asymétrie, champ hyperfin, angles polaires du champ hyperfin et de la direcion du rayonnement dans les axes du gradient de champ électrique.
+Il permet d'obtenir une valeur ajustée pour les paramètres suivants : déplacement isomérique, largeur de raie, intensité globale d'absorption, 
+séparation quadrupolaire, paramètre d'asymétrie, champ hyperfin, angles polaires du champ hyperfin et de la direction du rayonnement dans les axes du gradient de champ électrique.
 
 \paragraph{}
-Chaque paramètre est, au choix, bloqué ou ajustable. À l'interieur d'un même spectre, on peut utiliser soit une largeur de raie unique, soit des largeurs différentes éventuellement ajustables. 
+Chaque paramètre est, au choix, bloqué ou ajustable.
+ À l'interieur d'un même spectre, on peut utiliser soit une largeur de raie unique, soit des largeurs différentes éventuellement ajustables. 
 
 \paragraph{}
-On peut ajuster jusqu'à la somme de 40 spectres théoriques à un spectres expérimental.
+On peut ajuster jusqu'à la somme de 40 spectres théoriques à un spectre expérimental.
  Une procédure particulièrement aisée est utilisée pour ajuster les distributions de paramètres hyperfins.
  Un paramètre hyperfin ajustable peut être commun à plusieurs de ces spectres.
  Un paramètre peut être astreint à satisfaire une relation le liant à plusieurs parametres ajustable.
- Une modification du module \lstinline{connex} et une re-compilation du programme est nécessaire pour ajouter de nouvelles relations.
+ Une modification du module \lstinline{connex} et une re-compilation du programme sont nécessaires pour ajouter de nouvelles relations.
  
 \paragraph{}
-On peut également tenir compte d'un bruit de fond de hauteur ajustable ou fixée dont le profil est donnée dans le fichier d'entrée.
+On peut également tenir compte d'un bruit de fond de hauteur ajustable ou fixée dont le profil est donné dans le fichier d'entrée.
 \newpage
 \tableofcontents
 \newpage
 \section{Spectres théoriques}
-\input{schema}
+\input{spectres}
 \FloatBarrier
 \input{hamilton}
 \FloatBarrier
-\section{Ajustement en moindres-carrés}
+\section{Ajustement en moindres carrés}
 \input{marquardt}
 \newpage
 \section{Organisation du programme}
@@ -61,14 +62,12 @@ On peut également tenir compte d'un bruit de fond de hauteur ajustable ou fixé
 \section{Entrée des données}
 \input{options}
 \input{entree}
+\newpage
 \section{Module Connex}
+\input{connex}
+\newpage
 \section{Remarques}
-\subsection{Remarques Importante}
-
-\subsection{Remarques diverses}
-plusieur affinements par job ?
-
-tracé spectre theorique seul
+\input{remarques_divers}
 \newpage
 \bibliographystyle{ieeetr}
 \bibliography{biblio}

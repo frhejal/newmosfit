@@ -3,10 +3,10 @@ En notant $Y$ le vecteur contenant l'ensemble des données du spectre expérimen
 \begin{equation}
 \phi = \sum^{n}_{i=1} \left[Y_i - \widehat{Y}_i\right]
 \end{equation}
-où $n$ est le nombre de données (nombre de canaux), $Y_i$ est la valeur mesurée dans le $i$ème canal du spectre..
+où $n$ est le nombre de données (nombre de canaux), $Y_i$ est la valeur mesurée dans le $i$ème canal du spectre.
 
-Mosfit utilise une version simplifiée de l'algorithme de moindres carrés décrit par Marquardt \cite{marquardt}.
-Le schéma de cette algorithme est présenté en figure \ref{fig:marquardt}.
+Mosfit2016 utilise une version simplifiée de l'algorithme de moindres carrés décrit par Marquardt \cite{marquardt}.
+Le schéma de cet algorithme est présenté en figure \ref{fig:marquardt}.
 À chaque itération, on calcule $B^r$, une valeur ajustée de $B$. $B^r_j$ est le $j$ième paramètre de $B^r$. 
  La résolution de l'équation (32) de Marquardt\cite{marquardt} permet de determiner $\delta^r$ tel que 
 \begin{equation}

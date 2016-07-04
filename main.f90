@@ -175,7 +175,7 @@ program mosfit
   call ecriture_ecart_stat(KHI2)
   call ecriture_tracer_spectres(N,Y,Q(:,k+2),cmin,cmax)
   if((IO(6)==1) .OR. (IO(11)==1)) then
-    ! Ecriture de la difference entre le spectre expérimental et le spectre calculé
+    ! Ecriture de la différence entre le spectre expérimental et le spectre calculé
     diffSpectres=Y-Q(:,K+2)
     if(IO(6)==1) call ecriture_spectre_entier(diffSpectres)
     if(IO(11)==1) call ecriture_tracer_spectres(N,diffSpectres,diffSpectres,cmin,cmax)

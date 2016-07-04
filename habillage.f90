@@ -13,9 +13,9 @@ module habillage
   use options
   use variablesAjustables
   implicit none
-  real(dp)::H(8,40) !< Hauteur des lorentziennes/gaussiennes
-  real(dp)::G(8,40) !< Largeur des lorentziennes/gaussiennes
-  real(dp)::X0(8,40)!< Emplacement des raies (énergie)
+  real(dp),save::H(8,40) !< Hauteur des lorentziennes/gaussiennes
+  real(dp),save::G(8,40) !< Largeur des lorentziennes/gaussiennes
+  real(dp),save::X0(8,40)!< Emplacement des raies (énergie)
   
   contains
 !---------------------------------------------------------------------
