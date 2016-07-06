@@ -45,6 +45,10 @@ class Data():
   def __init__(self,parent):
     
     self.parent=parent
+    try:
+      self.parent.txt.delete(0.0,END)
+    except:
+      pass
     self.parent.txt=Text(parent)
     self.CN=0.078125
     self.NMAX=20
@@ -63,9 +67,12 @@ class Data():
     self.textFromEntries()
     #~ self.parent.txt.pack(fill=BOTH, expand=1)
     
-  def textFromEntries(self):
-    
+  def textFromVariables(self):
     #transfert data form variables
+    try:
+      self.parent.txt.delete(0.0,END)
+    except:
+      pass
     self.setText("titre\n")
     #Variables generales
     string= str(self.CN)+" "+str(self.NMAX)
@@ -194,12 +201,12 @@ class Data():
       else:
         self.sousSpectres.append(Spectre(0))
       i+=1
-
+  def 
+  
   def convertFromCoo(self):
     
     #read data from text
     pass
-    
 #######################################################################
 class Spectre():
   def __init__(self,kind):
@@ -247,16 +254,24 @@ def main():
 
   fenetre = Tk()
   fenetre.title("Mosfit2016")
+  fenetre.geometry("600x500+300+300")
   p = PanedWindow(fenetre, orient=HORIZONTAL)
+  p.pack(side=TOP, expand=Y, fill=BOTH, pady=2, padx=2)
+  p2= PanedWindow(p, orient=VERTICAL)
+  p2.pack(side=TOP, expand=Y, fill=BOTH, pady=2, padx=2)
   barre = BarreMenu(fenetre)
   donnees=Data(fenetre)
-  fenetre.geometry("600x500+300+300")
-  p.pack(side=TOP, expand=Y, fill=BOTH, pady=2, padx=2)
+
   p.add(Label(p, text='Volet inputs', background='white', anchor=CENTER) )
-  p.add(Label(p, text='Volet boutons', background='white', anchor=CENTER) )
+  p.add(p2)
+  b1=Button(p2, text="Convert to .coo",command=donnees.textFromVariables)
+  p2.add(b1)
+  b1.pack(fill=Y)
+  b2=Button(p2, text="interpret .coo")
+  p2.add(b2)
+  b2.pack(fill=Y)
   p.add(fenetre.txt)
 
-  p.pack()
   fenetre.mainloop()  
 if __name__ == '__main__':
     main()  
