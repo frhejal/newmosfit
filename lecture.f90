@@ -44,7 +44,7 @@ module lecture
     if(IZZ==1) read(5,*) (IZ(i),i=1,10)
     if(IOPT==1) read(5,*) (IO(i),i=1,20)
     IF(IO(13)==3) read(5,*) plage
-    if(IO(17)/=0) read(5,*) (grass(i), i=1,10)
+    if(IO(17)==1) read(5,*) (grass(i), i=1,10)
   end subroutine lecture_options
 !=======================================================================
     !> @brief Lecture des paramètres hyperfins et de leurs options d'ajustement (ajustable vs fixe),

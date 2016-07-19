@@ -11,7 +11,7 @@ class BarreMenu(Frame):
     self.initUI()
 
   def initUI(self):
-    # Create File menu with Load an Exit option.
+    # Create File menu with Load, Save and Exit option.
     self.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
 
     menubar = Menu(self.parent)
@@ -19,6 +19,7 @@ class BarreMenu(Frame):
 
     fileMenu = Menu(menubar)
     fileMenu.add_command(label="Load", command=self.onOpen)
+    fileMenu.add_command(label="Save as", command=self.onSave)
     fileMenu.add_separator()
     fileMenu.add_command(label="Exit", command=self.parent.quit)        
     menubar.add_cascade(label="File", menu=fileMenu)        
@@ -38,11 +39,22 @@ class BarreMenu(Frame):
           except Exception:
             pass
             
+  def onSave(self):
+    # Open dialog box to browse file system
+    # Save content of variable self.parent.txt in .coo file
+    ftypes = [('.coo', '*.coo'), ('All files', '*')]
+    f = tkFileDialog.asksaveasfile(mode='w', defaultextension='*.coo',filetypes= ftypes)
+    if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+      return
+    f.write(self.parent.txt.get(0.0,END))
+    f.close()
+
   def readFile(self, filename):
     # open and read .coo file
     f = open(filename, "r")
     text = f.read()
     return text
+
 ########################################################################
 class DataEntries(PanedWindow):
   # Panel containing all entry fields for options
@@ -92,135 +104,332 @@ class DataEntries(PanedWindow):
     self.spectres.append(Spectre(1))
     self.spectres.append(Spectre(2))
     self.spectres.append(Spectre(0))
-    # First creation of scrolling list of spectres
-    self.setSpectresScroll(ns,ns1,ns2)
-    # First creation of entries for spectres parameters
-    self.setEntrySpectre()
-    
-          
+
     # Change entries for spectres when NS, NS1 or NS2 entries are modified
     self.strNS=StringVar()
     self.strNS1=StringVar()
     self.strNS2=StringVar()
+    self.strNS.set(str(ns))
+    self.strNS1.set(str(ns1))
+    self.strNS2.set(str(ns2))
     self.strNS.trace("w",self.resetSpectres)
     self.strNS1.trace("w",self.resetSpectres)
     self.strNS2.trace("w",self.resetSpectres)
     self.eNS.config(validate=ALL,textvariable=self.strNS)
     self.eNS1.config(validate=ALL,textvariable=self.strNS1)
     self.eNS2.config(validate=ALL,textvariable=self.strNS2)
-    #Filling entry for Ns, NS1, NS2. Triggers reconstruction of scolling menu + spectres entries
-    self.eNS.insert(0,str(ns))
-    self.eNS1.insert(0,str(ns1))
-    self.eNS2.insert(0,str(ns2))
-    
+
+    # First creation of scrolling list and entries for spectres parameters
+    self.setSpectresScroll(ns,ns1,ns2)
+    self.packScrollbar()
+    self.setEntrySpectre()
+    self.packEntrySpectre()
+
     # Change fields colors according to selected options
     self.izz=StringVar()
     self.iopt=StringVar()
-    self.io13=StringVar()
-    self.io17=StringVar()
+    #~ self.io13=StringVar()
+    #~ self.io17=StringVar()
     
     self.izz.trace("w", self.checkIZZ)
     self.iopt.trace("w", self.checkIOPT)
-    self.io13.trace("w",self.checkIO13)
-    self.io17.trace("w",self.checkIO17)
+    #~ self.io13.trace("w",self.checkIO13)
+    #~ self.io17.trace("w",self.checkIO17)
     self.eIZZ.config(validate=ALL,textvariable=self.izz)
     self.eIOPT.config(validate=ALL,textvariable=self.iopt)
-    self.eIO[12].config(validate=ALL,textvariable=self.io13)
-    self.eIO[16].config(validate=ALL,textvariable=self.io17)
-
 
     
-    # Afficher entrees
-    
+    # Change fields color in IO according to content
+    self.strIO=[]
+    i=0
+    while i<20:
+      self.strIO.append(StringVar())
+      if i not in [12, 16]:
+        self.strIO[i].trace("w", self.checkIO)
+        self.eIO[i].config(validate=ALL,textvariable=self.strIO[i])
+      i+=1
+    self.strIO[12].trace("w",self.checkIO13)
+    self.strIO[16].trace("w",self.checkIO17)    
+    self.eIO[12].config(validate=ALL,textvariable=self.strIO[12])
+    self.eIO[16].config(validate=ALL,textvariable=self.strIO[16])
   def checkIZZ(self,*args):
+    # Change background of entries IZ depending on entry IZZ
     try:
-        if int(self.izz.get()) != 1:
-          i=0
-          while i<10:
-            self.eIZ[i].config(bg="light gray")
-            i+=1
-        else:
-          i=0
-          while i<10:
-            self.eIZ[i].config(bg="white")
-            i+=1
-    except:
+      izz=int(self.izz.get())
+      if izz == 0:
+        i=0
+        while i<10:
+          self.eIZ[i].config(bg="light gray")
+          i+=1
+      elif izz == 1 :
+        i=0
+        while i<10:
+          self.eIZ[i].config(bg="white")
+          i+=1
+      else:
+        raise ValueError
+      self.eIZZ.config(bg="white")          
+    except ValueError:
+      self.eIZZ.config(bg="red")
       i=0
       while i<10:
         self.eIZ[i].config(bg="light gray")
         i+=1
-        
+    except Exception, e:
+      print(e)
+      
   def checkIOPT(self,*args):
+    # Change background color of entries IO depending on entry IOPT
+    # Also calls checks on IO(13) and IO(17)
     try:
-        if int(self.iopt.get())!=1:
-          i=0
-          while i<20:
-            self.eIO[i].config(bg="light gray")
-            i+=1
-        else:
-          i=0
-          while i<20:
-            self.eIO[i].config(bg="white")
-            i+=1
-    except:
-          i=0
-          while i<20:
-            self.eIO[i].config(bg="light gray")
-            i+=1
-    self.checkIO13()
-    self.checkIO17()
+      iopt=int(self.iopt.get())
+      if iopt == 0:
+        for i in range(0,20):
+          self.eIO[i].config(bg="light gray")
+      elif iopt == 1 :
+        for i in range(0,20):
+          self.eIO[i].config(bg="white")
+      else:
+        raise ValueError
+      self.eIOPT.config(bg="white")
+    except ValueError:
+      # if incorrect value, redden the box.
+      self.eIOPT.config(bg="red")
+      for i in range(0,20):
+        self.eIO[i].config(bg="light gray")
+    #~ self.checkIO13(args)
+    self.checkIO17(args)
+    self.checkIO(args)
+
+  def checkIO(self,*args):
+    # Check other entries for IO
+    try:
+      iopt=int(self.iopt.get())
+    except ValueError:
+      iopt=0
+      
+    if iopt!=1:
+      #color in gray
+      for i in range(0,20):
+        self.eIO[i].config(bg="light gray")
+    else:
+      #color in white by defaut...
+      for i in range(0,20):
+        self.eIO[i].config(bg="white")
+      # Then check if content is correct  
+      try: 
+        if int(self.strIO[0].get())<0 :
+          raise ValueError
+      except ValueError:
+        self.eIO[0].config(bg="red")
+      try:
+        if int(self.strIO[1].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[1].config(bg="red")
+      try:
+        if int(self.strIO[2].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[2].config(bg="red")
+      try:
+        if int(self.strIO[3].get()) not in [0,1,2]: raise ValueError
+      except ValueError :
+        self.eIO[3].config(bg="red")
+      try:
+        if int(self.strIO[4].get())<0: raise ValueError
+      except ValueError :
+        self.eIO[4].config(bg="red")
+      try:
+        if int(self.strIO[5].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[5].config(bg="red")
+      try:
+        if int(self.strIO[6].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[6].config(bg="red")
+      try:
+        if int(self.strIO[7].get()) not in [0,1]: raise ValueError  
+      except ValueError :
+        self.eIO[7].config(bg="red")
+      try:
+        if int(self.strIO[8].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[8].config(bg="red")
+      try:
+        if int(self.strIO[9].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[9].config(bg="red")
+      try:
+        if int(self.strIO[10].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[10].config(bg="red")
+      try:
+        if int(self.strIO[11].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[11].config(bg="red")
+      # Special function for IO(13) = self.eIO[12]:
+      self.checkIO13(args)
+      try:
+        if int(self.strIO[13].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[13].config(bg="red")
+      try:
+        if int(self.strIO[14].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[14].config(bg="red")
+      try:
+        if int(self.strIO[15].get()) not in range(0,100): raise ValueError
+      except ValueError :
+        self.eIO[15].config(bg="red")
+      # Special function for IO(17) = self.eIO[16] :
+      self.checkIO17(args)        
+      try:
+        if int(self.strIO[17].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[17].config(bg="red")
+      # io(19) not used.
+      try:
+        int(self.strIO[18].get())
+        self.eIO[18].config(bg="light grey")
+      except ValueError :
+        self.eIO[18].config(bg="red")
+      try:
+        if int(self.strIO[19].get()) not in [0,1]: raise ValueError
+      except ValueError :
+        self.eIO[19].config(bg="red")
+        
     
   def checkIO13(self,*args):
+    # Change background color of entries PLAGEL depending on value of entry IO(13)
+    # Also changes content of PLAGEL to match NS, and/or NS1 and NS2.
     try:
-        if int(self.io13.get())==3   and int(self.iopt.get())==1:
+      io13=int(self.strIO[12].get())
+      try:
+        iopt=int(self.iopt.get())
+      except ValueError:
+        iopt=0
+      if iopt==1:
+        self.eIO[12].config(bg="white")
+        self.ePLAGEL[0].config(bg="light gray")
+        self.ePLAGEL[1].config(bg="light gray")
+        if io13==0:
+          self.ePLAGEL[0].delete(0,END)
+          self.ePLAGEL[1].delete(0,END)
+          self.ePLAGEL[0].insert(0,"0")
+          self.ePLAGEL[1].insert(0,"0")
+        elif io13==1:
+          self.ePLAGEL[0].delete(0,END)
+          self.ePLAGEL[1].delete(0,END)
+          self.ePLAGEL[0].insert(0,"1")
+          self.ePLAGEL[1].insert(0,self.strNS.get())
+        elif io13==2:
+          self.ePLAGEL[0].delete(0,END)
+          self.ePLAGEL[1].delete(0,END)
+          self.ePLAGEL[0].insert(0,self.strNS1.get())
+          self.ePLAGEL[1].insert(0,self.strNS2.get())
+        elif io13==3:
           self.ePLAGEL[0].config(bg="white")
           self.ePLAGEL[1].config(bg="white")
         else:
-          self.ePLAGEL[0].config(bg="light gray")
-          self.ePLAGEL[1].config(bg="light gray")
-    except:
+          raise ValueError
+      else:
+        self.ePLAGEL[0].config(bg="light gray")
+        self.ePLAGEL[1].config(bg="light gray")
+        self.eIO[12].config(bg="light gray")
+    except ValueError:
+      # if incorrect value, redden the box.
+      self.eIO[12].config(bg="red")
       self.ePLAGEL[0].config(bg="light gray")
       self.ePLAGEL[1].config(bg="light gray")
+    except Exception, e:
+      print(e)
       
   def checkIO17(self,*args):
+    # Changes background color of entries GRASS depending on value or entry IO(17)
     try:
-      if int(self.io17.get())==1 and int(self.iopt.get())==1:
-        i=0
-        while i<10:
-          self.eGRASS[i].config(bg="white")
-          i+=1
-      else:
+      io17=int(self.strIO[16].get())
+      try:
+        iopt=int(self.iopt.get())
+      except ValueError:
+        iopt=0
+      if iopt==1:
+        self.eIO[16].config(bg="white")
+        if io17==0:
+          i=0
+          while i<10:
+            self.eGRASS[i].config(bg="light gray")
+            i+=1
+        elif io17==1:
+          i=0
+          while i<10:
+            self.eGRASS[i].config(bg="white")
+            i+=1  
+        else:
+          raise ValueError
+      else:  
+        self.eIO[16].config(bg="light gray")
         i=0
         while i<10:
           self.eGRASS[i].config(bg="light gray")
           i+=1
-    except:
+    except ValueError:
+      # if incorrect value, redden the box.
+      self.eIO[16].config(bg="red")
       i=0
       while i<10:
         self.eGRASS[i].config(bg="light gray")
         i+=1
-        
+    except Exception, e:
+      print(e)
+      
+  def checkIOGV(self,*args):
+    # Change color of entries for NG, GV depending on value of IOGV.
+    try:
+      iogv=int(self.strIOGV.get())
+      i=0 
+      if iogv==1 or iogv==2:
+        self.eNB[1].config(bg="light gray")
+      else:
+        self.eNB[1].config(bg="white")
+      if iogv==3:
+        while i<8:
+          self.eGV[i].config(bg="white")
+          self.eNG[i].config(bg="white")
+          i+=1
+      else:
+        while i<8:
+          self.eGV[i].config(bg="light gray")
+          self.eNG[i].config(bg="light gray")
+          i+=1
+      if iogv not in [0, 1, 2, 3]:
+        raise ValueError
+      self.eIOGV.config(bg="white")
+    except ValueError:
+      self.eIOGV.config(bg="red")
+    except Exception, e:
+      pass
+    self.saveSpectre(args)
+    
   def resetSpectres(self,*args):
     try:
       ns = int(self.strNS.get())
-    except:
+    except Exception:
       self.eNS.config(bg="red")
       ns=0
     try: 
       ns1 = int(self.strNS1.get())
-    except:
+    except Exception:
       ns1=0
     try:
       ns2 = int(self.strNS2.get())
-    except:
+    except Exception:
       ns2=0
   
     if ns1>ns:
-      self.eNS.config(bg="green")
+      self.eNS.config(bg="light green")
       self.eNS1.config(bg="red")
       self.eNS2.config(bg="white")
     elif ns2>ns:
-      self.eNS.config(bg="green")
+      self.eNS.config(bg="light green")
       self.eNS1.config(bg="white")
       self.eNS2.config(bg="red")
     elif ns1>ns2:
@@ -228,16 +437,32 @@ class DataEntries(PanedWindow):
       self.eNS1.config(bg="red")
       self.eNS2.config(bg="red")
     else:
-      self.setSpectresScroll( ns, ns1 , ns2 )
+      #reinitialize list of spectres
       self.delEntrySpectre()
+      del self.spectres
+      self.spectres=[]
+      nt=1
+      k=1
+      while nt<=ns :
+        if ((nt < ns1) or (nt > ns2)) or (ns1<=0 or ns2<=0):
+          self.spectres.append(Spectre(0))
+        elif nt==ns1:
+          self.spectres.append(Spectre(1))
+          k+=1
+        else:
+          self.spectres.append(Spectre(k))
+          k+=1
+        nt+=1
+      self.setSpectresScroll( ns, ns1 , ns2 )
       self.packScrollbar()
       self.setEntrySpectre()
       self.packEntrySpectre()
       self.eNS.config(bg="white")
       self.eNS1.config(bg="white")
       self.eNS2.config(bg="white")
-    
-      
+      nt=0
+      while nt<ns:
+        nt+=1
   def pack(self,**options):
     # affichages
     PanedWindow.grid(self,row=0)
@@ -279,10 +504,9 @@ class DataEntries(PanedWindow):
   def packScrollbar(self):
     self.scrollbar.grid(row=14,column=4,rowspan=5,sticky=W+N+S)
     self.listbox.grid(row=14,column=2,rowspan=5,columnspan=2)
-    self.packEntrySpectre()
+
 
   def setSpectresScroll(self,ns,ns1,ns2):
-    # set scroll bar to allow user to choose spectre
     try:
       self.scrollbar.grid_forget()
       self.listbox.grid_forget()
@@ -291,18 +515,16 @@ class DataEntries(PanedWindow):
     self.scrollbar = Scrollbar(self)
     self.listbox = Listbox(self,height= 5, width=10, selectmode=SINGLE, yscrollcommand=self.scrollbar.set)
     self.listbox.delete(0,END)
+    
     nt=0
-    k=0
     self.lstSp=[]
     while nt<ns :
       if((nt < ns1-1) or (nt >= ns2)) or (ns1<=0 or ns2<=0) :
         self.listbox.insert(END,"Spectre "+str(nt+1))
-        self.lstSp.insert(k+1,nt)
-        k+=1
+        self.lstSp.append(nt)
       elif nt == ns1-1:
-        self.listbox.insert(k+1,"Distribution")
-        self.lstSp.insert(k,nt)
-        k+=1
+        self.listbox.insert(END,"Distribution")
+        self.lstSp.append(nt)
       nt+=1
     self.scrollbar.config(command=self.listbox.yview)
     self.listbox.bind('<<ListboxSelect>>',self.selectSpectre)
@@ -318,114 +540,320 @@ class DataEntries(PanedWindow):
   def setEntrySpectre(self):
     # creer entrees
     s=self.spectres[self.selectedSpectre]
+    # Creer des StringVar et fonctions de sauvegarde pour enregistrer tout changement dans les entrees 
+    # vers le spectre courant self.spectres[self.selectedSpectre]
+    # attention  conflit avec insert pour contenu initial de l'entree: possibilité d'intialiser les StrinVar ?
+    
     if s.kind==0:
-      self.tDI=Label(self, text=" DI ")
-      self.eDI=Entry(self,width=6,bg="white"); self.eDI.insert(0,str(s.parameters["DI"]))
+        
+      self.strDI=StringVar()
+      self.strGA=StringVar()
+      self.strH1=StringVar()
+      self.strSQ=StringVar()
+      self.strCH=StringVar()
+      self.strETA=StringVar()
+      self.strTHETA=StringVar()
+      self.strGAMMA=StringVar()
+      self.strBETA=StringVar()
+      self.strALPHA=StringVar()
+      self.strMONOC=StringVar()
+      self.strIOGV=StringVar()
+      
+      self.tDI=Label(self, text="DI")
+      self.strDI.set(str(s.parameters["DI"])); self.strDI.trace("w",self.saveSpectre)
+      self.eDI=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strDI);
+      
       self.tGA=Label(self, text="GA")
-      self.eGA=Entry(self,width=6,bg="white"); self.eGA.insert(0,str(s.parameters["GA"]))
+      self.strGA.set(str(s.parameters["GA"])); self.strGA.trace("w",self.saveSpectre)
+      self.eGA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strGA);
+      
       self.tH1=Label(self, text="H1")
-      self.eH1=Entry(self,width=6,bg="white"); self.eH1.insert(0,str(s.parameters["H1"]))
+      self.strH1.set(str(s.parameters["H1"])); self.strH1.trace("w",self.saveSpectre)
+      self.eH1=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strH1);
+
       self.tSQ=Label(self, text=" SQ ")
-      self.eSQ=Entry(self,width=6,bg="white"); self.eSQ.insert(0,str(s.parameters["SQ"]))
+      self.strSQ.set(str(s.parameters["SQ"])); self.strSQ.trace("w",self.saveSpectre)
+      self.eSQ=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strSQ);
+      
       self.tCH=Label(self, text=" CH ")
-      self.eCH=Entry(self,width=6,bg="white"); self.eCH.insert(0,str(s.parameters["CH"]))
+      self.strCH.set(str(s.parameters["CH"])); self.strCH.trace("w",self.saveSpectre)
+      self.eCH=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strCH);
+      
       self.tETA=Label(self, text="ETA")
-      self.eETA=Entry(self,width=6,bg="white"); self.eETA.insert(0,str(s.parameters["ETA"]))
+      self.strETA.set(str(s.parameters["ETA"])); self.strETA.trace("w",self.saveSpectre)
+      self.eETA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strETA);
+      
       self.tTHETA=Label(self, text=" THETA ")
-      self.eTHETA=Entry(self,width=6,bg="white"); self.eTHETA.insert(0,str(s.parameters["THETA"]))
+      self.strTHETA.set(str(s.parameters["THETA"])); self.strTHETA.trace("w",self.saveSpectre)
+      self.eTHETA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strTHETA);
+      
       self.tGAMMA=Label(self, text="GAMMA")
-      self.eGAMMA=Entry(self,width=6,bg="white"); self.eGAMMA.insert(0,str(s.parameters["GAMMA"]))
+      self.strGAMMA.set(str(s.parameters["GAMMA"])); self.strGAMMA.trace("w",self.saveSpectre)
+      self.eGAMMA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strGAMMA);
+      
       self.tBETA=Label(self, text="BETA")
-      self.eBETA=Entry(self,width=6,bg="white"); self.eBETA.insert(0,str(s.parameters["BETA"]))
+      self.strBETA.set(str(s.parameters["BETA"])); self.strBETA.trace("w",self.saveSpectre)
+      self.eBETA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strBETA);
+      
       self.tALPHA=Label(self, text="ALPHA")
-      self.eALPHA=Entry(self,width=6,bg="white"); self.eALPHA.insert(0,str(s.parameters["ALPHA"]))
+      self.strALPHA.set(str(s.parameters["ALPHA"])); self.strALPHA.trace("w",self.saveSpectre)
+      self.eALPHA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strALPHA);
+      
       self.tMONOC=Label(self, text=" MONOC ")
-      self.eMONOC=Entry(self,width=6,bg="white"); self.eMONOC.insert(0,str(s.parameters["MONOC"]))
+      self.strMONOC.set(str(s.parameters["MONOC"])); self.strMONOC.trace("w",self.saveSpectre)
+      self.eMONOC=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strMONOC);
+
+      self.tIOGV=Label(self, text="IOGV")
+      self.strIOGV.set(str(s.parameters["IOGV"])); self.strIOGV.trace("w",self.checkIOGV)
+      self.eIOGV=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strIOGV);
+      # Array NB (adjustment parameters), 
+      self.strNB=[]
+      self.eNB=[]
+      j=0
+      while j<10:
+        self.strNB.append(StringVar())
+        self.strNB[j].set(str(s.NB[j]))
+        self.strNB[j].trace("w",self.saveSpectre)
+        self.eNB.append(Entry(self,width=2,bg="white",validate=ALL,textvariable=self.strNB[j]))
+        j+=1
+      # Array GV and NG ( use if IOGV==3)
+      self.strGV=[]
+      self.strNG=[]
+      self.eGV=[]
+      self.eNG=[]
+      color="light gray"
+      try:
+        if int(str(self.strIOGV.get()))==3:color="white"
+      except Exception, e :
+        print e
+        pass
+      j=0
+      while j<8:
+        self.strGV.append(StringVar())
+        self.strNG.append(StringVar())
+        self.strGV[j].set(str(s.GV[j]))
+        self.strNG[j].set(str(s.NG[j]))
+        self.strGV[j].trace("w",self.saveSpectre)
+        self.strNG[j].trace("w",self.saveSpectre)
+        self.eGV.append(Entry(self,width=5,bg=color,validate=ALL,textvariable=self.strGV[j]))
+        self.eNG.append(Entry(self,width=2,bg=color,validate=ALL,textvariable=self.strNG[j]))
+        j+=1
+      # Legend for GV and 
+      self.tGV=Label(self,text="GV:")
+      self.tNG=Label(self,text="NG:")
+        
     else:
+      self.strDI0=StringVar()
+      self.strPDI=StringVar()
+      self.strGA0=StringVar()
+      self.strH10=StringVar()
+      self.strSQ0=StringVar()
+      self.strPSQ=StringVar()
+      self.strCH0=StringVar()
+      self.strPCH=StringVar()
+      self.strETA0=StringVar()
+      self.strTHETA0=StringVar()
+      self.strPTHETA=StringVar()
+      self.strGAMMA0=StringVar()
+      self.strBETA0=StringVar()
+      self.strALPHA0=StringVar()
+      self.strMONOC0=StringVar()
+      
       self.tDI0=Label(self, text="DI0")
-      self.eDI0=Entry(self,width=6,bg="white"); self.eDI0.insert(0,str(s.parameters["DI0"]))
-      self.tPDI=Label(self, text="PDI")
-      self.ePDI=Entry(self,width=6,bg="white"); self.ePDI.insert(0,str(s.parameters["PDI"]))
+      self.strDI0.set(str(s.parameters["DI0"]));self.strDI0.trace("w",self.saveSpectre)
+      self.eDI0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strDI0);
+
+      self.strPDI.set(str(s.parameters["PDI"]));self.strPDI.trace("w",self.saveSpectre)
+      self.ePDI=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strPDI);
+
       self.tGA0=Label(self, text="GA")
-      self.eGA0=Entry(self,width=6,bg="white"); self.eGA0.insert(0,str(s.parameters["GA"]))        
+      self.strGA0.set(str(s.parameters["GA"]));self.strGA0.trace("w",self.saveSpectre)
+      self.eGA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strGA0);
+
       self.tH10=Label(self, text="H1")
-      self.eH10=Entry(self,width=6,bg="white"); self.eH10.insert(0,str(s.parameters["H1"]))        
+      self.strH10.set(str(s.parameters["H1"]));self.strH10.trace("w",self.saveSpectre)
+      self.eH10=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strH10);
+      
       self.tSQ0=Label(self, text="SQ0")
-      self.eSQ0=Entry(self,width=6,bg="white"); self.eSQ0.insert(0,str(s.parameters["SQ0"]))        
-      self.tPSQ=Label(self, text="PSQ")
-      self.ePSQ=Entry(self,width=6,bg="white"); self.ePSQ.insert(0,str(s.parameters["PSQ"]))        
+      self.strSQ0.set(str(s.parameters["SQ0"]));self.strSQ0.trace("w",self.saveSpectre)
+      self.eSQ0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strSQ0);    
+
+      self.strPSQ.set(str(s.parameters["PSQ"]));self.strPSQ.trace("w",self.saveSpectre)
+      self.ePSQ=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strPSQ);
+            
       self.tCH0=Label(self, text="CH0")
-      self.eCH0=Entry(self,width=6,bg="white"); self.eCH0.insert(0,str(s.parameters["CH0"]))
-      self.tPCH=Label(self, text="PCH")
-      self.ePCH=Entry(self,width=6,bg="white"); self.ePCH.insert(0,str(s.parameters["PCH"]))
+      self.strCH0.set(str(s.parameters["CH0"]));self.strCH0.trace("w",self.saveSpectre)
+      self.eCH0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strCH0);    
+
+      self.strPCH.set(str(s.parameters["PCH"]));self.strPCH.trace("w",self.saveSpectre)
+      self.ePCH=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strPCH);
+            
       self.tETA0=Label(self, text="ETA")
-      self.eETA0=Entry(self,width=6,bg="white"); self.eETA0.insert(0,str(s.parameters["ETA0"]))
+      self.strETA0.set(str(s.parameters["ETA0"]));self.strETA0.trace("w",self.saveSpectre)
+      self.eETA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strETA0);   
+      
       self.tTHETA0=Label(self, text="THETA0")
-      self.eTHETA0=Entry(self,width=6,bg="white"); self.eTHETA0.insert(0,str(s.parameters["THETA0"]))
-      self.tPTHETA=Label(self, text="PTHETA")
-      self.ePTHETA=Entry(self,width=6,bg="white"); self.ePTHETA.insert(0,str(s.parameters["PTHETA"]))
+      self.strTHETA0.set(str(s.parameters["THETA0"]));self.strTHETA0.trace("w",self.saveSpectre)
+      self.eTHETA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strTHETA0);   
+      
+      self.strPTHETA.set(str(s.parameters["PTHETA"]));self.strPTHETA.trace("w",self.saveSpectre)
+      self.ePTHETA=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strPTHETA);
+      
       self.tGAMMA0=Label(self, text="GAMMA")
-      self.eGAMMA0=Entry(self,width=6,bg="white"); self.eGAMMA0.insert(0,str(s.parameters["GAMMA0"]))
+      self.strGAMMA0.set(str(s.parameters["GAMMA0"]));self.strGAMMA0.trace("w",self.saveSpectre)
+      self.eGAMMA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strGAMMA0);
+      
       self.tBETA0=Label(self, text="BETA")
-      self.eBETA0=Entry(self,width=6,bg="white"); self.eBETA0.insert(0,str(s.parameters["BETA0"]))
+      self.strBETA0.set(str(s.parameters["BETA0"]));self.strBETA0.trace("w",self.saveSpectre)
+      self.eBETA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strBETA0);  
+      
       self.tALPHA0=Label(self, text="ALPHA")
-      self.eALPHA0=Entry(self,width=6,bg="white"); self.eALPHA0.insert(0,str(s.parameters["ALPHA0"]))
+      self.strALPHA0.set(str(s.parameters["ALPHA0"]));self.strALPHA0.trace("w",self.saveSpectre)
+      self.eALPHA0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strALPHA0);  
+      
       self.tMONOC0=Label(self, text="MONOC0")
-      self.eMONOC0=Entry(self,width=6,bg="white"); self.eMONOC0.insert(0,str(s.parameters["MONOC0"]))
-    #Entrees de NB
+      self.strMONOC0.set(str(s.parameters["MONOC0"]));self.strMONOC0.trace("w",self.saveSpectre)
+      self.eMONOC0=Entry(self,width=6,bg="white",validate=ALL,textvariable=self.strMONOC0); 
+      
+      self.strNB=[]
+      self.eNB=[]
+      j=0
+      while j<10:
+        self.strNB.append(StringVar())
+        self.strNB[j].set(str(s.NB0[j]))
+        self.strNB[j].trace("w",self.saveSpectre)
+        self.eNB.append(Entry(self,width=2,bg="white",validate=ALL,textvariable=self.strNB[j]))
+        j+=1
+      self.tStep=[]
+      self.tStep.append(Label(self,text="Step:"))
+      self.tStep.append(Label(self,text="Step:"))
+    self.tParam=[]
+    self.tParam.append(Label(self,text="Value:"))
+    self.tParam.append(Label(self,text="Value:"))
+    # Legend for NB
     self.tNB=[]
     self.tNB.append(Label(self,text="Adjust:"))
     self.tNB.append(Label(self,text="Adjust:"))
-    self.eNB=[]
-    j=0
-    while j<10:
-      self.eNB.append(Entry(self,width=2,bg="white"))
-      j+=1
- 
-      
+
+
+  def  saveSpectre(self,*args):
+    #Save current values of entries for parameters (and associates) to spectre in list
+    
+    n=self.selectedSpectre
+    if self.spectres[n].kind==0:
+      try:
+        self.spectres[n].parameters["DI"]=float(self.strDI.get())
+        self.spectres[n].parameters["GA"]=float(self.strGA.get())
+        self.spectres[n].parameters["H1"]=float(self.strH1.get())
+        self.spectres[n].parameters["SQ"]=float(self.strSQ.get())
+        self.spectres[n].parameters["CH"]=float(self.strCH.get())
+        self.spectres[n].parameters["ETA"]=float(self.strETA.get())
+        self.spectres[n].parameters["THETA"]=float(self.strTHETA.get())
+        self.spectres[n].parameters["GAMMA"]=float(self.strGAMMA.get())
+        self.spectres[n].parameters["BETA"]=float(self.strBETA.get())
+        self.spectres[n].parameters["ALPHA"]=float(self.strALPHA.get())
+        self.spectres[n].parameters["MONOC"]=int(self.strMONOC.get())
+        self.spectres[n].parameters["IOGV"]=int(self.strIOGV.get())
+        j=0
+        while j<10:
+          self.spectres[n].NB[j]=self.strNB[j].get()
+          j+=1
+      except ValueError:
+        pass
+      try:
+        if int(self.strIOGV.get())==3:
+          i=0
+          while i<8:
+            self.spectres[n].GV[i]=float(self.strGV[i].get())
+            self.spectres[n].NG[i]=int(self.strNG[i].get())
+            i+=1
+      except ValueError:
+        pass
+        
+    else:
+      try:
+        self.spectres[n].parameters["DI0"]=float(self.strDI0.get())
+        self.spectres[n].parameters["PDI"]=float(self.strPDI.get())
+        self.spectres[n].parameters["GA"]=float(self.strGA0.get())
+        self.spectres[n].parameters["H1"]=float(self.strH10.get())
+        self.spectres[n].parameters["SQ0"]=float(self.strSQ0.get())
+        self.spectres[n].parameters["PSQ"]=float(self.strPSQ.get())
+        self.spectres[n].parameters["CH0"]=float(self.strCH0.get())
+        self.spectres[n].parameters["PCH"]=float(self.strPCH.get())
+        self.spectres[n].parameters["ETA0"]=float(self.strETA0.get())
+        self.spectres[n].parameters["THETA0"]=float(self.strTHETA0.get())
+        self.spectres[n].parameters["PTHETA"]=float(self.strPTHETA.get())
+        self.spectres[n].parameters["GAMMA0"]=float(self.strGAMMA0.get())
+        self.spectres[n].parameters["BETA0"] =float(self.strBETA0.get())
+        self.spectres[n].parameters["ALPHA0"]=float(self.strALPHA0.get())
+        self.spectres[n].parameters["MONOC0"]=int(self.strMONOC0.get())
+        j=0
+        while j<10:
+          self.spectres[n].NB0[j]=self.strNB[j].get()
+          j+=1
+      except ValueError:
+        pass
+
   def packEntrySpectre(self):
     s=self.spectres[self.selectedSpectre]
-    #effacement anciennes entrees
     r0=13
     c0=6
-    r1=r0+7
+    r1=r0+4
+    r2=r1+5
+    c1=c0-2
+    #Display parameters entries
+    self.tParam[0].grid(row=r0+1,column=c0-1)
+    self.tParam[1].grid(row=r1+1,column=c0-1)
+    self.tNB[0].grid(row=r0+2,column=c0-1)
+    self.tNB[1].grid(row=r1+2,column=c0-1)
     if s.kind==0:
-      self.tDI.grid(row=r0+2,column=c0);self.eDI.grid(row=r0+3,column=c0)
-      self.tGA.grid(row=r0+2,column=c0+1);self.eGA.grid(row=r0+3,column=c0+1)
-      self.tH1.grid(row=r0+2,column=c0+2);self.eH1.grid(row=r0+3,column=c0+2)
-      self.tSQ.grid(row=r0+2,column=c0+3);self.eSQ.grid(row=r0+3,column=c0+3)
-      self.tCH.grid(row=r0+2,column=c0+4);self.eCH.grid(row=r0+3,column=c0+4)
-      self.tETA.grid(row=r0+2,column=c0+5);self.eETA.grid(row=r0+3,column=c0+5)
+      self.tDI.grid(row=r0,column=c0);self.eDI.grid(row=r0+1,column=c0)
+      self.tGA.grid(row=r0,column=c0+1);self.eGA.grid(row=r0+1,column=c0+1)
+      self.tH1.grid(row=r0,column=c0+2);self.eH1.grid(row=r0+1,column=c0+2)
+      self.tSQ.grid(row=r0,column=c0+3);self.eSQ.grid(row=r0+1,column=c0+3)
+      self.tCH.grid(row=r0,column=c0+4);self.eCH.grid(row=r0+1,column=c0+4)
+      self.tETA.grid(row=r0,column=c0+5);self.eETA.grid(row=r0+1,column=c0+5)
       self.tTHETA.grid(row=r1,column=c0);self.eTHETA.grid(row=r1+1,column=c0)
       self.tGAMMA.grid(row=r1,column=c0+1);self.eGAMMA.grid(row=r1+1,column=c0+1)
       self.tBETA.grid(row=r1,column=c0+2);self.eBETA.grid(row=r1+1,column=c0+2)
       self.tALPHA.grid(row=r1,column=c0+3);self.eALPHA.grid(row=r1+1,column=c0+3)
       self.tMONOC.grid(row=r1,column=c0+5);self.eMONOC.grid(row=r1+1,column=c0+5)
+      self.tIOGV.grid(row=r1+2,column=c0+5);self.eIOGV.grid(row=r1+3,column=c0+5)
+      # display GV and NG
+      self.tGV.grid(row=r2, column=c1-1)
+      self.tNG.grid(row=r2+1, column=c1-1)
+      j=0
+      while j<8:
+        self.eGV[j].grid(row=r2,column=c1+j);
+        self.eNG[j].grid(row=r2+1,column=c1+j);
+        j+=1
     else:
-      self.tDI0.grid(row=r0+2,column=c0);self.eDI0.grid(row=r0+3,column=c0)
-      self.tPDI.grid(row=r0,column=c0);self.ePDI.grid(row=r0+1,column=c0)
-      self.tGA0.grid(row=r0+2,column=c0+1);self.eGA0.grid(row=r0+3,column=c0+1)
-      self.tH10.grid(row=r0+2,column=c0+2);self.eH10.grid(row=r0+3,column=c0+2)
-      self.tSQ0.grid(row=r0+2,column=c0+3);self.eSQ0.grid(row=r0+3,column=c0+3)
-      self.tPSQ.grid(row=r0,column=c0+3);self.ePSQ.grid(row=r0+1,column=c0+3)
-      self.tCH0.grid(row=r0+2,column=c0+4);self.eCH0.grid(row=r0+3,column=c0+4)
-      self.tPCH.grid(row=r0,column=c0+4);self.ePCH.grid(row=r0+1,column=c0+4)
-      self.tETA0.grid(row=r0+2,column=c0+5);self.eETA0.grid(row=r0+3,column=c0+5)
+      self.tDI0.grid(row=r0,column=c0);self.eDI0.grid(row=r0+1,column=c0)
+      self.ePDI.grid(row=r0+3,column=c0)
+      self.tGA0.grid(row=r0,column=c0+1);self.eGA0.grid(row=r0+1,column=c0+1)
+      self.tH10.grid(row=r0,column=c0+2);self.eH10.grid(row=r0+1,column=c0+2)
+      self.tSQ0.grid(row=r0,column=c0+3);self.eSQ0.grid(row=r0+1,column=c0+3)
+      self.ePSQ.grid(row=r0+3,column=c0+3)
+      self.tCH0.grid(row=r0,column=c0+4);self.eCH0.grid(row=r0+1,column=c0+4)
+      self.ePCH.grid(row=r0+3,column=c0+4)
+      self.tETA0.grid(row=r0,column=c0+5);self.eETA0.grid(row=r0+1,column=c0+5)
       self.tTHETA0.grid(row=r1,column=c0);self.eTHETA0.grid(row=r1+1,column=c0)
-      self.tPTHETA.grid(row=r1-2,column=c0);self.ePTHETA.grid(row=r1-1,column=c0)
+      self.ePTHETA.grid(row=r1+3,column=c0)
       self.tGAMMA0.grid(row=r1,column=c0+1);self.eGAMMA0.grid(row=r1+1,column=c0+1)
       self.tBETA0.grid(row=r1,column=c0+2);self.eBETA0.grid(row=r1+1,column=c0+2)
       self.tALPHA0.grid(row=r1,column=c0+3);self.eALPHA0.grid(row=r1+1,column=c0+3)
       self.tMONOC0.grid(row=r1,column=c0+5);self.eMONOC0.grid(row=r1+1,column=c0+5)
-    self.tNB[0].grid(row=r0+4,column=c0-1)
-    self.tNB[1].grid(row=r1+2,column=c0-1)
+      self.tStep[0].grid(row=r0+3,column=c0-1)
+      self.tStep[1].grid(row=r1+3,column=c0-1)
+    # display NB entries
     j=0
     while j<6:
-      self.eNB[j].grid(row=r0+4,column=c0+j);
+      self.eNB[j].grid(row=r0+2,column=c0+j);
       j+=1
     while j<10:
       self.eNB[j].grid(row=r1+2,column=c0+j-6);
       j+=1
+
       
   def delEntrySpectre(self):
     try:
@@ -440,35 +868,48 @@ class DataEntries(PanedWindow):
       self.eBETA.grid_forget(); self.tBETA.grid_forget()
       self.eALPHA.grid_forget(); self.tALPHA.grid_forget()
       self.eMONOC.grid_forget(); self.tMONOC.grid_forget()
-    except:
+      self.eIOGV.grid_forget(); self.tIOGV.grid_forget()
+    except Exception:
       pass
     try:
-      self.tPDI.update();self.ePDI.update()
       self.tDI0.grid_forget();self.eDI0.grid_forget()
-      self.tPDI.grid_forget();self.ePDI.grid_forget()
+      self.ePDI.grid_forget()
       self.tGA0.grid_forget();self.eGA0.grid_forget()
       self.tH10.grid_forget();self.eH10.grid_forget()
-      self.eSQ0.grid_forget(); self.tSQ0.grid_forget()
-      self.ePSQ.grid_forget(); self.tPSQ.grid_forget()
-      self.eCH0.grid_forget(); self.tCH0.grid_forget()
-      self.ePCH.grid_forget(); self.tPCH.grid_forget()
-      self.eTHETA0.grid_forget(); self.tTHETA0.grid_forget()
-      self.ePTHETA.grid_forget(); self.tPTHETA.grid_forget()
-      self.eGAMMA0.grid_forget(); self.tGAMMA0.grid_forget()
-      self.eBETA0.grid_forget(); self.tBETA0.grid_forget()
-      self.eALPHA0.grid_forget(); self.tALPHA0.grid_forget()
-      self.eMONOC0.grid_forget(); self.tMONOC0.grid_forget()
-    except:
+      self.tSQ0.grid_forget(); self.eSQ0.grid_forget()
+      self.ePSQ.grid_forget()
+      self.tCH0.grid_forget(); self.eCH0.grid_forget()
+      self.ePCH.grid_forget()
+      self.tTHETA0.grid_forget(); self.eTHETA0.grid_forget()
+      self.ePTHETA.grid_forget()
+      self.tGAMMA0.grid_forget(); self.eGAMMA0.grid_forget()
+      self.tBETA0.grid_forget(); self.eBETA0.grid_forget()
+      self.tALPHA0.grid_forget(); self.eALPHA0.grid_forget()
+      self.tMONOC0.grid_forget(); self.eMONOC0.grid_forget()
+      for i in [0,1]:
+        self.tStep[i].grid_forget()
+    except Exception:
       pass
     try:
-      self.tNB[1].grid_forget()
+      for i in [0,1]:
+        self.tParam[i].grid_forget()
+        self.tNB[i].grid_forget()
       j=0
       while j<10:
         self.eNB[j].grid_forget()
         j+=1
-    except:
+    except Exception:
       pass
-
+    try:
+      self.tGV.grid_forget()
+      self.tNG.grid_forget()
+      j=0
+      while j<8:
+        self.eGV[j].grid_forget()
+        self.eNG[j].grid_forget()
+        j+=1
+    except Exception:
+      pass
 ########################################################################
 class Data():
   # Set of variables to store values between Text and Entries
@@ -511,7 +952,7 @@ class Data():
     self.insertTableOption(self.IZZ,1,self.IZ)
     #Options IO
     self.insertTableOption(self.IOPT,1,self.IO)
-    #Plage de canaux Ã  lisser
+    #Plage de canaux a  lisser
     self.insertTableOption(self.IO[12],3,self.PLAGEL)
     #Plages de canaux a tracer
     self.insertTableOption(self.IO[16],1,self.GRASS)
@@ -520,8 +961,11 @@ class Data():
     while nt<self.NS:
       self.insertSpectre(nt)
       nt+=1
-    #Inserer spectre ?
-    #Inserer spectre de bruit ?
+    #reecriture du reste
+    try:
+      self.parent.txt.insert(INSERT,"\n"+self.expdata)
+    except Exception:
+      pass
     
   def setText(self,string):
     self.parent.txt.insert(INSERT,string)
@@ -613,6 +1057,7 @@ class Data():
     else:
       string=''
     self.parent.txt.insert(INSERT,string)
+    
   def setSpectres(self):
     # creation de la liste des sous-spectres
     self.sousSpectres=[]
@@ -630,7 +1075,6 @@ class Data():
     phrase=self.parent.txt.get("%d.%d" % (self.l, 0),"%d.end" % (self.l)).split()
     self.l+=1
     return phrase
-    
   def textFromEntries(self):
     # Filling text space from  content of entries
     # Placement des valeurs des entrees dans les variables
@@ -667,11 +1111,35 @@ class Data():
       while i<10:
         self.GRASS[i]=int(self.parent.entries.eGRASS[i].get())
         i+=1
-        
+    # Spectres
+    self.lireSpectresFromEntries()
+      
+  def lireSpectresFromEntries(self):
+    try:
+      del self.sousSpectres
+    except:
+      pass
+    self.sousSpectres=[]
+    nt=0
+    #~ print(self.parent.entries.spectres[nt]["DI0"], self.parent.entries.spectres[nt].kind)
+    while nt<self.NS:
+      if nt<self.NS1 :
+        self.sousSpectres.append(self.parent.entries.spectres[nt])
+      elif nt<self.NS2 and self.NS2>0:
+        self.sousSpectres.append(Spectre(nt-self.NS1+2))
+      else:
+        print(nt)
+        self.sousSpectres.append(Spectre(0))
+      nt+=1
+    kt=0
+    
+    while kt<self.NS:
+      kt+=1
+      
   def entriesFromText(self):
     self.variablesFromText()
     self.entriesFromVariables()
-    self.parent.entries.spectres=self.sousSpectres
+    self.parent.entries.spectres=list(self.sousSpectres)
     self.parent.entries.setSpectresScroll(self.NS,self.NS1,self.NS2)
     self.parent.entries.delEntrySpectre()
     self.parent.entries.packScrollbar()
@@ -717,13 +1185,14 @@ class Data():
       for mot in phrase:
         self.GRASS[i]=int(mot)
         i+=1
-      # poursuivre avec la lecture des spectres
+    # poursuivre avec la lecture des spectres
     self.setSpectres()
     nt=0
     while nt < self.NS:
       self.lireSpectre(nt)
       nt+=1
-
+    #enregistrement du reste des donnees
+    self.expdata = self.parent.txt.get("%d.%d" % (self.l, 0),END )
     
   def lireSpectre(self,nt):
     # lire le ntieme spectre sur la ligne l
@@ -751,7 +1220,7 @@ class Data():
         phrase=self.getTextLine()
         j=0
         while j<8:
-          self.sousSpectres[nt].GV[j]=int(phrase[j])
+          self.sousSpectres[nt].GV[j]=float(phrase[j])
           j+=1
         phrase=self.getTextLine()
         while j<8:
@@ -891,7 +1360,7 @@ def main():
 
   fenetre = Tk()
   fenetre.title("Mosfit2016")
-  fenetre.geometry("1060x620+300+300")
+  fenetre.geometry("1280x620+300+300")
   cadreEntree = Frame(fenetre)
   cadreBoutons = Frame(fenetre)
   cadreTexte = Frame(fenetre)
