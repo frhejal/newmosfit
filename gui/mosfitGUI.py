@@ -30,7 +30,8 @@ class BarreMenu(Frame):
       ftypes = [('.coo', '*.coo'), ('All files', '*')]
       dlg = tkFileDialog.Open(self, filetypes = ftypes)
       fl = dlg.show()
-
+      if fl==None:
+        return
       if fl != '':
           text = self.readFile(fl)
           try:
@@ -41,7 +42,7 @@ class BarreMenu(Frame):
             
   def onSave(self):
     # Open dialog box to browse file system
-    # Save content of variable self.parent.txt in .coo file
+    # Save content of variable self.parent.txt to .coo file
     ftypes = [('.coo', '*.coo'), ('All files', '*')]
     f = tkFileDialog.asksaveasfile(mode='w', defaultextension='*.coo',filetypes= ftypes)
     if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
@@ -74,26 +75,20 @@ class DataEntries(PanedWindow):
     self.eHBRUIT=Entry(self,width=8,bg="white")
     # Options
     self.eIO =[]
-    i=0
-    while i<20:
+    for i in range(0,20):
       self.eIO.append(Entry(self,width=2,bg="light gray"))
-      i+=1
     # Chanels to ignore
     self.eIZ=[]
-    i=0
-    while i<10:
+    for i in range(0,10):
       self.eIZ.append(Entry(self,width=4,bg="light gray"))
-      i+=1
     # Spectres to smooth
     self.ePLAGEL=[]
     for i in [0,1]:
       self.ePLAGEL.append(Entry(self,width=4,bg="light gray"))
     # Spectres to plot
-    i=0
     self.eGRASS=[]
-    while i<10:
+    for i in range(0,10):
       self.eGRASS.append(Entry(self,width=4,bg="light gray"))
-      i+=1
     
     #Create initial list of bogus spectres
     ns=4;
@@ -141,13 +136,11 @@ class DataEntries(PanedWindow):
     
     # Change fields color in IO according to content
     self.strIO=[]
-    i=0
-    while i<20:
+    for i in range(0,20):
       self.strIO.append(StringVar())
       if i not in [12, 16]:
         self.strIO[i].trace("w", self.checkIO)
         self.eIO[i].config(validate=ALL,textvariable=self.strIO[i])
-      i+=1
     self.strIO[12].trace("w",self.checkIO13)
     self.strIO[16].trace("w",self.checkIO17)    
     self.eIO[12].config(validate=ALL,textvariable=self.strIO[12])
@@ -157,30 +150,24 @@ class DataEntries(PanedWindow):
     try:
       izz=int(self.izz.get())
       if izz == 0:
-        i=0
-        while i<10:
+        for i in range(0,10):
           self.eIZ[i].config(bg="light gray")
-          i+=1
       elif izz == 1 :
-        i=0
-        while i<10:
+        for i in range(0,10):
           self.eIZ[i].config(bg="white")
-          i+=1
       else:
         raise ValueError
       self.eIZZ.config(bg="white")          
     except ValueError:
       self.eIZZ.config(bg="red")
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.eIZ[i].config(bg="light gray")
-        i+=1
     except Exception, e:
       print(e)
       
   def checkIOPT(self,*args):
     # Change background color of entries IO depending on entry IOPT
-    # Also calls checks on IO(13) and IO(17)
+    # Also calls checks on IO
     try:
       iopt=int(self.iopt.get())
       if iopt == 0:
@@ -354,30 +341,22 @@ class DataEntries(PanedWindow):
       if iopt==1:
         self.eIO[16].config(bg="white")
         if io17==0:
-          i=0
-          while i<10:
+          for i in range(0,10):
             self.eGRASS[i].config(bg="light gray")
-            i+=1
         elif io17==1:
-          i=0
-          while i<10:
+          for i in range(0,10):
             self.eGRASS[i].config(bg="white")
-            i+=1  
         else:
           raise ValueError
       else:  
         self.eIO[16].config(bg="light gray")
-        i=0
-        while i<10:
+        for i in range(0,10):
           self.eGRASS[i].config(bg="light gray")
-          i+=1
     except ValueError:
       # if incorrect value, redden the box.
       self.eIO[16].config(bg="red")
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.eGRASS[i].config(bg="light gray")
-        i+=1
     except Exception, e:
       print(e)
       
@@ -385,21 +364,18 @@ class DataEntries(PanedWindow):
     # Change color of entries for NG, GV depending on value of IOGV.
     try:
       iogv=int(self.strIOGV.get())
-      i=0 
       if iogv==1 or iogv==2:
         self.eNB[1].config(bg="light gray")
       else:
         self.eNB[1].config(bg="white")
       if iogv==3:
-        while i<8:
+        for i in range(0,8):
           self.eGV[i].config(bg="white")
           self.eNG[i].config(bg="white")
-          i+=1
       else:
-        while i<8:
+        for i in range(0,8):
           self.eGV[i].config(bg="light gray")
           self.eNG[i].config(bg="light gray")
-          i+=1
       if iogv not in [0, 1, 2, 3]:
         raise ValueError
       self.eIOGV.config(bg="white")
@@ -460,9 +436,7 @@ class DataEntries(PanedWindow):
       self.eNS.config(bg="white")
       self.eNS1.config(bg="white")
       self.eNS2.config(bg="white")
-      nt=0
-      while nt<ns:
-        nt+=1
+        
   def pack(self,**options):
     # affichages
     PanedWindow.grid(self,row=0)
@@ -476,25 +450,19 @@ class DataEntries(PanedWindow):
     Label(self, text="IOPT").grid(row=3,column=2);self.eIOPT.grid(row=3,column=3,sticky=W)
     Label(self, text="HBRUIT").grid(row=4);self.eHBRUIT.grid(row=4,column=1,columnspan=2,sticky=W)
     Label(self, text="Options").grid(row=5,columnspan=2)
-    i=0
-    while i<20:
+    for i in range(0,20):
       Label(self, text="IO("+str(i+1)+")").grid(row=6+i ,sticky=E)
       self.eIO[i].grid(row=6+i,column=1,sticky=W)
-      i+=1
     Label(self, text="Chanels to ignore:").grid(row=5, column=2, columnspan=3,sticky=W)
-    i=0
-    while i<5:
+    for i in range(0,5):
       self.eIZ[2*i].grid(row=6+i,column=2,sticky=E)
       Label(self, text="to ").grid(row=6+i,column=3)
       self.eIZ[2*i+1].grid(row=6+i,column=4,sticky=W)
-      i+=1
     Label(self, text="Spectres to plot:").grid(row=5, column=6, columnspan=4,sticky=W)
-    i=0
-    while i<5:
+    for i in range(0,5):
       self.eGRASS[2*i].grid(row=6+i,column=6,sticky=E)
       Label(self, text="to ").grid(row=6+i,column=7)
       self.eGRASS[2*i+1].grid(row=6+i,column=8,sticky=W)
-      i+=1
     Label(self, text="Spectres to smooth:").grid(row=11, column=2, columnspan=3,sticky=W)
     self.ePLAGEL[0].grid(row=12,column=2,sticky=E)
     Label(self, text="to ").grid(row=12, column=3)
@@ -516,16 +484,14 @@ class DataEntries(PanedWindow):
     self.listbox = Listbox(self,height= 5, width=10, selectmode=SINGLE, yscrollcommand=self.scrollbar.set)
     self.listbox.delete(0,END)
     
-    nt=0
     self.lstSp=[]
-    while nt<ns :
+    for nt in range(0,ns):
       if((nt < ns1-1) or (nt >= ns2)) or (ns1<=0 or ns2<=0) :
         self.listbox.insert(END,"Spectre "+str(nt+1))
         self.lstSp.append(nt)
       elif nt == ns1-1:
         self.listbox.insert(END,"Distribution")
         self.lstSp.append(nt)
-      nt+=1
     self.scrollbar.config(command=self.listbox.yview)
     self.listbox.bind('<<ListboxSelect>>',self.selectSpectre)
     self.selectedSpectre=0
@@ -539,10 +505,9 @@ class DataEntries(PanedWindow):
     
   def setEntrySpectre(self):
     # creer entrees
-    s=self.spectres[self.selectedSpectre]
     # Creer des StringVar et fonctions de sauvegarde pour enregistrer tout changement dans les entrees 
     # vers le spectre courant self.spectres[self.selectedSpectre]
-    # attention  conflit avec insert pour contenu initial de l'entree: possibilité d'intialiser les StrinVar ?
+    s=self.spectres[self.selectedSpectre]
     
     if s.kind==0:
         
@@ -609,13 +574,11 @@ class DataEntries(PanedWindow):
       # Array NB (adjustment parameters), 
       self.strNB=[]
       self.eNB=[]
-      j=0
-      while j<10:
+      for j in range(0,10):
         self.strNB.append(StringVar())
         self.strNB[j].set(str(s.NB[j]))
         self.strNB[j].trace("w",self.saveSpectre)
         self.eNB.append(Entry(self,width=2,bg="white",validate=ALL,textvariable=self.strNB[j]))
-        j+=1
       # Array GV and NG ( use if IOGV==3)
       self.strGV=[]
       self.strNG=[]
@@ -627,8 +590,7 @@ class DataEntries(PanedWindow):
       except Exception, e :
         print e
         pass
-      j=0
-      while j<8:
+      for j in range(0,8):
         self.strGV.append(StringVar())
         self.strNG.append(StringVar())
         self.strGV[j].set(str(s.GV[j]))
@@ -637,8 +599,7 @@ class DataEntries(PanedWindow):
         self.strNG[j].trace("w",self.saveSpectre)
         self.eGV.append(Entry(self,width=5,bg=color,validate=ALL,textvariable=self.strGV[j]))
         self.eNG.append(Entry(self,width=2,bg=color,validate=ALL,textvariable=self.strNG[j]))
-        j+=1
-      # Legend for GV and 
+      # Legend for GV and NG
       self.tGV=Label(self,text="GV:")
       self.tNG=Label(self,text="NG:")
         
@@ -717,13 +678,11 @@ class DataEntries(PanedWindow):
       
       self.strNB=[]
       self.eNB=[]
-      j=0
-      while j<10:
+      for j in range(0,10):
         self.strNB.append(StringVar())
         self.strNB[j].set(str(s.NB0[j]))
         self.strNB[j].trace("w",self.saveSpectre)
         self.eNB.append(Entry(self,width=2,bg="white",validate=ALL,textvariable=self.strNB[j]))
-        j+=1
       self.tStep=[]
       self.tStep.append(Label(self,text="Step:"))
       self.tStep.append(Label(self,text="Step:"))
@@ -754,19 +713,15 @@ class DataEntries(PanedWindow):
         self.spectres[n].parameters["ALPHA"]=float(self.strALPHA.get())
         self.spectres[n].parameters["MONOC"]=int(self.strMONOC.get())
         self.spectres[n].parameters["IOGV"]=int(self.strIOGV.get())
-        j=0
-        while j<10:
+        for j in range(0,10):
           self.spectres[n].NB[j]=self.strNB[j].get()
-          j+=1
       except ValueError:
         pass
       try:
         if int(self.strIOGV.get())==3:
-          i=0
-          while i<8:
+          for i in range(0,8):
             self.spectres[n].GV[i]=float(self.strGV[i].get())
             self.spectres[n].NG[i]=int(self.strNG[i].get())
-            i+=1
       except ValueError:
         pass
         
@@ -787,10 +742,8 @@ class DataEntries(PanedWindow):
         self.spectres[n].parameters["BETA0"] =float(self.strBETA0.get())
         self.spectres[n].parameters["ALPHA0"]=float(self.strALPHA0.get())
         self.spectres[n].parameters["MONOC0"]=int(self.strMONOC0.get())
-        j=0
-        while j<10:
+        for j in range(0,10):
           self.spectres[n].NB0[j]=self.strNB[j].get()
-          j+=1
       except ValueError:
         pass
 
@@ -822,11 +775,9 @@ class DataEntries(PanedWindow):
       # display GV and NG
       self.tGV.grid(row=r2, column=c1-1)
       self.tNG.grid(row=r2+1, column=c1-1)
-      j=0
-      while j<8:
+      for j in range(0,8):
         self.eGV[j].grid(row=r2,column=c1+j);
         self.eNG[j].grid(row=r2+1,column=c1+j);
-        j+=1
     else:
       self.tDI0.grid(row=r0,column=c0);self.eDI0.grid(row=r0+1,column=c0)
       self.ePDI.grid(row=r0+3,column=c0)
@@ -846,13 +797,10 @@ class DataEntries(PanedWindow):
       self.tStep[0].grid(row=r0+3,column=c0-1)
       self.tStep[1].grid(row=r1+3,column=c0-1)
     # display NB entries
-    j=0
-    while j<6:
+    for j in range(0,6):
       self.eNB[j].grid(row=r0+2,column=c0+j);
-      j+=1
-    while j<10:
+    for j in range(6,10):
       self.eNB[j].grid(row=r1+2,column=c0+j-6);
-      j+=1
 
       
   def delEntrySpectre(self):
@@ -869,7 +817,7 @@ class DataEntries(PanedWindow):
       self.eALPHA.grid_forget(); self.tALPHA.grid_forget()
       self.eMONOC.grid_forget(); self.tMONOC.grid_forget()
       self.eIOGV.grid_forget(); self.tIOGV.grid_forget()
-    except Exception:
+    except AttributeError:
       pass
     try:
       self.tDI0.grid_forget();self.eDI0.grid_forget()
@@ -888,27 +836,23 @@ class DataEntries(PanedWindow):
       self.tMONOC0.grid_forget(); self.eMONOC0.grid_forget()
       for i in [0,1]:
         self.tStep[i].grid_forget()
-    except Exception:
+    except AttributeError:
       pass
     try:
       for i in [0,1]:
         self.tParam[i].grid_forget()
         self.tNB[i].grid_forget()
-      j=0
-      while j<10:
+      for j in range(10):
         self.eNB[j].grid_forget()
-        j+=1
-    except Exception:
+    except AttributeError:
       pass
     try:
       self.tGV.grid_forget()
       self.tNG.grid_forget()
-      j=0
-      while j<8:
+      for j in range(0,8):
         self.eGV[j].grid_forget()
         self.eNG[j].grid_forget()
-        j+=1
-    except Exception:
+    except AttributeError:
       pass
 ########################################################################
 class Data():
@@ -917,7 +861,7 @@ class Data():
     
     self.parent=parent
     self.parent.txt=Text(textmaster,bg="white")
-    self.l=0 #derniere ligne lue dans le texte
+    self.l=0 # latest line that was read in the text
     self.titre="Sans Titre"
     self.CN=0.078125
     self.NMAX=20
@@ -931,40 +875,37 @@ class Data():
     self.IO=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] #20
     self.PLAGEL=[0, 0]
     self.GRASS=[0, 0, 2, 5, 0, 0, 0, 0, 0, 0]#10
-    #sous Spectres    
+    #Parameters of Spectres
     self.setSpectres()
     self.textFromVariables()
-    #~ self.parent.txt.pack(fill=BOTH, expand=1)
     
   def textFromVariables(self):
-    #transfert data form variables
+    # Transfer data form variables
     try:
       self.parent.txt.delete(0.0,END)
-    except:
+    except AttributeError:
       pass
     self.setText(self.titre+"\n")
-    #Variables generales
+    # main options
     string= str(self.CN)+" "+str(self.NMAX)
     string=string+" "+str(self.NS)+" "+str(self.NS1)+" "+str(self.NS2)
     string=string+" "+str(self.IZZ)+" "+str(self.IOPT)+" "+str(self.HBRUIT)
     self.parent.txt.insert(INSERT,string)
-    #canaux a ignorer
+    # Ignored chanels
     self.insertTableOption(self.IZZ,1,self.IZ)
-    #Options IO
+    # Options IO
     self.insertTableOption(self.IOPT,1,self.IO)
-    #Plage de canaux a  lisser
+    # Chanels to be smoothed
     self.insertTableOption(self.IO[12],3,self.PLAGEL)
-    #Plages de canaux a tracer
+    # Chanels to be plotted
     self.insertTableOption(self.IO[16],1,self.GRASS)
-    #Spectres
-    nt=0
-    while nt<self.NS:
+    # Spectres
+    for nt in range(0,self.NS):
       self.insertSpectre(nt)
-      nt+=1
-    #reecriture du reste
+    # rewrite the rest (experimental spectre and/or spectre of noise)
     try:
       self.parent.txt.insert(INSERT,"\n"+self.expdata)
-    except Exception:
+    except AttributeError:
       pass
     
   def setText(self,string):
@@ -1003,22 +944,16 @@ class Data():
       string+=" "
       string+=str(self.sousSpectres[nt]["MONOC"])
       string+="\n"
-      j=0
-      while j<10:
+      for j in range(0,10):
         string=string+str(self.sousSpectres[nt].NB[j])+" "
-        j+=1
       string+=str(self.sousSpectres[nt]["IOGV"])
       if self.sousSpectres[nt]["IOGV"]==3:
         string+="\n"
-        j=0
-        while j<8:
+        for j in range(0,8):
           string=string+str(self.sousSpectres[nt].GV[j])+" "
-          j+=1
         string+="\n"
-        j=0
-        while j<8:
+        for j in range(0,8):
           string=string+str(self.sousSpectres[nt].NG[j])+" "
-          j+=1
     elif self.sousSpectres[nt].kind==1:
       string+=str(self.sousSpectres[nt]["DI0"])
       string+=" "
@@ -1050,26 +985,22 @@ class Data():
       string+=" "
       string+=str(self.sousSpectres[nt]["MONOC0"])
       string+="\n"
-      j=0
-      while j<10:
+      for j in range(0,10):
         string=string+str(self.sousSpectres[nt].NB0[j])+" "
-        j+=1
     else:
       string=''
     self.parent.txt.insert(INSERT,string)
     
   def setSpectres(self):
-    # creation de la liste des sous-spectres
+    # Create list of spectres
     self.sousSpectres=[]
-    nt=0
-    while nt<self.NS:
+    for nt in range(self.NS):
       if nt<self.NS1-1 :
         self.sousSpectres.append(Spectre(0))
       elif nt<self.NS2 and self.NS2>0:
         self.sousSpectres.append(Spectre(nt-self.NS1+2))
       else:
         self.sousSpectres.append(Spectre(0))
-      nt+=1
       
   def getTextLine(self):
     phrase=self.parent.txt.get("%d.%d" % (self.l, 0),"%d.end" % (self.l)).split()
@@ -1077,13 +1008,11 @@ class Data():
     return phrase
   def textFromEntries(self):
     # Filling text space from  content of entries
-    # Placement des valeurs des entrees dans les variables
     self.variablesFromEntries()
-    # Remplissage du text à partir des variables
     self.textFromVariables()
     
   def variablesFromEntries(self):
-    #lecture des chaines dans les champ d'entree et conversion en variables
+    # Read strings from entries and convert to variables
     self.titre=self.parent.entries.eTitre.get()
     self.CN=float(self.parent.entries.eCN.get())
     self.NMAX=int(self.parent.entries.eNMAX.get())
@@ -1094,60 +1023,43 @@ class Data():
     self.IOPT=int(self.parent.entries.eIOPT.get())
     self.HBRUIT=float(self.parent.entries.eHBRUIT.get())
     if self.IZZ==1:
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.IZ[i]= int(self.parent.entries.eIZ[i].get())
-        i+=1
     if self.IOPT==1:
-      i=0
-      while i<20:
+      for i in range(0,20):
         self.IO[i]= int(self.parent.entries.eIO[i].get())
-        i+=1
     if self.IO[12]==3:
       self.PLAGEL[0]=int(self.parent.entries.ePLAGEL[0].get())
       self.PLAGEL[1]=int(self.parent.entries.ePLAGEL[1].get())
     if self.IO[16]!=0:
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.GRASS[i]=int(self.parent.entries.eGRASS[i].get())
-        i+=1
     # Spectres
     self.lireSpectresFromEntries()
       
   def lireSpectresFromEntries(self):
+    # Copy list of spectres contains in entres
     try:
       del self.sousSpectres
-    except:
+    except AttributeError:
       pass
     self.sousSpectres=[]
-    nt=0
-    #~ print(self.parent.entries.spectres[nt]["DI0"], self.parent.entries.spectres[nt].kind)
-    while nt<self.NS:
+    for nt in range(0,self.NS):
       if nt<self.NS1 :
         self.sousSpectres.append(self.parent.entries.spectres[nt])
       elif nt<self.NS2 and self.NS2>0:
         self.sousSpectres.append(Spectre(nt-self.NS1+2))
       else:
-        print(nt)
-        self.sousSpectres.append(Spectre(0))
-      nt+=1
-    kt=0
-    
-    while kt<self.NS:
-      kt+=1
+        self.sousSpectres.append(self.parent.entries.spectres[nt])
       
   def entriesFromText(self):
+    # Fill entries with data read from text (through storage in Data)
     self.variablesFromText()
     self.entriesFromVariables()
-    self.parent.entries.spectres=list(self.sousSpectres)
-    self.parent.entries.setSpectresScroll(self.NS,self.NS1,self.NS2)
-    self.parent.entries.delEntrySpectre()
-    self.parent.entries.packScrollbar()
-    self.parent.entries.setEntrySpectre()
-    self.parent.entries.packEntrySpectre()
+
 
   def variablesFromText(self):
-    #read data from text
+    # Read data from text
     self.titre=self.parent.txt.get("0.0","1.end")
     self.l=2
     phrase=self.getTextLine()
@@ -1185,18 +1097,19 @@ class Data():
       for mot in phrase:
         self.GRASS[i]=int(mot)
         i+=1
-    # poursuivre avec la lecture des spectres
+    # Read spectres
     self.setSpectres()
     nt=0
     while nt < self.NS:
       self.lireSpectre(nt)
       nt+=1
-    #enregistrement du reste des donnees
+    # Save the rest of data ( noise spectre and/or experimental data)
     self.expdata = self.parent.txt.get("%d.%d" % (self.l, 0),END )
     
   def lireSpectre(self,nt):
-    # lire le ntieme spectre sur la ligne l
+    # read NTth spectre on line l
     if ((nt < self.NS1-1) or (nt >= self.NS2)) or (self.NS1<=0 or self.NS2<=0) :
+      # If not a spectre from the distribution
       phrase=self.getTextLine()
       self.sousSpectres[nt].kind=0
       self.sousSpectres[nt]["DI"]=float(phrase[0])
@@ -1211,65 +1124,61 @@ class Data():
       self.sousSpectres[nt]["BETA"]=float(phrase[9])
       self.sousSpectres[nt]["MONOC"]=int(phrase[10])
       phrase=self.getTextLine()
-      j=0
-      while j<10:
+      for j in range(0,8):
         self.sousSpectres[nt].NB[j]=int(phrase[j])
-        j+=1
       self.sousSpectres[nt]["IOGV"]= int(phrase[j])
       if self.sousSpectres[nt]["IOGV"]==3:
         phrase=self.getTextLine()
-        j=0
-        while j<8:
+        for j in range(0,8):
           self.sousSpectres[nt].GV[j]=float(phrase[j])
-          j+=1
         phrase=self.getTextLine()
-        while j<8:
+        for j in range(0,8):
           self.sousSpectres[nt].NG[j]=int(phrase[j])
-          j+=1
+    elif nt==self.NS1-1:
+      # If first spectre of the distribution
+      phrase=self.getTextLine()
+      self.sousSpectres[nt].kind=1
+      self.sousSpectres[nt]["DI0"]=float(phrase[0])
+      self.sousSpectres[nt]["PDI"]=float(phrase[1])
+      self.sousSpectres[nt]["GA"]=float(phrase[2])
+      self.sousSpectres[nt]["H1"]=float(phrase[3])
+      self.sousSpectres[nt]["SQ0"]=float(phrase[4])
+      self.sousSpectres[nt]["PSQ"]=float(phrase[5])
+      self.sousSpectres[nt]["CH0"]=float(phrase[6])
+      self.sousSpectres[nt]["PCH"]=float(phrase[7])
+      self.sousSpectres[nt]["ETA0"]=float(phrase[8])
+      self.sousSpectres[nt]["PTHETA"]=float(phrase[9])
+      self.sousSpectres[nt]["THETA0"]=float(phrase[10])
+      self.sousSpectres[nt]["GAMMA0"]=float(phrase[11])
+      self.sousSpectres[nt]["ALPHA0"]=float(phrase[12])
+      self.sousSpectres[nt]["BETA0"]=float(phrase[13])
+      self.sousSpectres[nt]["MONOC0"]=int(phrase[14])
+      phrase=self.getTextLine()
+      for j in range(0,10):
+        self.sousSpectres[nt].NB0[j]=int(phrase[j])
     else:
-      if nt==self.NS1-1:
-        phrase=self.getTextLine()
-        self.sousSpectres[nt].kind=1
-        self.sousSpectres[nt]["DI0"]=float(phrase[0])
-        self.sousSpectres[nt]["PDI"]=float(phrase[1])
-        self.sousSpectres[nt]["GA"]=float(phrase[2])
-        self.sousSpectres[nt]["H1"]=float(phrase[3])
-        self.sousSpectres[nt]["SQ0"]=float(phrase[4])
-        self.sousSpectres[nt]["PSQ"]=float(phrase[5])
-        self.sousSpectres[nt]["CH0"]=float(phrase[6])
-        self.sousSpectres[nt]["PCH"]=float(phrase[7])
-        self.sousSpectres[nt]["ETA0"]=float(phrase[8])
-        self.sousSpectres[nt]["PTHETA"]=float(phrase[9])
-        self.sousSpectres[nt]["THETA0"]=float(phrase[10])
-        self.sousSpectres[nt]["GAMMA0"]=float(phrase[11])
-        self.sousSpectres[nt]["ALPHA0"]=float(phrase[12])
-        self.sousSpectres[nt]["BETA0"]=float(phrase[13])
-        self.sousSpectres[nt]["MONOC0"]=int(phrase[14])
-        phrase=self.getTextLine()
-        j=0
-        while j<10:
-          self.sousSpectres[nt].NB0[j]=int(phrase[j])
-          j+=1
-      else:
-        self.sousSpectres[nt].kind=self.sousSpectres[nt-1].kind+1
-        self.sousSpectres[nt]["DI0"]=self.sousSpectres[nt-1]["DI0"]
-        self.sousSpectres[nt]["PDI"]=self.sousSpectres[nt-1]["PDI"]
-        self.sousSpectres[nt]["GA"]=self.sousSpectres[nt-1]["GA"]
-        self.sousSpectres[nt]["H1"]=self.sousSpectres[nt-1]["H1"]
-        self.sousSpectres[nt]["SQ0"]=self.sousSpectres[nt-1]["SQ0"]
-        self.sousSpectres[nt]["PSQ"]=self.sousSpectres[nt-1]["PSQ"]
-        self.sousSpectres[nt]["CH0"]=self.sousSpectres[nt-1]["CH0"]
-        self.sousSpectres[nt]["PCH"]=self.sousSpectres[nt-1]["PCH"]
-        self.sousSpectres[nt]["ETA0"]=self.sousSpectres[nt-1]["ETA0"]
-        self.sousSpectres[nt]["PTHETA"]=self.sousSpectres[nt-1]["PTHETA"]
-        self.sousSpectres[nt]["THETA0"]=self.sousSpectres[nt-1]["THETA0"]
-        self.sousSpectres[nt]["GAMMA0"]=self.sousSpectres[nt-1]["GAMMA0"]
-        self.sousSpectres[nt]["ALPHA0"]=self.sousSpectres[nt-1]["ALPHA0"]
-        self.sousSpectres[nt]["BETA0"]=self.sousSpectres[nt-1]["BETA0"]
-        self.sousSpectres[nt]["MONOC0"]=self.sousSpectres[nt-1]["MONOC0"]
-        self.sousSpectres[nt].NB0=self.sousSpectres[nt-1].NB0
+      # If any other spectre of the distribution
+      self.sousSpectres[nt].kind=self.sousSpectres[nt-1].kind+1
+      self.sousSpectres[nt]["DI0"]=self.sousSpectres[nt-1]["DI0"]
+      self.sousSpectres[nt]["PDI"]=self.sousSpectres[nt-1]["PDI"]
+      self.sousSpectres[nt]["GA"]=self.sousSpectres[nt-1]["GA"]
+      self.sousSpectres[nt]["H1"]=self.sousSpectres[nt-1]["H1"]
+      self.sousSpectres[nt]["SQ0"]=self.sousSpectres[nt-1]["SQ0"]
+      self.sousSpectres[nt]["PSQ"]=self.sousSpectres[nt-1]["PSQ"]
+      self.sousSpectres[nt]["CH0"]=self.sousSpectres[nt-1]["CH0"]
+      self.sousSpectres[nt]["PCH"]=self.sousSpectres[nt-1]["PCH"]
+      self.sousSpectres[nt]["ETA0"]=self.sousSpectres[nt-1]["ETA0"]
+      self.sousSpectres[nt]["PTHETA"]=self.sousSpectres[nt-1]["PTHETA"]
+      self.sousSpectres[nt]["THETA0"]=self.sousSpectres[nt-1]["THETA0"]
+      self.sousSpectres[nt]["GAMMA0"]=self.sousSpectres[nt-1]["GAMMA0"]
+      self.sousSpectres[nt]["ALPHA0"]=self.sousSpectres[nt-1]["ALPHA0"]
+      self.sousSpectres[nt]["BETA0"]=self.sousSpectres[nt-1]["BETA0"]
+      self.sousSpectres[nt]["MONOC0"]=self.sousSpectres[nt-1]["MONOC0"]
+      self.sousSpectres[nt].NB0=self.sousSpectres[nt-1].NB0
       
   def entriesFromVariables(self):
+    # Fill with values stored in Data. 
+    # Global options
     self.parent.entries.eTitre.delete(0,END)
     self.parent.entries.eTitre.insert(0,self.titre)
     self.parent.entries.eCN.delete(0, END)
@@ -1288,34 +1197,38 @@ class Data():
     self.parent.entries.eIOPT.insert(0, str(self.IOPT))
     self.parent.entries.eHBRUIT.delete(0, END)
     self.parent.entries.eHBRUIT.insert(0, str(self.HBRUIT))
+    # Entries for IZ
     if self.IZZ==1:
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.parent.entries.eIZ[i].delete(0, END)
         self.parent.entries.eIZ[i].insert(0, str(self.IZ[i]))
-        i+=1
+    # Entries for IO
     if self.IOPT==1:
-      i=0
-      while i<20:
+      for i in range(0,20):
         self.parent.entries.eIO[i].delete(0, END)
         self.parent.entries.eIO[i].insert(0, str(self.IO[i]))
-        i+=1
+    # Entries for PLAGEL
     if self.IO[12]==3:
       for i in [0,1]:
         self.parent.entries.ePLAGEL[i].delete(0, END)
         self.parent.entries.ePLAGEL[i].insert(0, str(self.PLAGEL[i]))
+    # Entries for GRASS
     if self.IO[16]!=0:
-      i=0
-      while i<10:
+      for i in range(0,10):
         self.parent.entries.eGRASS[i].delete(0, END)
         self.parent.entries.eGRASS[i].insert(0, str(self.GRASS[i]))
-        i+=1
-    #ajouter remplacement des variables des entrees de spectre:
-        
+    # Entries for parameters of spectres
+    self.parent.entries.spectres=list(self.sousSpectres)
+    self.parent.entries.setSpectresScroll(self.NS,self.NS1,self.NS2)
+    self.parent.entries.delEntrySpectre()
+    self.parent.entries.packScrollbar()
+    self.parent.entries.setEntrySpectre()
+    self.parent.entries.packEntrySpectre()
 #######################################################################
 class Spectre():
   def __init__(self,kind):
-    self.kind = kind #0 = sous-spectre standard, 1= premier sous spectre d'une distrib, 2 = 2eme, etc..
+    # Create a new spectre with default value
+    self.kind = kind #0 = standard spectre, 1= 1rst spectre of a distribution, 2 = 2nd, etc..
     self.parameters=dict()
     self["Titre"]="Sans Titre"
     if self.kind==0:
@@ -1357,37 +1270,40 @@ class Spectre():
     return self.parameters[index]
 #######################################################################
 def main():
-
+  # Create window
   fenetre = Tk()
   fenetre.title("Mosfit2016")
   fenetre.geometry("1280x620+300+300")
+  # Creates 3 frames
   cadreEntree = Frame(fenetre)
   cadreBoutons = Frame(fenetre)
   cadreTexte = Frame(fenetre)
+  #create paned windows for the 3 frames
   p = PanedWindow(fenetre, orient=HORIZONTAL)
   p.add(cadreEntree)
   p.add(cadreBoutons)
   p.add(cadreTexte)
-  fenetre.entries=DataEntries(cadreEntree,fenetre)
+  # Menu
   barre = BarreMenu(fenetre)
+  # Entries for manual input
+  fenetre.entries=DataEntries(cadreEntree,fenetre)
+  # Data storage space
   fenetre.donnees = Data(fenetre,cadreTexte)
-  
+  # Buttons to convert entries to text and vice versa
   p2 = PanedWindow(cadreBoutons, orient=VERTICAL)
   p2.pack(side=LEFT, expand=Y, fill=BOTH, pady=2, padx=2)
   b1 = Button(p2, text="Decypher .coo",command=fenetre.donnees.entriesFromText)
   b2 = Button(p2, text="Translate to .coo",command=fenetre.donnees.textFromEntries)
   b1.pack(fill=Y)
   b2.pack(fill=Y)
-
+  # plot all
   cadreEntree.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
   cadreBoutons.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
   cadreTexte.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
   fenetre.txt.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
   fenetre.entries.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
   p.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
-
-
-
+  # Main loop
   fenetre.mainloop()  
 if __name__ == '__main__':
     main()  
