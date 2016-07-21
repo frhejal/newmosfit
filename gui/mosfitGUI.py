@@ -1,7 +1,26 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
+# Depending on version of Tkinter:
+# Python 2             Python 3
+# Tkinter         ->  tkinter
+# Tix             ->  tkinter.tix
+# ttk             ->  tkinter.ttk
+# tkMessageBox    ->  tkinter.messagebox
+# tkColorChooser  ->  tkinter.colorchooser
+# tkFileDialog    ->  tkinter.filedialog
+# tkCommonDialog  ->  tkinter.commondialog
+# tkSimpleDialog  ->  tkinter.simpledialog
+# tkFont          ->  tkinter.font
+# Tkdnd           ->  tkinter.dnd
+# ScrolledText    ->  tkinter.scrolledtext
+
 from Tkinter import *
-import tkFileDialog 
+import tkFileDialog
+
+#~ # Or :
+
+#~ from tkinter import *
+#~ import tkinter.filedialog as tkFileDialog
 
 ########################################################################
 class BarreMenu(Frame):
@@ -21,7 +40,7 @@ class BarreMenu(Frame):
     fileMenu.add_command(label="Load", command=self.onOpen)
     fileMenu.add_command(label="Save as", command=self.onSave)
     fileMenu.add_separator()
-    fileMenu.add_command(label="Exit", command=self.parent.quit)        
+    fileMenu.add_command(label="Exit", command=self.parent.destroy)        
     menubar.add_cascade(label="File", menu=fileMenu)        
 
   def onOpen(self):
@@ -162,7 +181,7 @@ class DataEntries(PanedWindow):
       self.eIZZ.config(bg="red")
       for i in range(0,10):
         self.eIZ[i].config(bg="light gray")
-    except Exception, e:
+    except Exception as e:
       print(e)
       
   def checkIOPT(self,*args):
@@ -327,7 +346,7 @@ class DataEntries(PanedWindow):
       self.eIO[12].config(bg="red")
       self.ePLAGEL[0].config(bg="light gray")
       self.ePLAGEL[1].config(bg="light gray")
-    except Exception, e:
+    except Exception as e:
       print(e)
       
   def checkIO17(self,*args):
@@ -357,7 +376,7 @@ class DataEntries(PanedWindow):
       self.eIO[16].config(bg="red")
       for i in range(0,10):
         self.eGRASS[i].config(bg="light gray")
-    except Exception, e:
+    except Exception as e:
       print(e)
       
   def checkIOGV(self,*args):
@@ -381,7 +400,8 @@ class DataEntries(PanedWindow):
       self.eIOGV.config(bg="white")
     except ValueError:
       self.eIOGV.config(bg="red")
-    except Exception, e:
+    except Exception as e:
+      print(e)
       pass
     self.saveSpectre(args)
     
@@ -587,8 +607,8 @@ class DataEntries(PanedWindow):
       color="light gray"
       try:
         if int(str(self.strIOGV.get()))==3:color="white"
-      except Exception, e :
-        print e
+      except Exception as e :
+        print(e)
         pass
       for j in range(0,8):
         self.strGV.append(StringVar())
@@ -1124,9 +1144,9 @@ class Data():
       self.sousSpectres[nt]["BETA"]=float(phrase[9])
       self.sousSpectres[nt]["MONOC"]=int(phrase[10])
       phrase=self.getTextLine()
-      for j in range(0,8):
+      for j in range(0,10):
         self.sousSpectres[nt].NB[j]=int(phrase[j])
-      self.sousSpectres[nt]["IOGV"]= int(phrase[j])
+      self.sousSpectres[nt]["IOGV"]= int(phrase[10])
       if self.sousSpectres[nt]["IOGV"]==3:
         phrase=self.getTextLine()
         for j in range(0,8):
