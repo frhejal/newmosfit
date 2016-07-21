@@ -449,13 +449,9 @@ class DataEntries(PanedWindow):
           self.spectres.append(Spectre(k))
           k+=1
         nt+=1
-      print("setscroll", ns,ns1,ns2)
       self.setSpectresScroll( ns, ns1 , ns2 )
-      print("packscroll", ns,ns1,ns2)
       self.packScrollbar()
-      print("setEntry", ns,ns1,ns2)
       self.setEntrySpectre()
-      print("packEntry", ns,ns1,ns2)
       self.packEntrySpectre()
       self.eNS.config(bg="white")
       self.eNS1.config(bg="white")
@@ -527,8 +523,6 @@ class DataEntries(PanedWindow):
   def selectSpectre(self,event):
     lb = event.widget
     self.selectedSpectre=self.lstSp[lb.curselection()[0]]
-    print(self.lstSp)
-    print("in select:",self.selectedSpectre)
     self.delEntrySpectre()
     self.setEntrySpectre()
     self.packEntrySpectre()
@@ -537,10 +531,6 @@ class DataEntries(PanedWindow):
     # creer entrees
     # Creer des StringVar et fonctions de sauvegarde pour enregistrer tout changement dans les entrees 
     # vers le spectre courant self.spectres[self.selectedSpectre]
-    print("selected: ",self.selectedSpectre)
-    print("len: ", len(self.spectres))
-    print(self.spectres)
-    self.spectres[0]
     s=self.spectres[self.selectedSpectre]
 
     if s.kind==0:
@@ -623,7 +613,6 @@ class DataEntries(PanedWindow):
         if int(str(self.strIOGV.get()))==3:color="white"
       except Exception as e :
         print(e)
-        pass
       for j in range(0,8):
         self.strGV.append(StringVar())
         self.strNG.append(StringVar())
