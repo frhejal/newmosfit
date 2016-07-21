@@ -14,13 +14,13 @@
 # Tkdnd           ->  tkinter.dnd
 # ScrolledText    ->  tkinter.scrolledtext
 
-from Tkinter import *
-import tkFileDialog
+#from Tkinter import *
+#import tkFileDialog
 
 #~ # Or :
 
-#~ from tkinter import *
-#~ import tkinter.filedialog as tkFileDialog
+from tkinter import *
+import tkinter.filedialog as tkFileDialog
 
 ########################################################################
 class BarreMenu(Frame):
@@ -449,9 +449,13 @@ class DataEntries(PanedWindow):
           self.spectres.append(Spectre(k))
           k+=1
         nt+=1
+      print("setscroll", ns,ns1,ns2)
       self.setSpectresScroll( ns, ns1 , ns2 )
+      print("packscroll", ns,ns1,ns2)
       self.packScrollbar()
+      print("setEntry", ns,ns1,ns2)
       self.setEntrySpectre()
+      print("packEntry", ns,ns1,ns2)
       self.packEntrySpectre()
       self.eNS.config(bg="white")
       self.eNS1.config(bg="white")
@@ -498,19 +502,23 @@ class DataEntries(PanedWindow):
     try:
       self.scrollbar.grid_forget()
       self.listbox.grid_forget()
-    except:
-      pass
+    except Exception as e:
+      print(e)
     self.scrollbar = Scrollbar(self)
     self.listbox = Listbox(self,height= 5, width=10, selectmode=SINGLE, yscrollcommand=self.scrollbar.set)
     self.listbox.delete(0,END)
     
     self.lstSp=[]
     for nt in range(0,ns):
-      if((nt < ns1-1) or (nt >= ns2)) or (ns1<=0 or ns2<=0) :
+      if (ns1>0 and ns2>0):
+        if (nt < ns1-1) or (nt >= ns2):
+          self.listbox.insert(END,"Spectre "+str(nt+1))
+          self.lstSp.append(nt)
+        else:
+          self.listbox.insert(END,"Distribution")
+          self.lstSp.append(nt)
+      else:
         self.listbox.insert(END,"Spectre "+str(nt+1))
-        self.lstSp.append(nt)
-      elif nt == ns1-1:
-        self.listbox.insert(END,"Distribution")
         self.lstSp.append(nt)
     self.scrollbar.config(command=self.listbox.yview)
     self.listbox.bind('<<ListboxSelect>>',self.selectSpectre)
@@ -519,6 +527,8 @@ class DataEntries(PanedWindow):
   def selectSpectre(self,event):
     lb = event.widget
     self.selectedSpectre=self.lstSp[lb.curselection()[0]]
+    print(self.lstSp)
+    print("in select:",self.selectedSpectre)
     self.delEntrySpectre()
     self.setEntrySpectre()
     self.packEntrySpectre()
@@ -527,8 +537,12 @@ class DataEntries(PanedWindow):
     # creer entrees
     # Creer des StringVar et fonctions de sauvegarde pour enregistrer tout changement dans les entrees 
     # vers le spectre courant self.spectres[self.selectedSpectre]
+    print("selected: ",self.selectedSpectre)
+    print("len: ", len(self.spectres))
+    print(self.spectres)
+    self.spectres[0]
     s=self.spectres[self.selectedSpectre]
-    
+
     if s.kind==0:
         
       self.strDI=StringVar()
@@ -1017,7 +1031,7 @@ class Data():
     for nt in range(self.NS):
       if nt<self.NS1-1 :
         self.sousSpectres.append(Spectre(0))
-      elif nt<self.NS2 and self.NS2>0:
+      elif nt<self.NS2 and self.NS2>0 and self.NS1>0:
         self.sousSpectres.append(Spectre(nt-self.NS1+2))
       else:
         self.sousSpectres.append(Spectre(0))
@@ -1119,10 +1133,8 @@ class Data():
         i+=1
     # Read spectres
     self.setSpectres()
-    nt=0
-    while nt < self.NS:
+    for nt in range(0,self.NS):
       self.lireSpectre(nt)
-      nt+=1
     # Save the rest of data ( noise spectre and/or experimental data)
     self.expdata = self.parent.txt.get("%d.%d" % (self.l, 0),END )
     
@@ -1205,16 +1217,13 @@ class Data():
     self.parent.entries.eCN.insert(0, str(self.CN))
     self.parent.entries.eNMAX.delete(0, END)
     self.parent.entries.eNMAX.insert(0, str(self.NMAX))
-    self.parent.entries.eNS.delete(0, END)
-    self.parent.entries.eNS.insert(0, str(self.NS))
-    self.parent.entries.eNS1.delete(0, END)
-    self.parent.entries.eNS1.insert(0, str(self.NS1))
-    self.parent.entries.eNS2.delete(0, END)
-    self.parent.entries.eNS2.insert(0, str(self.NS2))
-    self.parent.entries.eIZZ.delete(0, END)
-    self.parent.entries.eIZZ.insert(0, str(self.IZZ))
-    self.parent.entries.eIOPT.delete(0, END)
-    self.parent.entries.eIOPT.insert(0, str(self.IOPT))
+
+    self.parent.entries.strNS.set(str(self.NS))
+    self.parent.entries.strNS1.set(str(self.NS1))
+    self.parent.entries.strNS2.set(str(self.NS2))
+    
+    self.parent.entries.izz.set(str(self.IZZ))
+    self.parent.entries.iopt.set(str(self.IOPT))
     self.parent.entries.eHBRUIT.delete(0, END)
     self.parent.entries.eHBRUIT.insert(0, str(self.HBRUIT))
     # Entries for IZ
@@ -1225,8 +1234,7 @@ class Data():
     # Entries for IO
     if self.IOPT==1:
       for i in range(0,20):
-        self.parent.entries.eIO[i].delete(0, END)
-        self.parent.entries.eIO[i].insert(0, str(self.IO[i]))
+        self.parent.entries.strIO[i].set(str(self.IO[i]))
     # Entries for PLAGEL
     if self.IO[12]==3:
       for i in [0,1]:
