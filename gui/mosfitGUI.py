@@ -1286,7 +1286,7 @@ class Spectre():
     self.parameters[index]=value
   def __getitem__(self, index):
     return self.parameters[index]
-#######################################################################
+########################################################################
 def main():
   # Create window
   fenetre = Tk()

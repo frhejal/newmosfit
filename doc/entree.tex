@@ -170,7 +170,7 @@ Enfin, les 32 lignes suivantes contiennent les mesures des 256 canaux du spectre
 \subsubsection{Utilisation du fichier d'entree}
 \paragraph{Sous Windows,} deux possibilités:
 \begin{itemize}
-\item glisser/déposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe ou sur l'icone du raccourcit vers cet executable, 
+\item glisser/déposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe ou sur l'icone du raccourci vers cet executable, 
 \item en invite de commande, se déplacer dans le dossier contenant l'éxecutable et entrer la commande: 
 \end{itemize}
 
@@ -185,16 +185,17 @@ mosfit2016 nomDuFichier.coo
 \end{lstlisting}
 \FloatBarrier
 \subsection{Sorties}
-Trois fichiers de sortie sont crées :  \lstinline{fit.out}, \lstinline{RESULTAT.doc} et \lstinline{Spect.dat}, placé dans le répertoire de l'executable.
+Trois fichiers de sortie sont créés :  \lstinline{fit.out}, \lstinline{RESULTAT.doc} et \lstinline{Spect.dat}, placé dans le répertoire courant.
 \begin{itemize}
 \item Le fichier .out contient les paramètres hyperfins ajustés, l'ensemble des grandeurs demandées en option, ainsi que les valeurs intermédiares des paramètres ajustables obtenus au cours de la recherche en moindres carrés.
      Un graphique en caractère ASCII (précision 1/100) est également affiché en fin de fichier, qui donne un apperçu du spectre expérimental et du spectre calculé.
 \item Le fichier .dat contient les valeurs pour chaque canal du spectre expérimental, du spectre calculé et des eventuels groupes de sous-spectres demandés.
 \item Le fichier .doc contient les paramètres hyperfins ajustés, et, si demandé, leurs moyennes pour chaque groupe de sous-spectres. 
 \end{itemize}
-Si \lstinline{IO(18)}=1, le nom des fichiers est adapté au nom du fichier d'entrée : un fichier d'entrée \lstinline{fichier.coo} donnera les fichiers de sortie \lstinline{fichier.out}, \lstinline{fichier.dat}, \lstinline{fichier.doc}.
-Les fichiers de sortie sont alors placés dans le même répertoire que le fichier d'entrée.
 
-\paragraph{Remarque concernant l'utilisation du glisser-déposer sous Windows :}
-Lorsque Mosfit est utilisé sous Windows en faisant glisser l'icone du fichier .coo sur l'icone de l'exécutable, les fichiers de sortie sont créés dans le repertoire du fichier .coo, quelque soit la valeur de \lstinline{IO(18)}.
-Si l'icone du fichier .coo est utilisé sur l'icone d'un raccourcit vers l'executable, en revanche, le comportement correspond à celui décrit précédemment. 
+Si \lstinline{IO(18)}=1, le nom des fichiers est adapté au nom du fichier d'entrée : un fichier d'entrée \lstinline{nom_fichier.coo} donnera les fichiers de sortie \lstinline{nom_fichier.out}, \lstinline{nom_fichier.dat}, \lstinline{nom_fichier.doc}.
+Attention dans ce cas au nom du fichier d'entree, en particulier si celui-ci se situe dans un autre répertoire que l'executable. 
+
+\paragraph{Remarque sous Windows :}
+En faisant glisser l'icone du fichier sur l'icone de l'executable, le fichier de sortie sera toujours placé dans le même répertoire que le fichier d'entrée. 
+En faisant glisser le fichier d'entrée sur un raccourci, en revanche, le fichier de sortie sera placé dans le répertoire de l'exécutable si \lstinline{IO(18)}=0, et dans le répertoire du fichier d'entrée si \lstinline{IO(18)}=1.
