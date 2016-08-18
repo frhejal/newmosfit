@@ -2,8 +2,8 @@
 \label{part:fichier_entree}
 %-----------------------------------------------------------------------
 \subsubsection{Composition d'un fichier d'entrée}
-Les opérations de lecture se font dans un fichier d'entree au format ASCII possédant une extension .coo (ou toute autre extension de trois lettres).
-Le contenu typique d'un fichier .coo comprend :
+Les opérations de lecture se font dans un fichier d'entree au format ASCII d'extension .coo (ou toute autre extension de trois lettres).
+Le contenu typique d'un fichier .coo comprend, dans cet ordre :
 
 \begin{itemize}
 \item le titre du spectre expérimental. Il est arbitraire et doit tenir sur une ligne.
@@ -27,7 +27,7 @@ Les valeurs des canaux sont réparties sur 32 lignes.
 \caption{\label{fig:format_fichier} 
 Exemple de fichier donnant l'allure général d'un fichier d'entrée.
 Les noms des variables doivent être remplacés par les valeurs numérique.
-Les lignes en italique sont des commentaires qui ne doivent pas appara\^itre dans un vrai fichier d'entrée.}
+Les lignes en italique et commençant par "..." sont des commentaires qui ne doivent pas appara\^itre dans un vrai fichier d'entrée.}
 \begin{lstlisting}[frame=tbl,escapeinside=<>]
 Ligne de titre, donnant des indications diverses.
 CN NMAX NS NS1 NS2 IZZ IOPT HBRUIT
@@ -58,14 +58,14 @@ NB0(1) NB0(2) NB0(3)... NB0(9) NB0(10)
   0 29368 29374 29374 29378 29361 29336 29358 29389
   8 29383 29359 29345 29351 29372 29384 29393 29388
  16 29365 29369 29370 29377 29389 29393 29382 29384
-<{\it ... reste du spectre ...}>
+<{\it ... etc ...}>
 240 29380 29348 29379 29376 29349 29367 29380 29363
 248 29369 29367 29369 29384 29383 29370 29385 29389
-<{\it si IO(4)=1, presence d'un spectre  de bruit :}>
+<{\it ... si IO(4)=1, presence d'un spectre  de bruit :}>
  TITRE du spectre de bruit
   0 29262 29297 29297 29320 29335 29322 29327 29345
   8 29352 29345 29342 29326 29305 29290 29285 29301
-<{\it ... reste du spectre ... }>
+<{\it ... etc ... }>
  248 29330 29336 29339 29358 29387 29354 29373 29363
  \end{lstlisting}
 \end{figure}
@@ -74,7 +74,7 @@ NB0(1) NB0(2) NB0(3)... NB0(9) NB0(10)
 \newpage
 
 \subsubsection{Exemple de fichier d'entrée}
-Prenons l'exemple du fichier suivant :
+Considérons le fichier d'entrée suivant :
 \begin{lstlisting}[frame=tbl]
 0/09/97 NR Fe51Pt27Nb2B20 900C Mot:H1 8mm/s App:1 Temp:300K
 0.0600356 80 8 5 8 0 1 0
@@ -130,7 +130,7 @@ La seconde ligne est :
 0.0600356 80 8 5 8 0 1 0
 \end{lstlisting}
 On a une vitesse par canal \lstinline{CN}$=0.0600356$~\milli\meter.\reciprocal\second.
-\lstinline{NMAX}$=80$, donc l'algorithme des moindres carrés s'arrêtera après la 80ème itération si la convergence n'est pas atteinte avant.
+On a \lstinline{NMAX}$=80$, donc l'algorithme des moindres carrés s'arrêtera après la 80ème itération si la convergence n'est pas atteinte avant.
 On souhaite utiliser \lstinline{NS}$=8$ sous-spectres théoriques pour décrire le spectre expérimental.
 Parmi ces sous-spectres, les spectres \lstinline{NS1}=5 à \lstinline{NS2}=8 sont décrits par une distribution arithmétique.
 \lstinline{IZZ}$=0$, aucun canal n'est ignoré. \lstinline{IOPT}$=1$, on doit donc spécifier les options \lstinline{IO} sur la ligne suivante. La ligne suivante est :
@@ -145,7 +145,7 @@ Comme \lstinline{IO(17)}$=1$, la ligne suivante correspond aux groupes de sous-s
 Le premier groupe comprend uniquement le premier sous-spectre.
  De même, le second groupe et le troisième groupe contiennent le sous-spectre 2 et le sous-spectre 3 respectivement.
 Le dernier groupe contient les sous-spectres 4 à 8. Il n'y a pas de cinquième groupe. 
-Au final, on souhaite donc des informations en sortie sur 4 sous forme de 4 spectres : les sous-spectres \lstinline{NT}$=1$, \lstinline{NT}$=2$  et \lstinline{NT}$=3$,  ainsi qu'un nouveau spectre qui est la moyenne du sous-spectre $\text{NT}=4$  et des sous-spectres de la distribution (\lstinline{NT}$=5$ à \lstinline{NT}$=8$ ).
+Au final, on souhaite donc des informations en sortie sous forme de 4 spectres : les sous-spectres \lstinline{NT}$=1$, \lstinline{NT}$=2$  et \lstinline{NT}$=3$,  ainsi qu'un nouveau spectre qui est la moyenne du sous-spectre $\text{NT}=4$  et des sous-spectres de la distribution (\lstinline{NT}$=5$ à \lstinline{NT}$=8$ ).
 
 Les deux lignes suivantes correspondent à la description des paramètres du premier sous-spectre.
 La première ligne donne leurs valeurs initiales, la second donne leurs types d'ajustement.
@@ -155,7 +155,7 @@ La première ligne donne leurs valeurs initiales, la second donne leurs types d'
 \end{lstlisting}
 On a donc, dans l'ordre: \lstinline{DI}=0.13 (ajustable),  \lstinline{GA}=0.18 (fixée), \lstinline{H1}=81000 (ajustable), \lstinline{SQ}=0.27 (ajustable), \lstinline{CH}=277 (ajustable).
  Tout les autres paramètres (\lstinline{ETA} et les angles) sont fixés et nuls.
-\lstinline{MONOC}=0, l'échantillon est donc une poudre. Enfin,  \lstinline{IOGV}=0, les largeurs de raies sont don cindéendantes entre elle et on n'a pas d'indications supplémentaires à fournir les concernant.
+\lstinline{MONOC}=0, l'échantillon est donc une poudre. Enfin,  \lstinline{IOGV}=0, les largeurs de raies sont donc indépendantes entre elle et on n'a pas d'indications supplémentaires à fournir les concernant.
 Les sous-spectres 2,3 et 4 sont définis de manière similaire par les huit lignes suivantes.
 
 On a ensuite la définition de la distribution qui permet de décrire les sous-spectres 5 à 8 :
@@ -168,14 +168,17 @@ Enfin, les 32 lignes suivantes contiennent les mesures des 256 canaux du spectre
 
 
 \subsubsection{Utilisation du fichier d'entree}
-Sous Windows: glisser/déposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe, 
-ou, en invite de commande, se déplacer dans le dossier contenant l'éxecutable et entrer la commande: 
+\paragraph{Sous Windows,} deux possibilités:
+\begin{itemize}
+\item glisser/déposer l'icone du fichier .coo sur l'icone de l'executable mosfit2016.exe ou sur l'icone du raccourcit vers cet executable, 
+\item en invite de commande, se déplacer dans le dossier contenant l'éxecutable et entrer la commande: 
+\end{itemize}
 
 \begin{lstlisting}[frame=single]
 mosfit2016 nomDuFichier.coo
 \end{lstlisting}
 
-Sous MacOS/Linux : se placer dans le dossier de Mosfit et entrer la commande: 
+\paragraph{Sous MacOS/Linux, } se placer dans le dossier de Mosfit et entrer la commande : 
 
 \begin{lstlisting}[frame=single]
 mosfit2016 nomDuFichier.coo
@@ -184,10 +187,14 @@ mosfit2016 nomDuFichier.coo
 \subsection{Sorties}
 Trois fichiers de sortie sont crées :  \lstinline{fit.out}, \lstinline{RESULTAT.doc} et \lstinline{Spect.dat}, placé dans le répertoire de l'executable.
 \begin{itemize}
-\item Le fichier .out contient les paramètres hyerpfins ajustés, l'ensemble des grandeurs demandées en option, ainsi que les valeurs intermédiares des paramètres ajustables obtenus au cours de la recherche en moindres carrés.
+\item Le fichier .out contient les paramètres hyperfins ajustés, l'ensemble des grandeurs demandées en option, ainsi que les valeurs intermédiares des paramètres ajustables obtenus au cours de la recherche en moindres carrés.
      Un graphique en caractère ASCII (précision 1/100) est également affiché en fin de fichier, qui donne un apperçu du spectre expérimental et du spectre calculé.
 \item Le fichier .dat contient les valeurs pour chaque canal du spectre expérimental, du spectre calculé et des eventuels groupes de sous-spectres demandés.
 \item Le fichier .doc contient les paramètres hyperfins ajustés, et, si demandé, leurs moyennes pour chaque groupe de sous-spectres. 
 \end{itemize}
 Si \lstinline{IO(18)}=1, le nom des fichiers est adapté au nom du fichier d'entrée : un fichier d'entrée \lstinline{fichier.coo} donnera les fichiers de sortie \lstinline{fichier.out}, \lstinline{fichier.dat}, \lstinline{fichier.doc}.
 Les fichiers de sortie sont alors placés dans le même répertoire que le fichier d'entrée.
+
+\paragraph{Remarque concernant l'utilisation du glisser-déposer sous Windows :}
+Lorsque Mosfit est utilisé sous Windows en faisant glisser l'icone du fichier .coo sur l'icone de l'exécutable, les fichiers de sortie sont créés dans le repertoire du fichier .coo, quelque soit la valeur de \lstinline{IO(18)}.
+Si l'icone du fichier .coo est utilisé sur l'icone d'un raccourcit vers l'executable, en revanche, le comportement correspond à celui décrit précédemment. 

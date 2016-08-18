@@ -26,7 +26,7 @@
 !    JAN 94  NR  SORTIE DES SPECTRES SOUS MATLAB 4.0 IBM RISC/6000
 !    FEV 94  NR  TRACE DES SOUS-SPECTRES
 !    MAR 95  YL  VALEUR MAX DE L'EXPONENTIELLE DANS CONVOL
-!    1995-2016 ??  ???
+!   1995-2016 ??  ???  Nombreuses modifications non documentées. 
 !    MAI 2016 FL  v2.0 REECRITURE EN FORTRAN 95
 !    JUN 2016 FL  v2.1 Ajout de cycloides
 !***********************************************************************
@@ -40,19 +40,19 @@ program mosfit
   use precision
   use options         ! Variables pour choix des options
   use variablesFixes  ! Variables générales
-  use variablesAjustables ! Variables des parametres hyperfins  use lecture  
+  use variablesAjustables ! Variables des parametres hyperfins
   use lecture         ! Routines de lecture du fichier .coo
   use ecriture        ! Routines d'ecriture du fichier résultat
   use algebre         ! Routines d'algebre lineaire (inverses de matrice, resolution de systemes)
   use spectres        ! Variables de stockage des spectre (experimental, theorique ou de bruit), gestion du bruit
   use ajustement      ! Moindres carrés
   implicit none
-  real(dp)::AA(1600) 
-  real(dp)::dump ! Variable-poubelle
-  real(dp)::cmin=0,cmax=0
   integer::nt
   integer::nts ! Nombre de plages de sous-spectres à sommer
   integer::nsmin,nsmax
+  real(dp)::AA(1600) 
+  real(dp)::dump ! Variable-poubelle
+  real(dp)::cmin=0,cmax=0
   real(dp)::daExp,daFit,sExp,sFit,sBruit
   real(dp)::diffSpectres(N)
   real(dp)::champ(44)
@@ -60,23 +60,23 @@ program mosfit
   real(dp)::sl(42)
   real(dp)::sInt(40) 
   real(dp)::btmoy(7,2)
-  ! Isnitialisations------------------------------------------------------
+  ! Initialisations-----------------------------------------------------
   call raz
 !=======================================================================
 ! Entrée des options et des données, copie dans le fichier de sortie
 !=======================================================================
   call lecture_ouvrir_fichier_entree
-  ! Lecture des options--------------------------------------------------
+  ! Lecture des options-------------------------------------------------
   call lecture_titre
   call lecture_options(CN,NMAX,NS,NS1,NS2,HBRUIT,GRASS,PLAGEL)
   call ecriture_nommer_fichier_de_sortie(fichierCoo)
   call ecriture_titre(0)
   call ecriture_options(CN,NMAX,NS,NS1,NS2,PLAGEL)
-  ! Lecture des paramètres ajustables des sous-spectres------------------
+  ! Lecture des paramètres ajustables des sous-spectres-----------------
   ! (ou construction d'une distribution en progression arithmétique)
   do NT=1,NS
-    MONOC=0
-    IOGV=0
+    MONOC=0  ! Par defaut, poudre
+    IOGV=0   ! Par defaut, largeur de raies unique
     if((NT>=NS1) .AND. (NT<=NS2))then
       ! Progression arithmétique demandee du sous-spectre NS1 au sous-spectre NS2
       if(NT==NS1) call lecture_param0(DI0,PDI,GA,H1,SQ0,PSQ,CH0,PCH,ETA,&
@@ -91,7 +91,7 @@ program mosfit
     ! Mise en tableau des paramètres hyperfins et des largeurs variables
     call variablesAjustables_ranger(NT) 
   enddo
-  ! Lecture de bruit-----------------------------------------------------
+  ! Lecture de bruit----------------------------------------------------
   if(IO(4)/=0)then
     if(IO(4)/=1) call variablesAjustables_ranger_bruit
     call ecriture_titre(1)

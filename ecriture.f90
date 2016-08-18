@@ -9,7 +9,7 @@ module ecriture
   use precision
   use options
   implicit none
-  integer,save::NOUT=6  ! Label du fichier de sortie (sortie par défaut)
+  integer,save::NOUT=41  ! Label du fichier de sortie (sortie par défaut)
   character(len=255),save,private::fichierOut !< Fichier de sortie complet
   character(len=255),save,private::fichierDat !< Fichier de données des spectres (pour tracé éventuel)
   character(len=255),save,private::fichierDoc !< Fichier de resumé des résultats
@@ -34,6 +34,7 @@ module ecriture
       fichierDoc="RESULTAT.doc"
       fichierDat="Spect.dat"
     endif
+    write(6,*) fichierOut
     open(NOUT,file=trim(fichierOut), status='unknown', form='formatted')
     write(NOUT,'(A)') ' VERSION 2.1, Juin 2016 '
   end subroutine ecriture_nommer_fichier_de_sortie
@@ -69,7 +70,7 @@ module ecriture
     if(IO(13)==1)write(NOUT,*) 'LISSAGE DE TOUS LES SPECTRES'
     if(IO(13)==2)write(NOUT,*) 'LISSAGE DE LA DISTRIBUTION'
     if(IO(13)==3)write(NOUT,*) 'LISSAGE DU SPECTRE ', plage(1) ,'AU SPECTRE ', plage(2)
-    if(ns>40) write(6,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
+    if(ns>40) write(NOUT,*) '  NOMBRE DE SOUS SPECTRES(NS) SUPERIEUR A 40 '
   end subroutine ecriture_options
   !=====================================================================
   !>@brief Ecriture des valeurs des paramètres hyperfins dans le fichier de sortie
@@ -294,7 +295,7 @@ module ecriture
     real(dp)::echelle,ordExp,ordFit
     cMin=min(minval(spectre_exp),minval(spectre_fit))
     cMax=max(maxval(spectre_exp),maxval(spectre_fit))
-    write(6,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)') cmax,cmin
+    write(NOUT,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)') cmax,cmin
     echelle=119.0
     if(IO(2)==1)echelle=107.0
     do i=n,1,-1

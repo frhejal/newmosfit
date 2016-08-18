@@ -21,6 +21,7 @@ module lecture
     if(taille/=0)then
       open(NIN,file=fichierCoo,status="unknown",form="formatted", access="sequential")
     endif
+    write(6,*) fichierCoo
   end subroutine lecture_ouvrir_fichier_entree
 !=======================================================================
   !>@brief Lecture du titre du fichier d'entrée. 256 caractères maximum,

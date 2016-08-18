@@ -14,13 +14,14 @@
 # Tkdnd           ->  tkinter.dnd
 # ScrolledText    ->  tkinter.scrolledtext
 
-#from Tkinter import *
-#import tkFileDialog
+#Python 2:
+from Tkinter import *
+import tkFileDialog
 
-#~ # Or :
+# Or Python 3 :
 
-from tkinter import *
-import tkinter.filedialog as tkFileDialog
+#~ from tkinter import *
+#~ import tkinter.filedialog as tkFileDialog
 
 ########################################################################
 class BarreMenu(Frame):
