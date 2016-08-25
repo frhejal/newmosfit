@@ -3,7 +3,7 @@ program test_cegren
   use algebre
   use old_cegren
   implicit none
-  complex(dp)::A(10),Aold(10),V(16),Vold(16)
+  complex(DP)::A(10),Aold(10),V(16),Vold(16)
   integer::k,n,mv
   n=4
   mv=1
@@ -34,7 +34,7 @@ program test_cegren
   call afficher_triangle(Aold,n)
   contains
   subroutine afficher_triangle(A,n)
-    complex(dp),intent(in)::A(10)
+    complex(DP),intent(in)::A(10)
     integer,intent(in)::n
     integer::i,k
     k=1
@@ -51,7 +51,7 @@ program test_cegren
     enddo
   end subroutine afficher_triangle
   subroutine afficherVecMat(A,n)
-    complex(dp),intent(in)::A(16)
+    complex(DP),intent(in)::A(16)
     integer,intent(in)::n
     integer::i,imin,imax
     write(6,*) "partie reelle"

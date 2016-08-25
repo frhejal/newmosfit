@@ -20,7 +20,7 @@ module connex
   IMPLICIT NONE  !  DECLAREZ VOS VARIABLES !
   contains
   subroutine connex_connexions(bt,io)
-    real(dp),intent(inout)::bt(10,40) !< Tableau des paramètres ajustables pour chaque sous-spectre
+    real(DP),intent(inout)::bt(10,40) !< Tableau des paramètres ajustables pour chaque sous-spectre
     integer,intent(in)::io(20)!< Liste d'options
     !=====================================================================
     !   DEBUT DE ZONE A MODIFIER  
@@ -31,22 +31,22 @@ module connex
         print *, 'Un appel inutile à CONNEX a été fait'
       case(1)
     !  J.P  OXYDATION DU VERT                                           
-        bt(3,2)=0.63_dp*bt(2,1)*bt(3,1)/bt(2,2)
+        bt(3,2)=0.63_DP*bt(2,1)*bt(3,1)/bt(2,2)
       case(2)
     !  JACQUES
-        bt(3,2)=bt(2,1)*bt(3,1)/2.0_dp/bt(2,2)
+        bt(3,2)=bt(2,1)*bt(3,1)/2.0_DP/bt(2,2)
       case(3)
     !  FERRITES BEATRICE                                                
         do i=2,20
-          bt(1,i)=bt(1,1)+0.11_dp
+          bt(1,i)=bt(1,1)+0.11_DP
         enddo 
       case(4)
     !  JEAN-MARC
-        bt(3,3)=bt(2,1)*bt(3,1)/3.0_dp/bt(2,3)
+        bt(3,3)=bt(2,1)*bt(3,1)/3.0_DP/bt(2,3)
       case(5)
     !  GAETAN
-        bt(3,3)=bt(2,1)*bt(3,1)/3.0_dp/bt(2,3)
-        bt(3,4)=bt(2,6)*bt(3,6)/3.0_dp/bt(2,4)
+        bt(3,3)=bt(2,1)*bt(3,1)/3.0_DP/bt(2,3)
+        bt(3,4)=bt(2,6)*bt(3,6)/3.0_DP/bt(2,4)
       case default
         stop 'OPTION IO(5) : VALEUR INCONNUE DANS CONNEX'
     end select

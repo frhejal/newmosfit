@@ -36,8 +36,8 @@ module lecture
     integer,intent(out)::ns !< Nombre de sous-spectres
     integer,intent(out)::ns1 !< Numéro du premier sous spectre de la distribution
     integer,intent(out)::ns2 !< Numéro du dernier sous-spectre de la distribution
-    real(dp),intent(out)::cn !< Largeur d'un canal (mm/s)
-    real(dp),intent(out)::hbruit !< Hauteur du spectre de bruit
+    real(DP),intent(out)::cn !< Largeur d'un canal (mm/s)
+    real(DP),intent(out)::hbruit !< Hauteur du spectre de bruit
     integer,intent(out)::grass(10) !< Plages de sous-spectres à sommer
     integer,intent(out)::plage(2) !< Plages de sous-spectres à lisser
     integer::i
@@ -53,9 +53,9 @@ module lecture
     subroutine lecture_param(di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc,nb,iogv,gv,ng)
       integer,intent(out)::monoc!< Monocristal ou pas monocristal
       integer,intent(out)::iogv !< Type d'ajustement des raies
-      real(dp),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha !< Paramètres hyperfins
+      real(DP),intent(out)::di,ga,h1,sq,ch,eta,teta,gama,beta,alpha !< Paramètres hyperfins
       integer,intent(out)::nb(10) !< Type d'ajustement des paramètres hyperfins
-      real(dp),intent(out)::gv(8) !< Largeur des raies (si IOGV==3)
+      real(DP),intent(out)::gv(8) !< Largeur des raies (si IOGV==3)
       integer,intent(out)::ng(8)  !< Ajustement des raies (si IOGV==3)
       integer::i
       read(NIN,*) di,ga,h1,sq,ch,eta,teta,gama,beta,alpha,monoc
@@ -69,7 +69,7 @@ module lecture
     !> @brief Lecture des paramètres hyperfins à partir desquels construire une progression arithmétique
     subroutine lecture_param0( di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha,monoc,nb)
       integer,intent(out):: monoc
-      real(dp),intent(out)::di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha
+      real(DP),intent(out)::di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha
       integer,intent(out)::nb(10)
       integer::i
       read(NIN,*)  di,pdi,ga,h1,sq,psq,ch,pch,eta,teta,pteta,gama,beta,alpha,monoc
@@ -79,7 +79,7 @@ module lecture
     !> @brief Lecture des valeurs du spectre
     subroutine lecture_spectre(spectre,N)
       integer,intent(in)::N
-      real(dp),intent(out)::spectre(N)
+      real(DP),intent(out)::spectre(N)
       integer:: temp(N)
       integer::i,j,dump
       do i=1,n,8

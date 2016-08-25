@@ -16,15 +16,15 @@ module algebre
 !!
 !!Traduction en Fortran95 de la sous-routine F77 "MINV"
   subroutine algebre_inverser_matrice(A,N,D)
-    real(dp),intent(inout):: A(N*N) !<Matrice a inverser,détruite et remplacée par son inverse
+    real(DP),intent(inout):: A(N*N) !<Matrice a inverser,détruite et remplacée par son inverse
     integer,intent(in)    :: N !< Ordre de la matrce A
-    real(dp),intent(out)  :: D !< Déterminant résultant de l'inversion
+    real(DP),intent(out)  :: D !< Déterminant résultant de l'inversion
     integer               :: I,IJ,IZ,IK,J,JI,JK,JP,JQ,JR,K,KI,KJ,KK,NK
     integer               :: L(N),M(N)
-    real(dp)              :: BIGA, HOLD
+    real(DP)              :: BIGA, HOLD
 !=======================================================================
 ! Recherche de l'élément le plus grand
-    D=1.0_dp
+    D=1.0_DP
     NK=-N
     do K=1,N       ! Recherche du Kième pivot
       NK=NK+N
@@ -142,11 +142,11 @@ module algebre
     integer,intent(in)::NA  !< Ordre du système
     integer,intent(in)::M !< Nombre de seconds membres
     integer,intent(out)::IER !0 si matrice non singulière, 1 si singulière
-    real(dp),intent(inout),dimension(ID,*)::A!< Matrice et second membres (remplacés par les solutions)
+    real(DP),intent(inout),dimension(ID,*)::A!< Matrice et second membres (remplacés par les solutions)
     integer,intent(inout),dimension(100)::K !< K permet de garder la trace des déplacements de ligne effectués
     !variables locales :
     integer::I,I1,I2,I3,IN,it,J,J2,J3,JMAX,KC,MP,N,NAB,NDEB,NM
-    real(dp)::AMAX,AUX,ERA,P,S,T
+    real(DP)::AMAX,AUX,ERA,P,S,T
     IER=0
     N=NA
     do I=1,N
@@ -269,23 +269,23 @@ module algebre
 !        | .  .  . 10 |   | 7  8  9 10 |
 ! 
 ! les GOTO font référence à l'ancienne version F66 de mosfit, 
-! au cas où des courageux voudraient décrypter l'algorithme.
+!  au cas où des courageux voudraient décrypter l'algorithme.
   subroutine algebre_eigenvalues(a,r,n,mv)
     integer,intent(in)::n,mv
-    complex(dp),intent(inout)::a(10)
-    complex(dp),intent(out)::r(16)
+    complex(DP),intent(inout)::a(10)
+    complex(DP),intent(out)::r(16)
     integer::i,ii,il,ilq,ilr,im,imq,imr,ind,ip,iq
     integer::j,jq,k,l,ll,lm,lq,m,mm,mq,mvk,nn,nnl
-    real(dp)::anorm,anrmx,sinus,thr,uw,x,y,yp,yu,yz,z,zu
-    complex(dp)::co,cosinus,cp,tmp
+    real(DP)::anorm,anrmx,sinus,thr,uw,x,y,yp,yu,yz,z,zu
+    complex(DP)::co,cosinus,cp,tmp
     ip=0
     mvk=0
     if(mv/=1)then 
       ! Diagonale de R=1, le reste=0
-      r=(0.0_dp,0.0_dp)
+      r=(0.0_DP,0.0_DP)
       do i=1,n
         ii= (i-1)*n + i
-        r(ii)=(1.0_dp , 0.0_dp)
+        r(ii)=(1.0_DP , 0.0_DP)
       enddo
     endif
     ! Normalisation du plus grand terme de la diagonale
@@ -301,7 +301,7 @@ module algebre
         zu=max(abs(a(k)),zu)
       enddo
     enddo
-    if(zu/=0.0_dp)then
+    if(zu/=0.0_DP)then
       y=1.D30
       nn=((n-1)*n)/2 ! Nbre élement non diagonaux
       nnl=nn+n       ! Nbre élements dans a
@@ -330,7 +330,7 @@ module algebre
       do k=1,nnl
         a(k)=a(k)/z
       enddo
-      anorm=0.0_dp
+      anorm=0.0_DP
       do i=1,n
         do j=i+1,n
           k=i+(j*j-j)/2 
@@ -361,7 +361,7 @@ module algebre
                 ind=1
                 ll=l+lq
                 mm=m+mq
-                x=0.5_dp*real(A(ll)-a(mm),dp)
+                x=0.5_DP*real(A(ll)-a(mm),dp)
                 y=sqrt(x*x + abs(a(lm))*abs(a(lm)))
                 if(x<0)then     !goto 70
                   co=a(lm)/(x-y)
@@ -370,10 +370,10 @@ module algebre
                 else            !goto 75
                   cp=a(lm)/abs(a(lm))
                 endif           !goto 81
-                yp=1.0_dp + abs(co)*abs(co)
-                sinus=1.0_dp/sqrt(yp)
+                yp=1.0_DP + abs(co)*abs(co)
+                sinus=1.0_DP/sqrt(yp)
                 cosinus=co*sinus
-                if(abs(cosinus)==0.0_dp)then
+                if(abs(cosinus)==0.0_DP)then
                   ip=ip+1
                 else !goto 83
                   ip=0
@@ -410,11 +410,11 @@ module algebre
                       r(ilr)=tmp
                     endif
                   enddo !goto 125
-                  y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_dp) + 2.0_dp*real(conjg(co)*a(lm)))/yp
-                  x=(real(a(mm),dp) +  real(a(ll),dp)*(yp-1.0_dp) - 2.0_dp*real(conjg(co)*a(lm)))/yp
+                  y=(real(a(ll),dp) +  real(a(mm),dp)*(yp-1.0_DP) + 2.0_DP*real(conjg(co)*a(lm)))/yp
+                  x=(real(a(mm),dp) +  real(a(ll),dp)*(yp-1.0_DP) - 2.0_DP*real(conjg(co)*a(lm)))/yp
                   a(lm)=(a(lm)-co*co*conjg(a(lm)) +co*(a(mm)-a(ll)))/yp
-                  a(ll)=cmplx(y,0.0_dp,dp)
-                  a(mm)=cmplx(x,0.0_dp,dp)
+                  a(ll)=cmplx(y,0.0_DP,dp)
+                  a(mm)=cmplx(x,0.0_DP,dp)
                 endif
               endif
               !label 130
@@ -433,7 +433,7 @@ module algebre
           endif
         enddo inner
         ! label 160
-        if(sinus==1.0_dp) exit outer ! Ça peut vraiment arriver.
+        if(sinus==1.0_DP) exit outer ! Ça peut vraiment arriver.
       enddo outer
     endif
     ! label 165
@@ -471,8 +471,8 @@ module algebre
   !=====================================================================
   !>@brief Recopie les valeurs d'une matrice dans un vecteur, colonne par colonne.
   subroutine algebre_matrice_vers_vecteur(mat,vec,m,n)
-    real(dp),intent(in)::mat(:,:)
-    real(dp),intent(out)::vec(:)
+    real(DP),intent(in)::mat(:,:)
+    real(DP),intent(out)::vec(:)
     integer,intent(in)::m !< nombre de lignes de la matrice
     integer,intent(in)::n !< nombre de colonnes de la matrice
     integer::i,j,ij
@@ -489,8 +489,8 @@ module algebre
   !=====================================================================
   !>@brief  Recopie les valeurs d'un vecteur dans une matrice, colonne par colonne.
   subroutine algebre_vecteur_vers_matrice(vec,mat,m,n)
-    real(dp),intent(in)::vec(:)
-    real(dp),intent(out)::mat(:,:)
+    real(DP),intent(in)::vec(:)
+    real(DP),intent(out)::mat(:,:)
     integer,intent(in)::m !< Nombre de lignes de la matrice
     integer,intent(in)::n !< Nombre de colonnes de la matrice
     integer::i,j,ij

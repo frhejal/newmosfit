@@ -57,7 +57,7 @@ module ecriture
   !>@brief Ecriture des options précédemment lues
   !!@details L'écriture se fait dans le fichier de sortie (unité NOUT précédemment ouverte)
   subroutine ecriture_options(cn,nmax,ns,ns1,ns2,plage)
-    real(dp),intent(in)::cn
+    real(DP),intent(in)::cn
     integer,intent(in)::nmax,ns,ns1,ns2
     integer,intent(in)::plage(2)
     integer::i
@@ -77,10 +77,10 @@ module ecriture
   !!@details Le fichier n'est pas effacé, les données sont ajoutées à la fin.
   subroutine ecriture_param( di,ga,h1,sq,ch,eta,teta,gama,beta,alfa,monoc,nb,iogv,gv,ng)
     integer,intent(in)::monoc
-    real(dp),intent(in)::di,ga,h1,sq,ch,eta,teta,gama,beta,alfa
+    real(DP),intent(in)::di,ga,h1,sq,ch,eta,teta,gama,beta,alfa
     integer,intent(in)::nb(10)
     integer,intent(in)::iogv
-    real(dp),intent(in)::gv(8)
+    real(DP),intent(in)::gv(8)
     integer,intent(in)::ng(8)
     integer::i
     integer,save::cpt=0
@@ -107,7 +107,7 @@ module ecriture
   subroutine ecriture_info_iteration(npas,nmax,b)
     integer,intent(in)::npas !< Numéro de l'itération
     integer,intent(in)::nmax !< Nombre maximum d'itérations
-    real(dp),intent(in)::b(:) !< Paramètres ajustés
+    real(DP),intent(in)::b(:) !< Paramètres ajustés
     integer::i,k
     k=size(b)
     write(NOUT,'(1X,A,I6)') '  NUMERO DU PASSAGE ', npas
@@ -124,10 +124,10 @@ module ecriture
   !>@brief Ecriture des ecarts type de chaque sous-spectre
   subroutine ecriture_ecart_type(ns,bt,etbt,gvt,etgvt,iogvt)
     integer,intent(in)::ns
-    real(dp),intent(in)::bt(10,40)
-    real(dp),intent(in)::etbt(10,40)
-    real(dp),intent(in)::gvt(8,40)
-    real(dp),intent(in)::etgvt(8,40)
+    real(DP),intent(in)::bt(10,40)
+    real(DP),intent(in)::etbt(10,40)
+    real(DP),intent(in)::gvt(8,40)
+    real(DP),intent(in)::etgvt(8,40)
     integer,intent(in)::iogvt(40)
     integer::i,nt
     write(NOUT,'(//,50X,A,//)') 'CARACTERISTIQUES DES SPECTRES'
@@ -163,10 +163,10 @@ module ecriture
   !>@brief Ecriture des caractéristiques des raies (largeur, hauteur, energie)
   subroutine ecriture_raies_covariance(ns,x0,g,h)
     integer,intent(in)::ns
-    real(dp),intent(in)::x0(8,40)
-    real(dp),intent(in)::g(8,40)
-    real(dp),intent(in)::h(8,40)
-!~     real(dp),intent(in)::vq(40,40)
+    real(DP),intent(in)::x0(8,40)
+    real(DP),intent(in)::g(8,40)
+    real(DP),intent(in)::h(8,40)
+!~     real(DP),intent(in)::vq(40,40)
     integer::nt,l
     write(NOUT,'(/,42X,"X0",9X,"G",10X,"H",5X,"(CANAUX)",/)')
     do nt=1,ns
@@ -184,10 +184,10 @@ module ecriture
   subroutine ecriture_lissage(nsmin,nsmax,s,sl,champ)
     integer,intent(in)::nsmin
     integer,intent(in)::nsmax
-    real(dp),intent(in)::s(44)
-    real(dp),intent(in)::sl(42)
-    real(dp),intent(in)::champ(44)
-    real(dp)::ordS,ordT
+    real(DP),intent(in)::s(44)
+    real(DP),intent(in)::sl(42)
+    real(DP),intent(in)::champ(44)
+    real(DP)::ordS,ordT
     integer::i,ic,colMax,colonneS,colonneT
     character::chaine(256)
     ! Lissage de la distribution
@@ -201,8 +201,8 @@ module ecriture
       write(NOUT,'(52X,"0",19X,"5",18X,"10%",17X,"15%",17X,"20%",17X,"25%",17X,"30%")')
       ! Tracé de la distribution en ASCII-art...
       do i=nsmin,nsmax+2
-        ordS=20.0_dp+4.0_dp*sl(i)
-        ordT=20.0_dp+4.0_dp*s(i+1)
+        ordS=20.0_DP+4.0_DP*sl(i)
+        ordT=20.0_DP+4.0_DP*s(i+1)
         colonneS=1+int(ordS)
         colonneT=1+int(ordT)
         if(colonneS>256) colonneS=21
@@ -231,15 +231,15 @@ module ecriture
     integer,intent(in)::nsmin!< Premier spectre du lissage
     integer,intent(in)::nsmax!< Dernier spectre du lissage
     integer,intent(in)::k
-    real(dp),intent(in)::hbruit
-    real(dp),intent(in)::daExp
-    real(dp),intent(in)::daFit
-    real(dp),intent(in)::sExp
-    real(dp),intent(in)::sFit
-    real(dp),intent(in)::sBruit
-    real(dp),intent(in)::b(40)
-    real(dp),intent(in)::s(44)
-    real(dp),intent(in)::sInt(40)
+    real(DP),intent(in)::hbruit
+    real(DP),intent(in)::daExp
+    real(DP),intent(in)::daFit
+    real(DP),intent(in)::sExp
+    real(DP),intent(in)::sFit
+    real(DP),intent(in)::sBruit
+    real(DP),intent(in)::b(40)
+    real(DP),intent(in)::s(44)
+    real(DP),intent(in)::sInt(40)
     integer::nt
     if(IO(4)==1) write(NOUT,'(//,"  BRUIT DE FOND NON  HBRUIT= ",F10.3,///)') hbruit
     if(IO(4)==2) write(NOUT,'(//,"  BRUIT DE FOND  HBRUIT= ",F10.3,///)') b(k-1)
@@ -258,7 +258,7 @@ module ecriture
   subroutine ecriture_moyennes(nsmin,nsmax,btmoy,dash)
     integer,intent(in)::nsmin!< premier des sous-spectres lissés
     integer,intent(in)::nsmax!< dernier des sous-spectres lissés
-    real(dp),intent(in)::btmoy(7,2)
+    real(DP),intent(in)::btmoy(7,2)
     character,intent(in)::dash(1)
     integer::i
     if(IO(13)==1)then
@@ -279,7 +279,7 @@ module ecriture
   !=====================================================================
   !>@brief Ecriture de l'écart statistique "Khi"
   subroutine ecriture_ecart_stat(khi2)
-    real(dp),intent(in)::khi2
+    real(DP),intent(in)::khi2
     write(NOUT,'("1",//,50X,"KHI2 = ",E15.8)') khi2
   end subroutine ecriture_ecart_stat
   !=====================================================================
@@ -287,12 +287,12 @@ module ecriture
   !... Parce que les interfaces graphiques c'est pour les faibles.
   subroutine ecriture_tracer_spectres(n,spectre_exp,spectre_fit,cMin,cMax)
     integer,intent(in)::n
-    real(dp),intent(in)::spectre_exp(n) !< Spectre expérimental
-    real(dp),intent(in)::spectre_fit(n)	!< Spectre calculé
-    real(dp),intent(out)::cmin,cmax
+    real(DP),intent(in)::spectre_exp(n) !< Spectre expérimental
+    real(DP),intent(in)::spectre_fit(n)	!< Spectre calculé
+    real(DP),intent(out)::cmin,cmax
     character::chaine(120)
     integer::i,ic,colExp,colFit,colMax
-    real(dp)::echelle,ordExp,ordFit
+    real(DP)::echelle,ordExp,ordFit
     cMin=min(minval(spectre_exp),minval(spectre_fit))
     cMax=max(maxval(spectre_exp),maxval(spectre_fit))
     write(NOUT,'(1X,/," MAX = ",F10.0,"     MIN = ",F10.0)') cmax,cmin
@@ -315,7 +315,7 @@ module ecriture
   !=====================================================================
   !>@brief Ecriture des valeurs d'un spectre sous forme d'entiers, par groupes de 8 canaux.
   subroutine ecriture_spectre_entier(spectre)
-    real(dp),intent(in)::spectre(:)
+    real(DP),intent(in)::spectre(:)
     integer::i,j,n
     n=size(spectre,1)
     do i=1,n,8
@@ -328,11 +328,11 @@ module ecriture
   subroutine ecriture_pour_gnuplot(n,nts,cn,spectreExp,spectreFit,totalSousSpectres)
     integer,intent(in)::n
     integer,intent(in)::nts !< Nombre de plages de sous-spectres
-    real(dp),intent(in)::cn !< Vitesse par canaux
-    real(dp),intent(in)::spectreExp(n) !< Spectre expérimental
-    real(dp),intent(in)::spectreFit(n) !< Spectre théorique (calculé)
-    real(dp),intent(in)::totalSousSpectres(n,5)!< Sous-spectres
-    real(dp)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau.
+    real(DP),intent(in)::cn !< Vitesse par canaux
+    real(DP),intent(in)::spectreExp(n) !< Spectre expérimental
+    real(DP),intent(in)::spectreFit(n) !< Spectre théorique (calculé)
+    real(DP),intent(in)::totalSousSpectres(n,5)!< Sous-spectres
+    real(DP)::tout(n,8) ! les 4 variables ci-dessus dans un seul tableau.
     integer::i,j,NoutSave
     NoutSave=NOUT
     NOUT=42
@@ -364,10 +364,10 @@ module ecriture
   subroutine ecriture_resultats_resume(nsmin,nsmax,s,sl,bt,btmoy)
     integer,intent(in)::nsmin !< Nombre de sous-spectres
     integer,intent(in)::nsmax !< Nombre de sous-spectres sommés
-    real(dp),intent(in)::s(44)
-    real(dp),intent(in)::sl(42)
-    real(dp),intent(in)::bt(10,40)
-    real(dp),intent(in)::btmoy(7,2)
+    real(DP),intent(in)::s(44)
+    real(DP),intent(in)::sl(42)
+    real(DP),intent(in)::bt(10,40)
+    real(DP),intent(in)::btmoy(7,2)
     integer::i,nt,NoutSave
     NoutSave=NOUT
     NOUT=42

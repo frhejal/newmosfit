@@ -8,7 +8,7 @@
 module variablesFixes
   use precision
   ! Variables lues en option
-  real(dp),save::CN=0.078125_dp  !< Largeur du canal (mm/s)
+  real(DP),save::CN=0.078125_DP  !< Largeur du canal (mm/s)
   integer,save::NS=1 !< Nombre de sous-spectres théoriques utilisé pour l'ajustement d'un spectre expérimental.
   integer,save::NMAX=0  !< Nombre maximum d'itérations dans l'ajustement en moindres carrés
   integer,save::NS1=0 !< Premier spectre de la distribution

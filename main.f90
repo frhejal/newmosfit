@@ -50,16 +50,16 @@ program mosfit
   integer::nt
   integer::nts ! Nombre de plages de sous-spectres à sommer
   integer::nsmin,nsmax
-  real(dp)::AA(1600) 
-  real(dp)::dump ! Variable-poubelle
-  real(dp)::cmin=0,cmax=0
-  real(dp)::daExp,daFit,sExp,sFit,sBruit
-  real(dp)::diffSpectres(N)
-  real(dp)::champ(44)
-  real(dp)::s(44)
-  real(dp)::sl(42)
-  real(dp)::sInt(40) 
-  real(dp)::btmoy(7,2)
+  real(DP)::AA(1600) 
+  real(DP)::dump ! Variable-poubelle
+  real(DP)::cmin=0,cmax=0
+  real(DP)::daExp,daFit,sExp,sFit,sBruit
+  real(DP)::diffSpectres(N)
+  real(DP)::champ(44)
+  real(DP)::s(44)
+  real(DP)::sl(42)
+  real(DP)::sInt(40) 
+  real(DP)::btmoy(7,2)
   ! Initialisations-----------------------------------------------------
   call raz
 !=======================================================================
@@ -104,13 +104,13 @@ program mosfit
   if(IO(10)==0)call lecture_spectre(Y,N)  
   if(IO(10)==1)then
     ! Pas de spectre experimental
-    Y=0.0_dp
+    Y=0.0_DP
   else
     ! Ajout de IO(1) million(s) demandée en option
-    Y = Y + real(IO(1),dp)*1000000_dp
+    Y = Y + real(IO(1),dp)*1000000_DP
   endif
   ! Défnition du niveau zéro-----------------------------------------------
-  if(TY==0.0_dp) call variablesAjustables_nivzer(Y)
+  if(TY==0.0_DP) call variablesAjustables_nivzer(Y)
   ! Modification des poids pour canaux ignorés-----------------------------
   call spectres_poids(IZ)
 !=======================================================================

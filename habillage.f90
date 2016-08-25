@@ -13,9 +13,9 @@ module habillage
   use options
   use variablesAjustables
   implicit none
-  real(dp),save::H(8,40) !< Hauteur des lorentziennes/gaussiennes
-  real(dp),save::G(8,40) !< Largeur des lorentziennes/gaussiennes
-  real(dp),save::X0(8,40)!< Emplacement des raies (énergie)
+  real(DP),save::H(8,40) !< Hauteur des lorentziennes/gaussiennes
+  real(DP),save::G(8,40) !< Largeur des lorentziennes/gaussiennes
+  real(DP),save::X0(8,40)!< Emplacement des raies (énergie)
   
   contains
 !---------------------------------------------------------------------
@@ -23,13 +23,13 @@ module habillage
   subroutine habillage_raies(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     integer,intent(in)::n !< Nombre de canaux par spectre
     integer,intent(in)::nt !< Numéro du sous-spectre
-    real(dp),intent(in)::cn !< Largeur d'un canal
-    real(dp),intent(in)::diso !< Déplacement isomérique
-    real(dp),intent(in)::largeur !< Largeur des raies
-    real(dp),intent(in)::hauteur !< Hauteur des raies
-    real(dp),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
-    real(dp),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
-    real(dp),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
+    real(DP),intent(in)::cn !< Largeur d'un canal
+    real(DP),intent(in)::diso !< Déplacement isomérique
+    real(DP),intent(in)::largeur !< Largeur des raies
+    real(DP),intent(in)::hauteur !< Hauteur des raies
+    real(DP),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
+    real(DP),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
+    real(DP),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
     if(IO(16)==0)then 
       call habillage_lorentz(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     else
@@ -41,20 +41,20 @@ module habillage
   subroutine habillage_lorentz(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     integer,intent(in)::n !< Nombre de canaux par spectre
     integer,intent(in)::nt !< Numéro du sous-spectre
-    real(dp),intent(in)::cn !< Largeur d'un canal
-    real(dp),intent(in)::diso !< Déplacement isomérique
-    real(dp),intent(in)::largeur !< Largeur des raies
-    real(dp),intent(in)::hauteur !< Hauteur des raies
-    real(dp),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
-    real(dp),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
-    real(dp),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
+    real(DP),intent(in)::cn !< Largeur d'un canal
+    real(DP),intent(in)::diso !< Déplacement isomérique
+    real(DP),intent(in)::largeur !< Largeur des raies
+    real(DP),intent(in)::hauteur !< Hauteur des raies
+    real(DP),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
+    real(DP),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
+    real(DP),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
     integer::i,l
-    real(dp)::b,d0
-    spectre=0.0_dp
-    d0= 0.5_dp*(real(N,dp) + 1.0_dp)   ! Milieu du spectre
+    real(DP)::b,d0
+    spectre=0.0_DP
+    d0= 0.5_DP*(real(N,dp) + 1.0_DP)   ! Milieu du spectre
     do l=1,8
       G(l,nt)=largeur/cn ! Largeur par défaut ..
-      H(l,nt)=hauteur*intensites(l)/8.0_dp
+      H(l,nt)=hauteur*intensites(l)/8.0_DP
       ! Correction  de la largeur selon l'option IOGV
       if(  ((IOGVT(nt)==3 ) .AND. (NGT(l,nt) /=0) )& ! Si l'ajustement des raies est customisé, on se réfère à NGT (I.E, NG donné par l'utilisateur)
           &   .OR.      (IOGVT(nt)==1)             & ! Si on a 2 groupes (spectre quadrupolaire), toutes les raies ont déjà leur largeur décrite dans GVT (appel précédent à variablesAjustables_actualiser_largeur_raies)
@@ -75,27 +75,27 @@ module habillage
   subroutine habillage_convol(cn,diso,largeur,hauteur,n,nt,energies,intensites,spectre)
     integer,intent(in)::n !< Nombre de canaux par spectre
     integer,intent(in)::nt !< Numéro du sous-spectre
-    real(dp),intent(in)::cn !< Largeur d'un canal
-    real(dp),intent(in)::diso !< Déplacement isomérique
-    real(dp),intent(in)::largeur !< Largeur des raies
-    real(dp),intent(in)::hauteur !< Hauteur des raies
-    real(dp),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
-    real(dp),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
-    real(dp),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
+    real(DP),intent(in)::cn !< Largeur d'un canal
+    real(DP),intent(in)::diso !< Déplacement isomérique
+    real(DP),intent(in)::largeur !< Largeur des raies
+    real(DP),intent(in)::hauteur !< Hauteur des raies
+    real(DP),intent(in)::energies(8)  !< "Energie" (i.e. vitesse effet doppler) théorique des 8 raies du NTième spectre
+    real(DP),intent(in)::intensites(8)!< Intensité théorique des 8 raies du NTième spectre
+    real(DP),intent(out)::spectre(n) !< Spectre théorique résultant de l'habillage des raies
     integer::i,j,kp,l,m
-    real(dp)::b,cm,d0,u,ugauss,xi,xj
-    real(dp),allocatable::gauss(:),lorentz(:)
-    spectre=0.0_dp
+    real(DP)::b,cm,d0,u,ugauss,xi,xj
+    real(DP),allocatable::gauss(:),lorentz(:)
+    spectre=0.0_DP
     kp=IO(16)
     m=n*kp  ! Découpage de chaque canal en kp sous-canaux.
     cm=CN/kp
     allocate(gauss(m),lorentz(m))
-    gauss=0.0_dp
-    lorentz=0.0_dp
-    d0=0.5_dp*(real(m,dp)+1.0_dp)! Milieu du spectre
+    gauss=0.0_DP
+    lorentz=0.0_DP
+    d0=0.5_DP*(real(m,dp)+1.0_DP)! Milieu du spectre
     do l=1,8
       G(l,nt)=largeur/cm
-      H(l,nt)=hauteur*intensites(l)/8.0_dp
+      H(l,nt)=hauteur*intensites(l)/8.0_DP
       if(  ((IOGVT(nt)==3 ) .AND. (NGT(l,nt) /=0) )&
           &   .OR.      (IOGVT(nt)==1)             &
           &   .OR.      (IOGVT(nt)==2)             &
@@ -106,9 +106,9 @@ module habillage
       do i=1,m
         xi=real(i,dp)
         b=xi-x0(l,nt)
-        u=(b*b)/(2.0_dp*(G(l,nt)**2))
-        u=min(u,40.0_dp) ! Limitation de la hauteur max de la gaussienne
-        ! u=min(u,140.0_dp) ancienne valeur yvan
+        u=(b*b)/(2.0_DP*(G(l,nt)**2))
+        u=min(u,40.0_DP) ! Limitation de la hauteur max de la gaussienne
+        ! u=min(u,140.0_DP) ancienne valeur yvan
         ugauss=exp(-u)
         gauss(i)=gauss(i)+H(l,nt)*ugauss
       enddo
@@ -119,14 +119,14 @@ module habillage
       do j=1,m
         xj=real(j,dp)
         b=xi-xj
-        lorentz(i) = lorentz(i)+gauss(j)*(0.1_dp/cm)**2 /(b*b + ((0.1_dp/cm))**2)
+        lorentz(i) = lorentz(i)+gauss(j)*(0.1_DP/cm)**2 /(b*b + ((0.1_DP/cm))**2)
       enddo
     enddo
     j=1
     do i=kp,m,kp
       spectre(j)=lorentz(i)
       j=j+1
-      if(abs(spectre(j))<0.2_dp) spectre(j)=0.0_dp ! Pourquoi cette valeur ?
+      if(abs(spectre(j))<0.2_DP) spectre(j)=0.0_DP ! Pourquoi cette valeur ?
     enddo
     deallocate(gauss,lorentz)
   end subroutine habillage_convol

@@ -17,18 +17,18 @@ module ajustement
   use ecriture
   use algebre
   implicit none
-  real(dp),save::PH  !< Phi dans ref.[1]
-  real(dp),save::CRITERE !< Critère de convergence
-  real(dp),save::KHI2   !< Ecart statistique de l'ajustement en moindres carrés
+  real(DP),save::PH  !< Phi dans ref.[1]
+  real(DP),save::CRITERE !< Critère de convergence
+  real(DP),save::KHI2   !< Ecart statistique de l'ajustement en moindres carrés
   contains
   !>@brief Calcul de la convergence.
   !>@details Vérifie si le critère de convergence est atteint.
   !! Le critère de convergence porte sur la différence relative entre les paramètres ajustés de la dernière itération 
   !! et  ceux de l'itération précedente.
   function convergence(eps)
-    real(dp),intent(in)::eps !< Critère de convergence
-    real(dp),save::oldB(40)
-    real(dp)::petit=1.0D-5 ! Pour éviter la division par zéro
+    real(DP),intent(in)::eps !< Critère de convergence
+    real(DP),save::oldB(40)
+    real(DP)::petit=1.0D-5 ! Pour éviter la division par zéro
     logical::convergence
     if(  maxval(abs(B(1:K)-oldB(1:K))/(abs(B(1:K))+petit)) > eps)  then
       convergence= .FALSE.
@@ -42,15 +42,15 @@ module ajustement
   function ajustement_ecart_stat(k,n,spectre_exp,spectre_fit,p)
     integer,intent(in)::k
     integer,intent(in)::n
-    real(dp),intent(in)::spectre_exp(n)
-    real(dp),intent(in)::spectre_fit(n)
-    real(dp),intent(in)::p(n) !Poids des canaux
-    real(dp)::khi2
-    real(dp)::ajustement_ecart_stat
+    real(DP),intent(in)::spectre_exp(n)
+    real(DP),intent(in)::spectre_fit(n)
+    real(DP),intent(in)::p(n) !Poids des canaux
+    real(DP)::khi2
+    real(DP)::ajustement_ecart_stat
     integer::i
-    khi2=0.0_dp
+    khi2=0.0_DP
     do i=1,n
-      if(spectre_exp(i)/=0.0_dp) khi2=khi2+p(i)*(spectre_fit(i) -spectre_exp(i))**2 /spectre_exp(i)
+      if(spectre_exp(i)/=0.0_DP) khi2=khi2+p(i)*(spectre_fit(i) -spectre_exp(i))**2 /spectre_exp(i)
     enddo
     khi2=khi2/(n-k)
     ajustement_ecart_stat=khi2
@@ -64,27 +64,27 @@ module ajustement
       integer,intent(in)::n !< Ordre du système (taille du spectre)
       integer,intent(in):: k !< Nombre de paramètres ajustables
       integer,intent(in):: nmax !< Nombre maximum d'itérations
-      real(dp),intent(in)::critere !<Critère de convergence
-      real(dp),intent(inout)::q(n,42) !< Tableau de travail. Apres calcul du spectre théorique , contient
+      real(DP),intent(in)::critere !<Critère de convergence
+      real(DP),intent(inout)::q(n,42) !< Tableau de travail. Apres calcul du spectre théorique , contient
                                       !! le spectre théorique + le tableau des dérivées 
                                       !!   (matrice de coefficients de correlation)
-      real(dp),intent(inout)::b(k) !< Vecteur des paramètres ajustables
-      real(dp),intent(in)::y(n) !< Spectre expérimental
-      real(dp),intent(in)::p(n) !< Poids statistique des canaux
+      real(DP),intent(inout)::b(k) !< Vecteur des paramètres ajustables
+      real(DP),intent(in)::y(n) !< Spectre expérimental
+      real(DP),intent(in)::p(n) !< Poids statistique des canaux
       logical::fin,coupureNmax 
       integer::i,j,l,m,ierr
       integer::iter ! Nombre d'itération de l'algorithme de Marquardt effectué
       integer::npas ! Nombre de calculs du spectre effectués (nombre d'appel de spectres_theorique_total)
       integer::dump(100)! Vecteur de travail pour alsb
-      real(dp)::saveB(40)
-      real(dp)::nu,lambda,phi
+      real(DP)::saveB(40)
+      real(DP)::nu,lambda,phi
       npas=0
       fin=.FALSE.
-      saveB=0.0_dp
-      Q=0.0_dp
-      VQ(1:K,1:K)=0.0_dp
-      nu=5.0_dp
-      lambda=0.01_dp
+      saveB=0.0_DP
+      Q=0.0_DP
+      VQ(1:K,1:K)=0.0_DP
+      nu=5.0_DP
+      lambda=0.01_DP
       iter=0
       !Début algorithme moindres carrés
       marquardt: do while(.NOT. fin)
@@ -97,7 +97,7 @@ module ajustement
         call spectres_theorique_total
         if(fin) exit marquardt  ! sortie sans calculer le reste (nmax ou critere atteint)
         !Calcul de phi--------------------------------------------------
-        PH=0.0_dp
+        PH=0.0_DP
         do i=1,n
           PH= PH + p(i)*(y(i)-q(i,K+2))**2  ! Equation (3) de ref.[1]
         enddo
@@ -122,7 +122,7 @@ module ajustement
         endif
         ! Vecteur g (équations (9) et (21) de ref.[1])
         do i=1,K
-          q(i,K+1)=0.0_dp
+          q(i,K+1)=0.0_DP
           do m=1,N
             q(i,K+1)=q(i,K+1)+(y(m)-q(m,K+2))*q(m,i)*p(m) 
           enddo
@@ -130,7 +130,7 @@ module ajustement
         ! Matrice A de ref.[1]
         do i=1,K
           do j=1,K
-            q(j,K+2)=0.0_dp
+            q(j,K+2)=0.0_DP
             if(j>=i)then 
               do l=1,n
                 q(j,K+2)=q(j,K+2)+q(l,i)*q(l,j)*p(l) 
@@ -150,7 +150,7 @@ module ajustement
         enddo
         ! Vecteur g*  (équation (28) de ref.[1]) 
         do i=1,K
-          if (q(i,i)==0.0_dp)then  ! La fonction est indépendante du paramètre i
+          if (q(i,i)==0.0_DP)then  ! La fonction est indépendante du paramètre i
             call ecriture_fonction_independante(i)
             do m=1,K
               q(m,K+2)=y(m)
@@ -164,7 +164,7 @@ module ajustement
         do i=1,K
           do j=1,K
             if(i==j)then
-              q(I,J)=1.0_dp+lambda
+              q(I,J)=1.0_DP+lambda
             elseif(i<j)then
               q(i,j)=q(i,j)/(q(i,K+2)*q(j,K+2))
             else
@@ -185,7 +185,7 @@ module ajustement
   !=====================================================================
   !>@brief Initialisation de Phi et du critère de convergence
   subroutine ajustement_raz
-    PH=0.0_dp
-    CRITERE = 0.001_dp
+    PH=0.0_DP
+    CRITERE = 0.001_DP
   end subroutine ajustement_raz
 end module ajustement
