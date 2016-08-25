@@ -35,7 +35,7 @@
 !!     compilateurs la procurent encore (ex : gfortran)  )
 module precision
   implicit none
-  integer,parameter:: real(DP)=kind(1.0D0) !< Double précision
+  integer,parameter::DP=kind(1.0D0) !< Double précision
   real(DP),parameter:: PI=4.0_dp*atan(1.0_dp) !<  Rapport entre le périmètre d'un cercle et son diamètre
   real(DP),parameter:: RPD=PI/180.0_dp    !< Conversion de degrés en radians
   real(DP),parameter:: ROOT2 = sqrt(2.0_dp)!< Racine de 2
