@@ -197,5 +197,6 @@ Si \lstinline{IO(18)}=1, le nom des fichiers est adapté au nom du fichier d'ent
 Attention dans ce cas au nom du fichier d'entree, en particulier si celui-ci se situe dans un autre répertoire que l'executable. 
 
 \paragraph{Remarque sous Windows :}
-En faisant glisser l'icone du fichier sur l'icone de l'executable, le fichier de sortie sera toujours placé dans le même répertoire que le fichier d'entrée. 
+En faisant glisser l'icone du fichier d'entrée sur l'icone de l'exécutable, le fichier de sortie sera toujours placé dans le même répertoire que le fichier d'entrée. 
 En faisant glisser le fichier d'entrée sur un raccourci, en revanche, le fichier de sortie sera placé dans le répertoire de l'exécutable si \lstinline{IO(18)}=0, et dans le répertoire du fichier d'entrée si \lstinline{IO(18)}=1.
+Les utilisateurs ayant recours à l'interface graphique de Gnuplot modifiée spécialement pour lire le fichier \lstinline{Spect.dat} dans le répertoire \lstinline{C:\mosfit} préferont donc faire glisser leurs fichiers d'input sur le raccourci plutôt que sur l'exécutable. 

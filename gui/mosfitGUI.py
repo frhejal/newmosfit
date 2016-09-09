@@ -25,19 +25,19 @@ import tkFileDialog
 
 ########################################################################
 class BarreMenu(Frame):
+  #Top menu of the window
   def __init__(self, parent):
-    Frame.__init__(self, parent)   
-    self.parent = parent        
-    self.initUI()
+    Frame.__init__(self, parent)   #Barremenu is a frame
+    self.parent = parent
+    self.initUI() #truly create the menu
 
   def initUI(self):
     # Create File menu with Load, Save and Exit option.
-    self.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2)
-
-    menubar = Menu(self.parent)
+    self.pack(side=LEFT,expand=Y, fill=BOTH, pady=2, padx=2) #pack/set position
+    menubar = Menu(self.parent)           # create menu
     self.parent.config(menu=menubar)
-
-    fileMenu = Menu(menubar)
+    #File menu      
+    fileMenu = Menu(menubar)              
     fileMenu.add_command(label="Load", command=self.onOpen)
     fileMenu.add_command(label="Save as", command=self.onSave)
     fileMenu.add_separator()
@@ -80,10 +80,9 @@ class BarreMenu(Frame):
 class DataEntries(PanedWindow):
   # Panel containing all entry fields for options
   def __init__(self,master,parent):
-    
     PanedWindow.__init__(self,master)
     self.parent=parent
-
+    # General parameters
     self.eTitre=Entry(self,width=30,bg="white")
     self.eCN=Entry(self,width=10,bg="white")
     self.eNMAX=Entry(self,width=4,bg="white")
@@ -121,6 +120,7 @@ class DataEntries(PanedWindow):
     self.spectres.append(Spectre(0))
 
     # Change entries for spectres when NS, NS1 or NS2 entries are modified
+    # uses StringVar objects for entries content
     self.strNS=StringVar()
     self.strNS1=StringVar()
     self.strNS2=StringVar()
@@ -143,16 +143,10 @@ class DataEntries(PanedWindow):
     # Change fields colors according to selected options
     self.izz=StringVar()
     self.iopt=StringVar()
-    #~ self.io13=StringVar()
-    #~ self.io17=StringVar()
-    
     self.izz.trace("w", self.checkIZZ)
     self.iopt.trace("w", self.checkIOPT)
-    #~ self.io13.trace("w",self.checkIO13)
-    #~ self.io17.trace("w",self.checkIO17)
     self.eIZZ.config(validate=ALL,textvariable=self.izz)
     self.eIOPT.config(validate=ALL,textvariable=self.iopt)
-
     
     # Change fields color in IO according to content
     self.strIO=[]
@@ -204,7 +198,6 @@ class DataEntries(PanedWindow):
       self.eIOPT.config(bg="red")
       for i in range(0,20):
         self.eIO[i].config(bg="light gray")
-    #~ self.checkIO13(args)
     self.checkIO17(args)
     self.checkIO(args)
 
@@ -303,7 +296,6 @@ class DataEntries(PanedWindow):
         if int(self.strIO[19].get()) not in [0,1]: raise ValueError
       except ValueError :
         self.eIO[19].config(bg="red")
-        
     
   def checkIO13(self,*args):
     # Change background color of entries PLAGEL depending on value of entry IO(13)
@@ -407,6 +399,10 @@ class DataEntries(PanedWindow):
     self.saveSpectre(args)
     
   def resetSpectres(self,*args):
+    #Check values of NS,NS1,NS2 entries, colorize entries.
+    #Calls for resetting scroll list of spectres. 
+   
+    #read values :
     try:
       ns = int(self.strNS.get())
     except Exception:
@@ -420,7 +416,7 @@ class DataEntries(PanedWindow):
       ns2 = int(self.strNS2.get())
     except Exception:
       ns2=0
-  
+    #Colorize in red if incompatible values, green if ok. 
     if ns1>ns:
       self.eNS.config(bg="light green")
       self.eNS1.config(bg="red")
@@ -440,6 +436,7 @@ class DataEntries(PanedWindow):
       self.spectres=[]
       nt=1
       k=1
+      #recreates list of spectres
       while nt<=ns :
         if ((nt < ns1) or (nt > ns2)) or (ns1<=0 or ns2<=0):
           self.spectres.append(Spectre(0))
@@ -450,6 +447,7 @@ class DataEntries(PanedWindow):
           self.spectres.append(Spectre(k))
           k+=1
         nt+=1
+      # recreates spectre scrol from ne list of spectres.
       self.setSpectresScroll( ns, ns1 , ns2 )
       self.packScrollbar()
       self.setEntrySpectre()
@@ -511,7 +509,7 @@ class DataEntries(PanedWindow):
         if (nt < ns1-1) or (nt >= ns2):
           self.listbox.insert(END,"Spectre "+str(nt+1))
           self.lstSp.append(nt)
-        else:
+        elif (nt==ns1-1):
           self.listbox.insert(END,"Distribution")
           self.lstSp.append(nt)
       else:
