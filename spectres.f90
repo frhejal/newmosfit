@@ -140,6 +140,9 @@ module spectres
         case default! Gestion d'erreur----------------------------------
           stop "valeur de IO(15) inconnue"
       end select
+      do i=1,N
+        Q(i,K+2)=Q(i,K+2)-spectre(i)
+      enddo
       ! Calcul des derivées du spectre théorique------------------------
       call spectres_derivee(nt,spectre)
     enddo
@@ -190,9 +193,6 @@ module spectres
     real(dp)::diff,di1,gb,pm
     real(dp)::spectre0(N)
     real(dp)::derivee(2,N)
-      do i=1,N
-        Q(i,K+2)=Q(i,K+2)-spectre(i)
-      enddo
       spectre0=spectre
       ! Calcul des derivees par rapport aux largeurs variables----------
       ! Les derivées sont estimées par un petit déplacement diff de chaque paramètre
@@ -243,6 +243,7 @@ module spectres
               derivee(jj,:)=(spectre0-spectre)/diff
           end select
         enddo
+        ! Somme avec les derivées des sous-spectres precedents pour obtenir la derivee du spectre total
         Q(:,l)=Q(:,l)+0.5_dp*(derivee(1,:)+derivee(2,:))
       enddo parametres
   end subroutine spectres_derivee
@@ -269,6 +270,7 @@ module spectres
           do nt=GRASS(i),GRASS(i+1) ! Total des sous-spectres de nt=GRASS(i) à nt=GRASS(i+1)
             TOTAL_SOUS_SPECTRES(:,compteur)=TOTAL_SOUS_SPECTRES(:,compteur)+SOUS_SPECTRES(:,nt)
           enddo
+
           TOTAL_SOUS_SPECTRES(:,compteur)=TY-TOTAL_SOUS_SPECTRES(:,compteur)
         endif
       enddo

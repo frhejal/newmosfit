@@ -457,7 +457,7 @@ class DataEntries(PanedWindow):
       self.eNS2.config(bg="white")
         
   def pack(self,**options):
-    # affichages
+    # Display all entries. 
     PanedWindow.grid(self,row=0)
     Label(self, text="Title").grid(row=0);self.eTitre.grid(row=0,column=1,columnspan=5,sticky=W)
     Label(self, text="CN").grid(row=1);self.eCN.grid(row=1,column=1,columnspan=3,sticky=W)
@@ -489,20 +489,24 @@ class DataEntries(PanedWindow):
     Label(self, text="Spectres: ").grid(row=13,column=2)
 
   def packScrollbar(self):
+    #Display scrollbar 
     self.scrollbar.grid(row=14,column=4,rowspan=5,sticky=W+N+S)
     self.listbox.grid(row=14,column=2,rowspan=5,columnspan=2)
 
 
   def setSpectresScroll(self,ns,ns1,ns2):
+    #Create scollbar of spectres
     try:
+      #destroy previous scollbar, if it exists.
       self.scrollbar.grid_forget()
       self.listbox.grid_forget()
     except Exception as e:
       print(e)
+    #new scrollbar
     self.scrollbar = Scrollbar(self)
     self.listbox = Listbox(self,height= 5, width=10, selectmode=SINGLE, yscrollcommand=self.scrollbar.set)
     self.listbox.delete(0,END)
-    
+    #filling scrollbar with spectres (with number or "Distribution")
     self.lstSp=[]
     for nt in range(0,ns):
       if (ns1>0 and ns2>0):
@@ -527,13 +531,12 @@ class DataEntries(PanedWindow):
     self.packEntrySpectre()
     
   def setEntrySpectre(self):
-    # creer entrees
-    # Creer des StringVar et fonctions de sauvegarde pour enregistrer tout changement dans les entrees 
-    # vers le spectre courant self.spectres[self.selectedSpectre]
+    # Create entries.
+    # Create StringVars and function to save all change in entries into current spectrum ,  self.spectres[self.selectedSpectre]
     s=self.spectres[self.selectedSpectre]
 
     if s.kind==0:
-        
+      #if new spectrum is not part of a distribution :
       self.strDI=StringVar()
       self.strGA=StringVar()
       self.strH1=StringVar()
@@ -602,7 +605,7 @@ class DataEntries(PanedWindow):
         self.strNB[j].set(str(s.NB[j]))
         self.strNB[j].trace("w",self.saveSpectre)
         self.eNB.append(Entry(self,width=2,bg="white",validate=ALL,textvariable=self.strNB[j]))
-      # Array GV and NG ( use if IOGV==3)
+      # Array GV and NG (use if IOGV==3)
       self.strGV=[]
       self.strNG=[]
       self.eGV=[]
@@ -626,6 +629,7 @@ class DataEntries(PanedWindow):
       self.tNG=Label(self,text="NG:")
         
     else:
+      #If part of a distribution :
       self.strDI0=StringVar()
       self.strPDI=StringVar()
       self.strGA0=StringVar()

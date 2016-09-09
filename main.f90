@@ -137,6 +137,7 @@ program mosfit
   else
     ! Algorithme d'estimation moindres-carrés de Marquardt
     call ajustement_moindres_carres(Q,N,B,Y,K,POIDS,NMAX,CRITERE)
+    TY=B(K)
     ! Inversion de la matrice des variances-covariances------------------
     call algebre_matrice_vers_vecteur(VQ,AA,K,K)
     call algebre_inverser_matrice(AA,K,dump)
@@ -146,11 +147,20 @@ program mosfit
       call variablesAjustables_calculer_ecart_type(PH,nt,N) 
       call variablesAjustables_actualiser_rangement(nt)
       if(IOGVT(nt)/=0) call variablesAjustables_actualiser_largeur_raies(nt)
-      call spectres_theorique(nt)
       DI=BT(1,nt)
       GA=BT(2,nt)
       H1=BT(3,nt)
-      call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
+!~       call spectres_theorique(nt)
+!~       call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
+      select case(IO(15))
+        case(0)! Cas classique-------------------------------------------
+          call spectres_theorique(nt)
+          call habillage_raies(CN,DI,GA,H1,N,nt,ENERGIES(:,nt),INTENSITES(:,nt),SOUS_SPECTRES(:,nt))
+        case(1)! Cycloide------------------------------------------------
+          call spectre_cycloide_theorique_et_habillage(nt,SOUS_SPECTRES(:,nt))
+        case default! Gestion d'erreur----------------------------------
+          stop "valeur de IO(15) inconnue"
+      end select
     enddo
   endif
 !=======================================================================
@@ -187,7 +197,7 @@ program mosfit
   ! Calcul du khi**2
   KHI2=ajustement_ecart_stat(K,N,Y,Q(:,K+2),POIDS)
   call ecriture_ecart_stat(KHI2)
-  call ecriture_tracer_spectres(N,Y,Q(:,k+2),cmin,cmax)
+  call ecriture_tracer_spectres(N,Y,Q(:,K+2),cmin,cmax)
   if((IO(6)==1) .OR. (IO(11)==1)) then
     ! Ecriture de la différence entre le spectre expérimental et le spectre calculé
     diffSpectres=Y-Q(:,K+2)
